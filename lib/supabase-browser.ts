@@ -38,3 +38,19 @@ export async function getSupabaseBrowserClient() {
 
   return client;
 }
+
+export async function getSupabaseAuthSettings() {
+  const config = await loadAuthConfig();
+  if (!config.supabaseUrl || !config.supabasePublishableKey) return null;
+
+  const response = await fetch(`${config.supabaseUrl}/auth/v1/settings`, {
+    headers: {
+      apikey: config.supabasePublishableKey,
+      Authorization: `Bearer ${config.supabasePublishableKey}`,
+    },
+  });
+  if (!response.ok) return null;
+  return (await response.json()) as {
+    external?: Record<string, boolean>;
+  };
+}

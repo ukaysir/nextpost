@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Session, User } from "@supabase/supabase-js";
-import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { getSupabaseAuthSettings, getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { getCurrentTestUser, signOutTestUser } from "@/lib/test-auth";
 
 export type AppUser = {
@@ -112,6 +112,13 @@ export async function signInWithGoogle(nextPath: string) {
   const supabase = await getSupabaseBrowserClient();
   if (!supabase) {
     throw new Error("Supabase URL 또는 publishable key가 설정되어 있지 않습니다.");
+  }
+
+  const settings = await getSupabaseAuthSettings();
+  if (settings?.external?.google === false) {
+    throw new Error(
+      "현재 Supabase 프로젝트에서 Google 로그인 provider가 꺼져 있습니다. Supabase Dashboard > Authentication > Providers > Google을 활성화해야 합니다.",
+    );
   }
 
   const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(
