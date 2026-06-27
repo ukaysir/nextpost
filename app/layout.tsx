@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { CanonicalAuthRedirect } from "@/components/canonical-auth-redirect";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -23,6 +24,7 @@ export default function RootLayout({
         />
       </head>
       <body>
+        <CanonicalAuthRedirect />
         {children}
         <Script src="https://js.puter.com/v2/" strategy="afterInteractive" />
       </body>
