@@ -1,10 +1,11 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, LockKeyhole, ShieldCheck, UserRound } from "lucide-react";
 import { signInWithGoogle } from "@/lib/auth-client";
+import { getAuthPublicConfig } from "@/lib/supabase-browser";
 import { isTestCredential, signInTestUser } from "@/lib/test-auth";
 
 function getSafeNextPath() {
@@ -21,6 +22,28 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    async function redirectToCanonicalHost() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("local") === "1") return;
+
+      const config = await getAuthPublicConfig();
+      if (!active || !config.siteUrl) return;
+
+      const canonicalOrigin = new URL(config.siteUrl).origin;
+      if (window.location.origin === canonicalOrigin) return;
+
+      window.location.replace(`${canonicalOrigin}${window.location.pathname}${window.location.search}`);
+    }
+
+    redirectToCanonicalHost();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   async function startGoogleLogin() {
     setError("");

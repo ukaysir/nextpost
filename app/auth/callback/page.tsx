@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, Loader2 } from "lucide-react";
-import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { getAuthPublicConfig, getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 function getSafeNextPath() {
   if (typeof window === "undefined") return "/analyze";
@@ -22,6 +22,17 @@ export default function AuthCallbackPage() {
 
     async function completeLogin() {
       try {
+        const config = await getAuthPublicConfig();
+        if (config.siteUrl) {
+          const canonicalOrigin = new URL(config.siteUrl).origin;
+          if (window.location.origin !== canonicalOrigin) {
+            window.location.replace(
+              `${canonicalOrigin}${window.location.pathname}${window.location.search}${window.location.hash}`,
+            );
+            return;
+          }
+        }
+
         const supabase = await getSupabaseBrowserClient();
         if (!supabase) throw new Error("Supabase 인증 설정이 없습니다.");
 
