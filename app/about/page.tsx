@@ -1,26 +1,13 @@
 import Link from "next/link";
-import {
-  ArrowLeft,
-  ArrowRight,
-  BarChart3,
-  BriefcaseBusiness,
-  Clock3,
-  Database,
-  FileSearch,
-  LineChart,
-  ShieldCheck,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { AuthMenu } from "@/components/auth-menu";
 import {
-  getLatestRuntimeIndustryStat,
   getRuntimeAppData,
   getRuntimeDataFreshness,
 } from "@/lib/runtime-data";
-import { formatWon } from "@/lib/utils";
 
 export default async function AboutPage() {
   const data = await getRuntimeAppData();
-  const latest = await getLatestRuntimeIndustryStat();
   const freshness = await getRuntimeDataFreshness();
 
   const companiesWithContracts = new Set(
@@ -57,8 +44,7 @@ export default async function AboutPage() {
               <ArrowLeft size={17} />
               랜딩으로
             </Link>
-            <span className="inline-flex h-10 items-center gap-2 rounded-[10px] border border-white/30 bg-white/15 px-3 text-xs font-extrabold backdrop-blur md:h-11 md:px-4 md:text-sm">
-              <ShieldCheck size={16} />
+            <span className="inline-flex h-10 items-center rounded-[10px] border border-white/30 bg-white/15 px-3 text-xs font-extrabold backdrop-blur md:h-11 md:px-4 md:text-sm">
               About NEXTPOST
             </span>
           </div>
@@ -92,25 +78,21 @@ export default async function AboutPage() {
 
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
           <MetricCard
-            icon={BriefcaseBusiness}
             label="방산 기업"
             value={`${data.companies.length}개`}
             caption="방산업체 지정현황 기준"
           />
           <MetricCard
-            icon={FileSearch}
             label="계약 원천"
             value={`${data.contractRecords.length.toLocaleString("ko-KR")}건`}
             caption={`${companiesWithContracts}개 기업 매칭`}
           />
           <MetricCard
-            icon={Database}
             label="출처 링크"
             value={`${data.companySources.length.toLocaleString("ko-KR")}건`}
             caption={`정부/공식 출처 ${officialSources.toLocaleString("ko-KR")}건`}
           />
           <MetricCard
-            icon={LineChart}
             label="OpenDART 재무"
             value={`${data.companyFinancials.length.toLocaleString("ko-KR")}건`}
             caption={`${companiesWithFinancials}개 기업, 2021~2025 반영`}
@@ -119,56 +101,44 @@ export default async function AboutPage() {
 
         <div className="mt-3 grid grid-cols-2 gap-3 md:mt-4 md:grid-cols-4 md:gap-4">
           <MetricCard
-            icon={ShieldCheck}
             label="채용 URL"
             value={`${companiesWithCareers}/${data.companies.length}`}
             caption={`${companiesWithJobPostings}개 기업 채용 포인터`}
           />
           <MetricCard
-            icon={BriefcaseBusiness}
             label="기업 프로필"
             value={`${data.companyProfiles.length}/${data.companies.length}`}
             caption={`홈페이지 ${companiesWithHomepage}개`}
           />
           <MetricCard
-            icon={BarChart3}
-            label={`${latest?.year ?? "-"} 산업 매출`}
-            value={latest?.sales ? formatWon(Number(latest.sales) * 100_000_000) : "-"}
-            caption={
-              latest?.operating_profit_rate
-                ? `영업이익률 ${latest.operating_profit_rate}%`
-                : "방산 산업 통계 기준"
-            }
+            label="직무 요구역량"
+            value={`${data.jobRequirements.length.toLocaleString("ko-KR")}건`}
+            caption="직무별 기술, 경험, 키워드"
           />
           <MetricCard
-            icon={Database}
-            label="교육/직무 데이터"
-            value={`${data.educationCerts.length + data.jobRequirements.length}건`}
-            caption="교육 과정, 자격, 직무 요구역량"
+            label="교육/자격 데이터"
+            value={`${data.educationCerts.length.toLocaleString("ko-KR")}건`}
+            caption="교육 과정과 추천 자격"
           />
         </div>
 
         <div className="mt-3 grid grid-cols-2 gap-3 md:mt-4 md:grid-cols-4 md:gap-4">
           <MetricCard
-            icon={Clock3}
             label="최근 출처 수집"
             value={formatFreshDate(freshness.latest_source_at)}
             caption="정부/기업/공개 출처 기준"
           />
           <MetricCard
-            icon={FileSearch}
             label="최근 계약 기준"
             value={formatFreshDate(freshness.latest_contract_date)}
             caption="국내조달 계약일 기준"
           />
           <MetricCard
-            icon={BriefcaseBusiness}
             label="채용 신호 수집"
             value={formatFreshDate(freshness.latest_job_posting_at)}
             caption="기업별 채용 포인터 기준"
           />
           <MetricCard
-            icon={LineChart}
             label="재무 기준연도"
             value={freshness.latest_financial_year ? `${freshness.latest_financial_year}년` : "-"}
             caption="OpenDART 재무 데이터 기준"
@@ -232,21 +202,16 @@ export default async function AboutPage() {
 
 function MetricCard({
   caption,
-  icon: Icon,
   label,
   value,
 }: {
   caption: string;
-  icon: typeof BriefcaseBusiness;
   label: string;
   value: string;
 }) {
   return (
     <article className="np-card p-4 md:p-5">
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-xs font-extrabold text-[var(--caption)] md:text-sm">{label}</p>
-        <Icon className="text-[var(--primary)]" size={20} />
-      </div>
+      <p className="text-xs font-extrabold text-[var(--caption)] md:text-sm">{label}</p>
       <p className="mt-2 break-words text-2xl font-black tracking-normal md:mt-3 md:text-3xl">{value}</p>
       <p className="mt-2 text-xs font-bold text-[var(--caption)]">{caption}</p>
     </article>

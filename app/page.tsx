@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, ShieldCheck } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { AuthMenu } from "@/components/auth-menu";
 
 export default function Home() {
@@ -21,8 +21,7 @@ export default function Home() {
 
         <div className="page-shell flex min-h-0 flex-1 items-center py-8">
           <div className="max-w-[710px] pb-6 md:pb-14">
-            <p className="inline-flex max-w-full items-center gap-2 rounded-full border border-white/30 bg-white/15 px-3 py-1 text-xs font-extrabold leading-5 backdrop-blur md:text-sm">
-              <ShieldCheck size={16} />
+            <p className="inline-flex max-w-full rounded-full border border-white/30 bg-white/15 px-3 py-1 text-xs font-extrabold leading-5 backdrop-blur md:text-sm">
               공개 데이터 기반 방산 커리어 분석
             </p>
             <h1 className="mt-5 text-[34px] font-black leading-[1.14] tracking-normal drop-shadow-[0_2px_18px_rgba(0,0,0,.42)] md:mt-7 md:text-[64px]">

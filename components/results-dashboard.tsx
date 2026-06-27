@@ -251,15 +251,6 @@ export function ResultsDashboard({
                   </div>
                 </div>
 
-                <div className="mt-5 flex flex-wrap gap-2 md:mt-6">
-                  {result.skill_translation.keywords.map((keyword) => (
-                    <span className="np-pill px-3 py-1" key={keyword}>
-                      {keyword}
-                    </span>
-                  ))}
-                </div>
-
-                <ReportSummary result={result} />
               </section>
 
               <Divider />
@@ -337,9 +328,6 @@ export function ResultsDashboard({
                     const detail = companyDetails.find(
                       (item) => item.company_name === company.company_name,
                     );
-                    const reliability = result.data_reliability?.find(
-                      (item) => item.company_name === company.company_name,
-                    );
                     const evidence = result.recommendation_evidence?.find(
                       (item) => item.company_name === company.company_name,
                     );
@@ -350,7 +338,6 @@ export function ResultsDashboard({
                         detail={detail}
                         evidence={evidence?.evidence_points ?? []}
                         key={company.company_name}
-                        reliability={reliability}
                       />
                     );
                   })}
@@ -373,7 +360,7 @@ export function ResultsDashboard({
                       <span>보완 후 88%</span>
                     </div>
                   </div>
-                  <div className="grid gap-4 md:grid-cols-2">
+                  <div className="grid gap-3">
                     <SkillPills title="보유 역량" items={result.skill_gap.possessed} />
                     <SkillPills title="보완 필요" items={result.skill_gap.missing} />
                   </div>
@@ -495,32 +482,14 @@ function saveReportLocally(result: ResultPayload, input: Record<string, unknown>
   }
 }
 
-function ReportSummary({ result }: { result: AnalysisResult }) {
-  const coverage = result.data_coverage_summary;
-
-  return (
-    <div className="mt-5 grid grid-cols-2 gap-2 md:mt-6 md:grid-cols-4 md:gap-3">
-      <MetricTile label="추천 기업" value={`${result.recommended_companies.length}개`} />
-      <MetricTile label="직무 후보" value={`${result.job_cards?.length ?? 0}개`} />
-      <MetricTile label="추천 자격" value={`${result.recommended_certs.length}개`} />
-      <MetricTile
-        label="근거 확보"
-        value={coverage ? `${coverage.with_sources}/${coverage.recommended_company_count}` : "정보 없음"}
-      />
-    </div>
-  );
-}
-
 function CompanyCard({
   company,
   detail,
   evidence,
-  reliability,
 }: {
   company: RecommendedCompany;
   detail?: CompanyDetail;
   evidence: string[];
-  reliability?: NonNullable<AnalysisResult["data_reliability"]>[number];
 }) {
   const topJob = detail?.job_postings?.[0];
   const homepageUrl = detail?.homepage_url;
@@ -537,11 +506,6 @@ function CompanyCard({
               <span className="inline-flex items-center gap-1 rounded-full bg-[#E9F6EF] px-2.5 py-1 text-xs font-black text-[var(--success)]">
                 <CheckCircle2 size={13} />
                 원가관리 인증
-              </span>
-            ) : null}
-            {detail?.data_quality_score ? (
-              <span className="rounded-full bg-[#EEF4FA] px-2.5 py-1 text-xs font-black text-[#506580]">
-                데이터 {detail.data_quality_score}점
               </span>
             ) : null}
           </div>
@@ -561,12 +525,8 @@ function CompanyCard({
             ))}
           </div>
 
-          <div className="mt-4 grid gap-2 text-xs font-bold text-[var(--caption)] md:grid-cols-3">
-            <span>추천 직무 {company.recommended_positions.slice(0, 2).join(", ") || "직무 확인 필요"}</span>
-            <span>채용 신호 {detail?.job_postings?.length ?? 0}건</span>
-            <span>
-              평균연봉 {company.avg_salary ? `${company.avg_salary.toLocaleString("ko-KR")}만원` : "공시 없음"}
-            </span>
+          <div className="mt-4 text-xs font-bold text-[var(--caption)]">
+            채용 신호 {detail?.job_postings?.length ?? 0}건
           </div>
 
           <div className="mt-4">
@@ -598,7 +558,7 @@ function CompanyCard({
               />
             </summary>
             <div className="grid gap-4 border-t border-[var(--border)] p-3 md:gap-5 md:p-4">
-              <CompanyMeta detail={detail} company={company} reliability={reliability} />
+              <CompanyMeta company={company} />
               {evidence.length ? <EvidenceList evidence={evidence} /> : null}
               <JobSignalList postings={detail?.job_postings ?? []} />
             </div>
@@ -613,20 +573,15 @@ function CompanyCard({
 
 function CompanyMeta({
   company,
-  detail,
-  reliability,
 }: {
   company: RecommendedCompany;
-  detail?: CompanyDetail;
-  reliability?: NonNullable<AnalysisResult["data_reliability"]>[number];
 }) {
   return (
     <div className="rounded-[12px] bg-white p-4">
       <p className="text-sm font-black text-[var(--primary)]">보직 기반 해석</p>
       <p className="mt-2 text-sm font-medium leading-7 text-[var(--muted-foreground)]">
         이 기업은 {company.recommended_positions.slice(0, 3).join(", ") || "관련 직무"}와 연결됩니다.
-        채용 신호, 추천 직무, 계약 분야를 함께 보되 화면에서는 사용자가 준비할 직무 중심으로
-        압축했습니다.
+        사용자가 준비할 직무와 채용 신호 중심으로 압축했습니다.
       </p>
       <div className="mt-3 flex flex-wrap gap-2">
         {company.recommended_positions.map((position) => (
@@ -634,11 +589,6 @@ function CompanyMeta({
             {position}
           </span>
         ))}
-      </div>
-      <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold text-[var(--caption)]">
-        {reliability ? <span>데이터 신뢰도 {reliability.score}점</span> : null}
-        {detail?.designation_date ? <span>방산 지정 {formatDate(detail.designation_date)}</span> : null}
-        {company.salary_source ? <span>연봉 출처 {company.salary_source}</span> : null}
       </div>
     </div>
   );
@@ -841,9 +791,9 @@ function SkillPills({
   title: string;
 }) {
   return (
-    <div className="rounded-[12px] border border-[var(--border)] bg-white p-3 md:p-4">
+    <div className="grid gap-2 md:grid-cols-[90px_1fr] md:items-center">
       <h3 className="font-black text-[var(--foreground)]">{title}</h3>
-      <div className="mt-3 flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 md:flex-nowrap md:overflow-x-auto">
         {items.map((item) => (
           <span className="rounded-full bg-[#F4F6F8] px-3 py-1 text-xs font-extrabold text-[var(--foreground)]" key={item}>
             {item}
@@ -860,15 +810,6 @@ function TimingCard({ body, title }: { body: string; title: string }) {
       <h3 className="font-black">{title}</h3>
       <p className="mt-2 text-sm font-medium leading-7 text-[var(--muted-foreground)]">{body}</p>
     </article>
-  );
-}
-
-function MetricTile({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-[12px] border border-[var(--border)] bg-white p-3 md:p-4">
-      <p className="text-xs font-black text-[var(--caption)]">{label}</p>
-      <p className="mt-2 break-words text-base font-black text-[var(--foreground)] md:text-lg">{value}</p>
-    </div>
   );
 }
 
