@@ -65,6 +65,7 @@ textarea {
 }
 
 .input {
+  height: 46px;
   min-height: 46px;
   width: 100%;
   border-radius: 9px;
