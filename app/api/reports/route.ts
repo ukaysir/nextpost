@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   try {
     const user = await getRequestUser(request);
     const userId = user?.id ?? request.nextUrl.searchParams.get("userId") ?? "test";
-    const reports = await listSavedReports(userId);
+    const reports = await listSavedReports(userId, user?.accessToken);
     return NextResponse.json({ reports });
   } catch (error) {
     return NextResponse.json(
@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
 
     const report = await createSavedReport({
       userId: user?.id ?? body.userId ?? "test",
+      accessToken: user?.accessToken,
       title: body.title,
       input: body.input,
       result: body.result,

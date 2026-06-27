@@ -12,6 +12,7 @@
     "audit:data": "node scripts/audit-data-coverage.mjs",
     "audit:data:remote": "node scripts/audit-data-coverage.mjs --remote",
     "verify:analysis": "node scripts/verify-analysis-output.mjs",
+    "auth:google:check": "node scripts/check-google-auth-provider.mjs",
     "test:mobile": "playwright test scripts/mobile-overflow-check.spec.mjs"
   },
   "dependencies": {

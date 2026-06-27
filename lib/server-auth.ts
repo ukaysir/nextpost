@@ -7,6 +7,7 @@ export type RequestUser = {
   name?: string;
   provider: "google" | "test";
   isAdmin: boolean;
+  accessToken?: string;
 };
 
 function hasSupabaseConfig() {
@@ -57,6 +58,7 @@ export async function getRequestUser(request: NextRequest): Promise<RequestUser 
         name,
         provider: "google",
         isAdmin: isAllowedAdmin(data.user.email ?? undefined),
+        accessToken: token,
       };
     }
   }

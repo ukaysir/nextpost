@@ -32,6 +32,7 @@ export type SavedReportSummary = Pick<
 
 export type SaveReportPayload = {
   userId?: string;
+  accessToken?: string;
   title?: string;
   input: AnalyzeInput | Record<string, unknown>;
   result: AnalysisResult;
@@ -41,13 +42,20 @@ function hasSupabaseConfig() {
   return Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_PUBLISHABLE_KEY);
 }
 
-function getClient() {
+function getClient(accessToken?: string) {
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_PUBLISHABLE_KEY) {
     throw new Error("Supabase configuration is missing.");
   }
 
   return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
+    global: accessToken
+      ? {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      : undefined,
   });
 }
 
@@ -68,7 +76,7 @@ export async function createSavedReport(payload: SaveReportPayload) {
     throw new Error("Supabase is not configured.");
   }
 
-  const client = getClient();
+  const client = getClient(payload.accessToken);
   const topCompany = getTopCompany(payload.result);
   const row = {
     user_id: payload.userId ?? "test",
@@ -112,12 +120,12 @@ export async function createSavedReport(payload: SaveReportPayload) {
   return report;
 }
 
-export async function listSavedReports(userId = "test") {
+export async function listSavedReports(userId = "test", accessToken?: string) {
   if (!hasSupabaseConfig()) {
     throw new Error("Supabase is not configured.");
   }
 
-  const client = getClient();
+  const client = getClient(accessToken);
   const { data, error } = await client
     .from("saved_reports")
     .select(
