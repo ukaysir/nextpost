@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getRuntimeAppData } from "@/lib/runtime-data";
+import { getRuntimeAppData, getRuntimeDataFreshness } from "@/lib/runtime-data";
 import {
   buildFallbackAnalysis,
   prepareAnalysisContext,
@@ -32,11 +32,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const appData = await getRuntimeAppData();
+
     return NextResponse.json({
       ...result,
+      data_freshness: await getRuntimeDataFreshness(),
       ai_provider: aiProvider,
       career_centers: selectCareerCenters(
-        (await getRuntimeAppData()).careerCenters,
+        appData.careerCenters,
         input.preferred_region,
       ),
     });

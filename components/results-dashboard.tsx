@@ -20,6 +20,7 @@ import {
   Mail,
   MapPin,
   RotateCcw,
+  Save,
   Send,
   ShieldCheck,
   Target,
@@ -37,14 +38,27 @@ type ResultPayload = AnalysisResult & {
 type CompanyDetail = NonNullable<AnalysisResult["company_details"]>[number];
 type RecommendedCompany = AnalysisResult["recommended_companies"][number];
 
-export function ResultsDashboard() {
-  const [result, setResult] = useState<ResultPayload | null>(null);
+export function ResultsDashboard({
+  initialResult,
+  readOnly = false,
+  savedReportShareId,
+}: {
+  initialResult?: ResultPayload;
+  readOnly?: boolean;
+  savedReportShareId?: string;
+}) {
+  const [result, setResult] = useState<ResultPayload | null>(initialResult ?? null);
   const [toast, setToast] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [savedSharePath, setSavedSharePath] = useState(
+    savedReportShareId ? `/reports/${savedReportShareId}` : "",
+  );
 
   useEffect(() => {
+    if (initialResult) return;
     const raw = sessionStorage.getItem("nextpost:last-result");
     if (raw) window.setTimeout(() => setResult(JSON.parse(raw)), 0);
-  }, []);
+  }, [initialResult]);
 
   function showToast(message: string) {
     setToast(message);
@@ -52,7 +66,49 @@ export function ResultsDashboard() {
   }
 
   const topScore = useMemo(() => result?.recommended_companies?.[0]?.fit_score ?? 0, [result]);
-  const reportUrl = typeof window !== "undefined" ? window.location.href : "";
+  const reportUrl =
+    typeof window !== "undefined"
+      ? savedSharePath
+        ? new URL(savedSharePath, window.location.origin).href
+        : window.location.href
+      : "";
+
+  async function saveReport() {
+    if (!result || isSaving || readOnly) return;
+    setIsSaving(true);
+
+    let input: Record<string, unknown> = {};
+    try {
+      input = JSON.parse(sessionStorage.getItem("nextpost:last-input") || "{}");
+    } catch {
+      input = {};
+    }
+
+    try {
+      const response = await fetch("/api/reports", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: "test", input, result }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.message || "리포트를 저장하지 못했습니다.");
+
+      const sharePath = payload.shareUrl as string;
+      setSavedSharePath(sharePath);
+      const absoluteUrl = new URL(sharePath, window.location.origin).href;
+      await navigator.clipboard.writeText(absoluteUrl);
+      showToast("리포트를 저장하고 공유 링크를 복사했습니다.");
+    } catch (error) {
+      saveReportLocally(result, input);
+      showToast(
+        error instanceof Error
+          ? `서버 저장 실패, 브라우저에 임시 저장했습니다: ${error.message}`
+          : "서버 저장 실패, 브라우저에 임시 저장했습니다.",
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  }
 
   if (!result) {
     return (
@@ -109,6 +165,14 @@ export function ResultsDashboard() {
             다시 입력하기
           </Link>
           <div className="ml-auto flex flex-wrap gap-2">
+            {!readOnly ? (
+              <ActionButton
+                icon={Save}
+                label={isSaving ? "저장 중" : savedSharePath ? "저장 완료" : "리포트 저장"}
+                onClick={saveReport}
+                primary={!savedSharePath}
+              />
+            ) : null}
             <ActionButton
               icon={Copy}
               label="링크 복사"
@@ -402,6 +466,33 @@ export function ResultsDashboard() {
       </div>
     </main>
   );
+}
+
+function saveReportLocally(result: ResultPayload, input: Record<string, unknown>) {
+  if (typeof window === "undefined") return;
+
+  const key = "nextpost:saved-reports";
+  const topCompany = result.recommended_companies?.[0];
+  const item = {
+    id: `local-${Date.now()}`,
+    share_id: "",
+    title: `${result.matched_field ?? "방산"} · ${topCompany?.company_name ?? "추천"} 리포트`,
+    input_payload: input,
+    result_payload: result,
+    matched_field: result.matched_field ?? null,
+    matched_job_group: result.matched_job_group ?? null,
+    top_company: topCompany?.company_name ?? null,
+    top_score: topCompany?.fit_score ?? null,
+    created_at: new Date().toISOString(),
+    local_only: true,
+  };
+
+  try {
+    const current = JSON.parse(window.localStorage.getItem(key) || "[]") as unknown[];
+    window.localStorage.setItem(key, JSON.stringify([item, ...current].slice(0, 20)));
+  } catch {
+    window.localStorage.setItem(key, JSON.stringify([item]));
+  }
 }
 
 function ReportSummary({ result }: { result: AnalysisResult }) {
@@ -785,6 +876,7 @@ function SourceList({ sources }: { sources: CompanyDetail["sources"] }) {
 
 function DataCoverage({ result }: { result: AnalysisResult }) {
   const coverage = result.data_coverage_summary;
+  const freshness = result.data_freshness;
   const details = result.company_details ?? [];
   const allSources = details.flatMap((detail) => detail.sources);
   const sourceCounts = allSources.reduce<Record<string, number>>((acc, source) => {
@@ -809,6 +901,17 @@ function DataCoverage({ result }: { result: AnalysisResult }) {
         <SourceBadge label="공공/파트너" value={sourceCounts.C_PUBLIC_OR_PARTNER ?? 0} large />
         <SourceBadge label="외부/상업" value={sourceCounts.D_SECONDARY_OR_COMMERCIAL ?? 0} large />
       </div>
+      {freshness ? (
+        <div className="grid gap-3 md:grid-cols-4">
+          <MetricTile label="최근 출처 수집" value={formatDate(freshness.latest_source_at)} />
+          <MetricTile label="최근 계약 기준" value={formatDate(freshness.latest_contract_date)} />
+          <MetricTile label="채용 신호 수집" value={formatDate(freshness.latest_job_posting_at)} />
+          <MetricTile
+            label="재무 기준연도"
+            value={freshness.latest_financial_year ? `${freshness.latest_financial_year}년` : "정보 없음"}
+          />
+        </div>
+      ) : null}
       {coverage?.known_gaps?.length ? (
         <div className="rounded-[12px] bg-[#FFF7E8] p-4 text-sm font-bold leading-7 text-[#7A4A00]">
           {coverage.known_gaps.join(" · ")}

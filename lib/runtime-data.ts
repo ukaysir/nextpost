@@ -170,3 +170,38 @@ export async function getLatestRuntimeIndustryStat() {
   const stats = (await getRuntimeAppData()).industryStats;
   return [...stats].sort((a, b) => b.year - a.year)[0];
 }
+
+function latestIso(values: Array<string | null | undefined>) {
+  const sorted = values
+    .filter((value): value is string => Boolean(value))
+    .map((value) => {
+      const time = new Date(value).getTime();
+      return Number.isNaN(time) ? null : { value, time };
+    })
+    .filter((item): item is { value: string; time: number } => Boolean(item))
+    .sort((a, b) => b.time - a.time);
+
+  return sorted[0]?.value ?? null;
+}
+
+export async function getRuntimeDataFreshness() {
+  const data = await getRuntimeAppData();
+  const latestFinancialYear = data.companyFinancials.reduce<number | null>(
+    (latest, item) =>
+      latest === null || item.fiscal_year > latest ? item.fiscal_year : latest,
+    null,
+  );
+
+  return {
+    latest_source_at: latestIso([
+      ...data.companySources.map((source) => source.retrieved_at ?? source.created_at),
+      ...data.contractRecords.map((record) => record.created_at),
+      ...data.companyFinancials.map((financial) => financial.created_at),
+    ]),
+    latest_profile_at: latestIso(data.companyProfiles.map((profile) => profile.updated_at)),
+    latest_job_posting_at: latestIso(data.jobPostings.map((posting) => posting.collected_at)),
+    latest_contract_date: latestIso(data.contractRecords.map((record) => record.contract_date)),
+    latest_financial_year: latestFinancialYear,
+    generated_at: new Date().toISOString(),
+  };
+}

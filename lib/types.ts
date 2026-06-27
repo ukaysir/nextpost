@@ -54,6 +54,7 @@ export type CompanyProfile = {
   main_products: string[];
   summary?: string | null;
   data_quality_score: number;
+  updated_at?: string | null;
 };
 
 export type CompanyFinancial = {
@@ -67,6 +68,7 @@ export type CompanyFinancial = {
   avg_salary?: number | null;
   source_id?: number | null;
   notes?: string | null;
+  created_at?: string | null;
 };
 
 export type ContractRecord = {
@@ -80,6 +82,7 @@ export type ContractRecord = {
   buyer?: string | null;
   product_category?: string | null;
   weapon_system?: string | null;
+  created_at?: string | null;
 };
 
 export type JobPosting = {
@@ -97,6 +100,7 @@ export type JobPosting = {
   deadline_at?: string | null;
   posting_url?: string | null;
   is_active?: boolean | null;
+  collected_at?: string | null;
 };
 
 export type CompanySource = {
@@ -107,7 +111,9 @@ export type CompanySource = {
   title?: string | null;
   source_url: string;
   publisher?: string | null;
+  retrieved_at?: string | null;
   notes?: string | null;
+  created_at?: string | null;
 };
 
 export type JobRequirement = {
@@ -268,6 +274,14 @@ export const analysisResultSchema = z.object({
     with_salary: z.number().int(),
     with_sources: z.number().int(),
     known_gaps: z.array(z.string()),
+  }).optional(),
+  data_freshness: z.object({
+    latest_source_at: z.string().nullable(),
+    latest_profile_at: z.string().nullable(),
+    latest_job_posting_at: z.string().nullable(),
+    latest_contract_date: z.string().nullable(),
+    latest_financial_year: z.number().nullable(),
+    generated_at: z.string(),
   }).optional(),
   company_details: z.array(
     z.object({

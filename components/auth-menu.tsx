@@ -39,6 +39,9 @@ export function AuthMenu({ compact = false }: { compact?: boolean }) {
           {user.id}
         </span>
       )}
+      <Link className="inline-flex items-center gap-1 font-extrabold" href="/dashboard">
+        대시보드
+      </Link>
       <button
         className="inline-flex items-center gap-1 font-extrabold"
         type="button"

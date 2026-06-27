@@ -12,6 +12,7 @@ pnpm-debug.log*
 *.tsbuildinfo
 .agents
 .codex
+supabase/.temp
 skills-lock.json
 
 .vercel

@@ -1,3 +1,7 @@
+create extension if not exists pgcrypto;
+
+drop table if exists public.saved_companies;
+drop table if exists public.saved_reports;
 drop table if exists public.glossary_terms;
 drop table if exists public.industry_stats;
 drop table if exists public.career_centers;
@@ -158,6 +162,33 @@ create table public.job_postings (
   collected_at timestamptz not null default now()
 );
 
+create table public.saved_reports (
+  id uuid primary key default gen_random_uuid(),
+  share_id text not null unique default encode(gen_random_bytes(9), 'hex'),
+  user_id text not null default 'test',
+  title text not null,
+  input_payload jsonb not null default '{}'::jsonb,
+  result_payload jsonb not null default '{}'::jsonb,
+  matched_field text,
+  matched_job_group text,
+  top_company text,
+  top_score integer,
+  is_public boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table public.saved_companies (
+  id bigint generated always as identity primary key,
+  report_id uuid references public.saved_reports(id) on delete cascade,
+  user_id text not null default 'test',
+  company_name text not null,
+  defense_field text,
+  fit_score integer,
+  memo text,
+  created_at timestamptz not null default now()
+);
+
 create index companies_defense_field_contract_idx
   on public.companies (defense_field, total_contract_amount desc);
 
@@ -200,6 +231,15 @@ create index job_postings_company_active_idx
 create index job_postings_source_id_idx
   on public.job_postings (source_id) where source_id is not null;
 
+create index saved_reports_user_created_idx
+  on public.saved_reports (user_id, created_at desc);
+
+create index saved_reports_share_id_idx
+  on public.saved_reports (share_id);
+
+create index saved_companies_user_created_idx
+  on public.saved_companies (user_id, created_at desc);
+
 alter table public.companies enable row level security;
 alter table public.job_requirements enable row level security;
 alter table public.education_certs enable row level security;
@@ -212,6 +252,8 @@ alter table public.company_profiles enable row level security;
 alter table public.company_financials enable row level security;
 alter table public.contract_records enable row level security;
 alter table public.job_postings enable row level security;
+alter table public.saved_reports enable row level security;
+alter table public.saved_companies enable row level security;
 
 create policy "public read companies"
   on public.companies for select
@@ -273,6 +315,38 @@ create policy "public read job_postings"
   to anon, authenticated
   using (true);
 
+create policy "public read saved_reports"
+  on public.saved_reports for select
+  to anon, authenticated
+  using (is_public = true or user_id = 'test');
+
+create policy "public insert saved_reports"
+  on public.saved_reports for insert
+  to anon, authenticated
+  with check (true);
+
+create policy "public update saved_reports"
+  on public.saved_reports for update
+  to anon, authenticated
+  using (user_id = 'test')
+  with check (user_id = 'test');
+
+create policy "public read saved_companies"
+  on public.saved_companies for select
+  to anon, authenticated
+  using (true);
+
+create policy "public insert saved_companies"
+  on public.saved_companies for insert
+  to anon, authenticated
+  with check (true);
+
+create policy "public update saved_companies"
+  on public.saved_companies for update
+  to anon, authenticated
+  using (user_id = 'test')
+  with check (user_id = 'test');
+
 grant usage on schema public to anon, authenticated;
 grant select on public.companies to anon, authenticated;
 grant select on public.job_requirements to anon, authenticated;
@@ -286,3 +360,6 @@ grant select on public.company_profiles to anon, authenticated;
 grant select on public.company_financials to anon, authenticated;
 grant select on public.contract_records to anon, authenticated;
 grant select on public.job_postings to anon, authenticated;
+grant select, insert, update on public.saved_reports to anon, authenticated;
+grant select, insert, update on public.saved_companies to anon, authenticated;
+grant usage, select on sequence public.saved_companies_id_seq to anon, authenticated;

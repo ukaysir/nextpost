@@ -4,6 +4,7 @@ import {
   ArrowRight,
   BarChart3,
   BriefcaseBusiness,
+  Clock3,
   Database,
   FileSearch,
   LineChart,
@@ -11,12 +12,17 @@ import {
 } from "lucide-react";
 import { AuthMenu } from "@/components/auth-menu";
 import { IndustryChart } from "@/components/industry-chart";
-import { getLatestRuntimeIndustryStat, getRuntimeAppData } from "@/lib/runtime-data";
+import {
+  getLatestRuntimeIndustryStat,
+  getRuntimeAppData,
+  getRuntimeDataFreshness,
+} from "@/lib/runtime-data";
 import { formatWon } from "@/lib/utils";
 
 export default async function AboutPage() {
   const data = await getRuntimeAppData();
   const latest = await getLatestRuntimeIndustryStat();
+  const freshness = await getRuntimeDataFreshness();
 
   const companiesWithContracts = new Set(
     data.contractRecords.map((record) => record.company_id).filter(Boolean),
@@ -126,6 +132,33 @@ export default async function AboutPage() {
             label="교육/직무 데이터"
             value={`${data.educationCerts.length + data.jobRequirements.length}건`}
             caption="교육 과정, 자격, 직무 요구역량"
+          />
+        </div>
+
+        <div className="mt-4 grid gap-4 md:grid-cols-4">
+          <MetricCard
+            icon={Clock3}
+            label="최근 출처 수집"
+            value={formatFreshDate(freshness.latest_source_at)}
+            caption="정부/기업/공개 출처 기준"
+          />
+          <MetricCard
+            icon={FileSearch}
+            label="최근 계약 기준"
+            value={formatFreshDate(freshness.latest_contract_date)}
+            caption="국내조달 계약일 기준"
+          />
+          <MetricCard
+            icon={BriefcaseBusiness}
+            label="채용 신호 수집"
+            value={formatFreshDate(freshness.latest_job_posting_at)}
+            caption="기업별 채용 포인터 기준"
+          />
+          <MetricCard
+            icon={LineChart}
+            label="재무 기준연도"
+            value={freshness.latest_financial_year ? `${freshness.latest_financial_year}년` : "-"}
+            caption="OpenDART 재무 데이터 기준"
           />
         </div>
 
@@ -243,4 +276,15 @@ function MetricCard({
       <p className="mt-2 text-xs font-bold text-[var(--caption)]">{caption}</p>
     </article>
   );
+}
+
+function formatFreshDate(value?: string | null) {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString("ko-KR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
 }

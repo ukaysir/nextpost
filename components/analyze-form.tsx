@@ -51,6 +51,53 @@ const defenseFieldLabels = [
   "기타",
 ];
 
+const specialtyPresets: Record<
+  string,
+  {
+    certs: string[];
+    field: string;
+    positions: string[];
+    skills: string[];
+  }
+> = {
+  통신: {
+    field: "통신전자",
+    positions: ["통신전자장비 정비/운용", "C4I 운용", "무전/위성통신 운용"],
+    skills: ["RF", "C4ISR", "네트워크", "전자회로"],
+    certs: ["정보처리기사", "무선설비기사", "정보통신기사"],
+  },
+  전산: {
+    field: "통신전자",
+    positions: ["전산체계 운용", "정보체계 관리", "보안관제"],
+    skills: ["소프트웨어", "DB", "보안", "클라우드"],
+    certs: ["정보처리기사", "SQLD", "정보보안기사"],
+  },
+  항공: {
+    field: "항공유도",
+    positions: ["항공정비", "항공전자 운용", "무인체계 운용"],
+    skills: ["항공전자", "센서", "정비", "품질"],
+    certs: ["항공산업기사", "전자기사", "품질경영기사"],
+  },
+  기갑: {
+    field: "기동",
+    positions: ["전차/장갑차 정비", "기동장비 운용", "차량 정비"],
+    skills: ["기계", "정비", "유압", "품질"],
+    certs: ["일반기계기사", "자동차정비기사", "품질경영기사"],
+  },
+  포병: {
+    field: "화력",
+    positions: ["화력장비 운용", "사격통제", "탄도/표적 분석"],
+    skills: ["사격통제", "센서", "기계", "데이터 분석"],
+    certs: ["기계설계기사", "전자기사", "정보처리기사"],
+  },
+  병기: {
+    field: "탄약",
+    positions: ["탄약/무장 정비", "창정비", "품질검사"],
+    skills: ["정비", "품질", "안전", "검사"],
+    certs: ["화공기사", "품질경영기사", "산업안전기사"],
+  },
+};
+
 const loadingMessages = [
   "군 경력을 방산 직무 언어로 번역하는 중입니다.",
   "방산업체 지정현황과 계약 데이터를 대조하는 중입니다.",
@@ -88,6 +135,20 @@ export function AnalyzeForm() {
   const [progress, setProgress] = useState(0);
   const [isAnalysisComplete, setIsAnalysisComplete] = useState(false);
 
+  const specialtyPreset = specialtyPresets[form.specialty];
+  const completionItems = useMemo(
+    () => [
+      { label: "군 경력", done: Boolean(form.military_branch && form.rank && form.specialty) },
+      { label: "보직 경험", done: Boolean(form.position && Number(form.years_served) >= 1) },
+      { label: "직무 목표", done: Boolean(form.major && form.desired_field) },
+      { label: "자격/교육", done: certifications.length > 0 },
+    ],
+    [certifications.length, form],
+  );
+  const completionRate = Math.round(
+    (completionItems.filter((item) => item.done).length / completionItems.length) * 100,
+  );
+
   const isValid = useMemo(() => {
     const yearsServed = Number(form.years_served);
     return (
@@ -107,11 +168,20 @@ export function AnalyzeForm() {
     setForm((current) => ({ ...current, [name]: value }));
   }
 
-  function addCertification() {
-    const value = certInput.trim();
+  function addCertification(nextValue = certInput) {
+    const value = nextValue.trim();
     if (!value || certifications.includes(value)) return;
     setCertifications((current) => [...current, value]);
-    setCertInput("");
+    if (nextValue === certInput) setCertInput("");
+  }
+
+  function applySpecialtyPreset(position?: string) {
+    if (!specialtyPreset) return;
+    setForm((current) => ({
+      ...current,
+      desired_field: specialtyPreset.field,
+      position: position ?? specialtyPreset.positions[0] ?? current.position,
+    }));
   }
 
   async function submit() {
@@ -185,6 +255,35 @@ export function AnalyzeForm() {
         </div>
 
         <section className="np-card mt-9 p-6 md:p-10">
+          <div className="mb-8 grid gap-4 rounded-[14px] bg-[#F8FAFB] p-4 md:grid-cols-[180px_1fr] md:items-center">
+            <div>
+              <p className="text-sm font-black text-[var(--primary)]">입력 완성도</p>
+              <p className="mt-1 text-3xl font-black tracking-normal">{completionRate}%</p>
+            </div>
+            <div>
+              <div className="h-3 overflow-hidden rounded-full bg-[#E5E8EB]">
+                <div
+                  className="h-full rounded-full bg-[var(--accent)] transition-all"
+                  style={{ width: `${completionRate}%` }}
+                />
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {completionItems.map((item) => (
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-black ${
+                      item.done
+                        ? "bg-[#E9F6EF] text-[var(--success)]"
+                        : "bg-white text-[var(--caption)]"
+                    }`}
+                    key={item.label}
+                  >
+                    {item.done ? "완료" : "필요"} · {item.label}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
           <FormSection number="1" title="기본 군 정보">
             <div className="grid gap-5 md:grid-cols-2">
               <Field label="군별" required>
@@ -219,12 +318,40 @@ export function AnalyzeForm() {
                 <select
                   className="input"
                   value={form.specialty}
-                  onChange={(event) => updateField("specialty", event.target.value)}
+                  onChange={(event) => {
+                    const specialty = event.target.value;
+                    const preset = specialtyPresets[specialty];
+                    setForm((current) => ({
+                      ...current,
+                      specialty,
+                      desired_field: preset?.field ?? current.desired_field,
+                      position: preset?.positions[0] ?? current.position,
+                    }));
+                  }}
                 >
                   {specialties.map((item) => (
                     <option key={item}>{item}</option>
                   ))}
                 </select>
+                {specialtyPreset ? (
+                  <div className="mt-2 rounded-[12px] bg-[#F8FAFB] p-3">
+                    <p className="text-xs font-black text-[var(--primary)]">
+                      {form.specialty} 병과 추천 보직
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {specialtyPreset.positions.map((position) => (
+                        <button
+                          className="rounded-full bg-white px-3 py-1 text-xs font-black text-[var(--caption)] transition hover:text-[var(--foreground)]"
+                          key={position}
+                          type="button"
+                          onClick={() => applySpecialtyPreset(position)}
+                        >
+                          {position}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
               </Field>
               <Field label="복무연수" required>
                 <input
@@ -306,12 +433,29 @@ export function AnalyzeForm() {
               <button
                 className="focus-ring grid h-[46px] w-[52px] shrink-0 place-items-center rounded-[9px] border-[1.5px] border-[#E5E8EB] bg-[#F2F4F6] text-[var(--muted-foreground)]"
                 type="button"
-                onClick={addCertification}
+                onClick={() => addCertification()}
                 aria-label="자격증 추가"
               >
                 <Plus size={20} />
               </button>
             </div>
+            {specialtyPreset ? (
+              <div className="mt-3">
+                <p className="text-xs font-black text-[var(--caption)]">추천 자격증 빠른 추가</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {specialtyPreset.certs.map((cert) => (
+                    <button
+                      className="rounded-full border border-[var(--border)] bg-white px-3 py-1 text-xs font-black text-[var(--caption)] transition hover:border-[var(--primary)] hover:text-[var(--foreground)]"
+                      key={cert}
+                      type="button"
+                      onClick={() => addCertification(cert)}
+                    >
+                      + {cert}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
             {certifications.length > 0 ? (
               <div className="mt-4 flex flex-wrap gap-2">
                 {certifications.map((cert) => (
@@ -420,11 +564,11 @@ function Field({
   required?: boolean;
 }) {
   return (
-    <label className="grid gap-2 text-[13.5px] font-black text-[var(--muted-foreground)]">
+    <div className="grid gap-2 text-[13.5px] font-black text-[var(--muted-foreground)]">
       <span>
         {label} {required ? <span className="text-[var(--required)]">*</span> : null}
       </span>
       {children}
-    </label>
+    </div>
   );
 }
