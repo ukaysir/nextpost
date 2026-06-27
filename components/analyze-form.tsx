@@ -242,7 +242,7 @@ export function AnalyzeForm() {
         </nav>
       </header>
 
-      <div className="mx-auto max-w-[358px] px-4 pb-20 pt-4 sm:max-w-[980px]">
+      <div className="mx-auto max-w-[358px] px-4 pb-14 pt-3 sm:max-w-[920px]">
         <div className="text-center text-white">
           <p className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/15 px-3 py-1 text-sm font-extrabold backdrop-blur">
             <Radar size={16} />
@@ -254,8 +254,8 @@ export function AnalyzeForm() {
           </h1>
         </div>
 
-        <section className="np-card mt-9 p-6 md:p-10">
-          <div className="mb-8 grid gap-4 rounded-[14px] bg-[#F8FAFB] p-4 md:grid-cols-[180px_1fr] md:items-center">
+        <section className="np-card mt-7 p-5 md:p-7">
+          <div className="mb-6 grid gap-3 rounded-[14px] bg-[#F8FAFB] p-4 md:grid-cols-[150px_1fr] md:items-center">
             <div>
               <p className="text-sm font-black text-[var(--primary)]">입력 완성도</p>
               <p className="mt-1 text-3xl font-black tracking-normal">{completionRate}%</p>
@@ -285,14 +285,14 @@ export function AnalyzeForm() {
           </div>
 
           <FormSection number="1" title="기본 군 정보">
-            <div className="grid gap-5 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-2">
               <Field label="군별" required>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-4">
                   {branchOptions.map((branch) => {
                     const selected = form.military_branch === branch.value;
                     return (
                       <button
-                        className={`focus-ring h-[46px] rounded-[9px] border-[1.5px] text-sm font-extrabold ${
+                        className={`focus-ring h-[42px] rounded-[9px] border-[1.5px] text-sm font-extrabold ${
                           selected
                             ? "border-[var(--primary)] bg-[var(--primary)] text-white"
                             : "border-[#E5E8EB] bg-[#F9FAFB] text-[var(--muted-foreground)]"
@@ -333,25 +333,6 @@ export function AnalyzeForm() {
                     <option key={item}>{item}</option>
                   ))}
                 </select>
-                {specialtyPreset ? (
-                  <div className="mt-2 rounded-[12px] bg-[#F8FAFB] p-3">
-                    <p className="text-xs font-black text-[var(--primary)]">
-                      {form.specialty} 병과 추천 보직
-                    </p>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {specialtyPreset.positions.map((position) => (
-                        <button
-                          className="rounded-full bg-white px-3 py-1 text-xs font-black text-[var(--caption)] transition hover:text-[var(--foreground)]"
-                          key={position}
-                          type="button"
-                          onClick={() => applySpecialtyPreset(position)}
-                        >
-                          {position}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ) : null}
               </Field>
               <Field label="복무연수" required>
                 <input
@@ -367,13 +348,32 @@ export function AnalyzeForm() {
                   }}
                 />
               </Field>
+              {specialtyPreset ? (
+                <div className="rounded-[12px] bg-[#F8FAFB] px-3 py-2 md:col-span-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="mr-1 text-xs font-black text-[var(--primary)]">
+                      {form.specialty} 추천 보직
+                    </span>
+                    {specialtyPreset.positions.map((position) => (
+                      <button
+                        className="rounded-full bg-white px-3 py-1 text-xs font-black text-[var(--caption)] transition hover:text-[var(--foreground)]"
+                        key={position}
+                        type="button"
+                        onClick={() => applySpecialtyPreset(position)}
+                      >
+                        {position}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </div>
           </FormSection>
 
-          <div className="np-divider my-8" />
+          <div className="np-divider my-6" />
 
           <FormSection number="2" title="직무와 전공">
-            <div className="grid gap-5 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-2">
               <Field label="보직 / 주특기" required>
                 <input
                   className="input"
@@ -414,7 +414,7 @@ export function AnalyzeForm() {
             </div>
           </FormSection>
 
-          <div className="np-divider my-8" />
+          <div className="np-divider my-6" />
 
           <FormSection number="3" title="보유 자격증">
             <div className="flex gap-2">
@@ -431,7 +431,7 @@ export function AnalyzeForm() {
                 placeholder="예: 정보처리기사"
               />
               <button
-                className="focus-ring grid h-[46px] w-[52px] shrink-0 place-items-center rounded-[9px] border-[1.5px] border-[#E5E8EB] bg-[#F2F4F6] text-[var(--muted-foreground)]"
+                className="focus-ring grid h-[44px] w-[50px] shrink-0 place-items-center rounded-[9px] border-[1.5px] border-[#E5E8EB] bg-[#F2F4F6] text-[var(--muted-foreground)]"
                 type="button"
                 onClick={() => addCertification()}
                 aria-label="자격증 추가"
@@ -481,7 +481,7 @@ export function AnalyzeForm() {
           ) : null}
 
           <button
-            className="focus-ring mt-9 inline-flex h-[64px] w-full items-center justify-center gap-3 rounded-[10px] bg-[#001025d9] px-6 text-xl font-black text-white disabled:cursor-not-allowed disabled:opacity-50"
+            className="focus-ring mt-7 inline-flex h-[56px] w-full items-center justify-center gap-3 rounded-[10px] bg-[#001025d9] px-6 text-lg font-black text-white disabled:cursor-not-allowed disabled:opacity-50"
             disabled={!isValid || isLoading}
             type="button"
             onClick={submit}
@@ -543,7 +543,7 @@ function FormSection({
 }) {
   return (
     <section>
-      <div className="mb-6 flex items-center gap-3">
+      <div className="mb-4 flex items-center gap-3">
         <span className="grid h-[26px] w-[26px] place-items-center rounded-[7px] bg-[var(--primary)] text-[13px] font-black text-white">
           {number}
         </span>
