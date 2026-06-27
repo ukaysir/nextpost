@@ -1,26 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { LogOut, UserRound } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
-import { getCurrentTestUser, signOutTestUser, TestUser } from "@/lib/test-auth";
+import { signOutCurrentUser, useAuthUser } from "@/lib/auth-client";
 
 export function AuthMenu({ compact = false }: { compact?: boolean }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [user, setUser] = useState<TestUser | null>(null);
+  const { user, isLoading } = useAuthUser();
 
-  useEffect(() => {
-    const syncUser = () => setUser(getCurrentTestUser());
-    syncUser();
-    window.addEventListener("storage", syncUser);
-    window.addEventListener("nextpost-auth-change", syncUser);
-    return () => {
-      window.removeEventListener("storage", syncUser);
-      window.removeEventListener("nextpost-auth-change", syncUser);
-    };
-  }, []);
+  if (isLoading) {
+    return <span className="text-white/70">확인 중</span>;
+  }
 
   if (!user) {
     const nextPath = pathname && pathname !== "/login" ? pathname : "/analyze";
@@ -32,7 +24,7 @@ export function AuthMenu({ compact = false }: { compact?: boolean }) {
       {compact ? null : (
         <span className="hidden items-center gap-1 md:inline-flex">
           <UserRound size={15} />
-          {user.id}
+          {user.email ?? user.id}
         </span>
       )}
       <Link className="inline-flex items-center gap-1 font-extrabold" href="/dashboard">
@@ -42,8 +34,8 @@ export function AuthMenu({ compact = false }: { compact?: boolean }) {
         aria-label="로그아웃"
         className="inline-flex items-center gap-1 font-extrabold"
         type="button"
-        onClick={() => {
-          signOutTestUser();
+        onClick={async () => {
+          await signOutCurrentUser();
           router.push(`/login?next=${encodeURIComponent(pathname || "/analyze")}`);
         }}
       >

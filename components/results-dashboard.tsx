@@ -31,6 +31,7 @@ import { AnalysisResult } from "@/lib/types";
 import { cn, formatWon } from "@/lib/utils";
 import { AuthMenu } from "@/components/auth-menu";
 import { DataChat } from "@/components/data-chat";
+import { getAuthHeaders } from "@/lib/auth-client";
 
 type ResultPayload = AnalysisResult & {
   ai_provider?: "openai" | "fallback";
@@ -88,8 +89,8 @@ export function ResultsDashboard({
     try {
       const response = await fetch("/api/reports", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: "test", input, result }),
+        headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
+        body: JSON.stringify({ input, result }),
       });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.message || "리포트를 저장하지 못했습니다.");
@@ -132,6 +133,13 @@ export function ResultsDashboard({
   }
 
   const companyDetails = result.company_details ?? [];
+  const mobileTabs = [
+    { href: "#report-summary", label: "요약" },
+    { href: "#report-companies", label: "추천기업" },
+    { href: "#report-skills", label: "역량" },
+    { href: "#report-evidence", label: "근거" },
+    { href: "#report-chat", label: "AI상담" },
+  ];
 
   return (
     <main className="min-h-screen bg-[var(--background)]">
@@ -212,10 +220,22 @@ export function ResultsDashboard({
           </div>
         </div>
 
+        <nav className="no-print sticky top-[57px] z-20 -mx-3 mb-4 flex gap-2 overflow-x-auto border-y border-[var(--border)] bg-[var(--background)] px-3 py-2 sm:hidden">
+          {mobileTabs.map((tab) => (
+            <a
+              className="shrink-0 rounded-full border border-[var(--border)] bg-white px-3 py-2 text-xs font-black text-[var(--muted-foreground)]"
+              href={tab.href}
+              key={tab.href}
+            >
+              {tab.label}
+            </a>
+          ))}
+        </nav>
+
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(380px,480px)] xl:items-start">
           <div className="min-w-0">
             <article className="np-card overflow-hidden">
-              <section className="p-4 md:p-8">
+              <section className="scroll-mt-28 p-4 md:p-8" id="report-summary">
                 <div className="grid gap-4 md:grid-cols-[1fr_220px] md:items-start md:gap-6">
                   <div>
                     <p className="text-xs font-black tracking-[1px] text-[var(--primary)] md:text-sm">
@@ -250,7 +270,7 @@ export function ResultsDashboard({
 
               <Divider />
 
-              <ReportSection icon={BriefcaseBusiness} title="추천 기업">
+              <ReportSection icon={BriefcaseBusiness} id="report-companies" title="추천 기업">
                 <div className="grid gap-4">
                   {result.recommended_companies.map((company) => {
                     const detail = companyDetails.find(
@@ -340,7 +360,7 @@ export function ResultsDashboard({
 
               <Divider />
 
-              <ReportSection icon={Target} title="Skill Gap">
+              <ReportSection icon={Target} id="report-skills" title="Skill Gap">
                 <div className="grid gap-5 md:grid-cols-[0.45fr_0.55fr]">
                   <div>
                     <h3 className="text-lg font-black">직무 준비도</h3>
@@ -437,7 +457,7 @@ export function ResultsDashboard({
 
               <Divider />
 
-              <ReportSection icon={Database} title="데이터 근거">
+              <ReportSection icon={Database} id="report-evidence" title="데이터 근거">
                 <DataCoverage result={result} />
               </ReportSection>
             </article>
@@ -466,7 +486,7 @@ export function ResultsDashboard({
             ) : null}
           </div>
 
-          <aside className="no-print min-h-0 xl:sticky xl:top-[92px]">
+          <aside className="no-print min-h-0 scroll-mt-28 xl:sticky xl:top-[92px]" id="report-chat">
             <DataChat
               analysisResult={result}
               className="mt-5 h-[620px] min-h-[500px] xl:mt-0 xl:h-[calc(100dvh-188px)]"
@@ -942,14 +962,16 @@ function Divider() {
 function ReportSection({
   children,
   icon: Icon,
+  id,
   title,
 }: {
   children: React.ReactNode;
   icon: LucideIcon;
+  id?: string;
   title: string;
 }) {
   return (
-    <section className="p-4 md:p-8">
+    <section className="scroll-mt-28 p-4 md:p-8" id={id}>
       <div className="mb-4 flex items-center gap-2 md:mb-5 md:gap-3">
         <Icon className="text-[var(--primary)]" size={21} />
         <h2 className="text-xl font-black tracking-normal md:text-2xl md:tracking-[-0.4px]">{title}</h2>

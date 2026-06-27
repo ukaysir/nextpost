@@ -5,6 +5,7 @@ import Link from "next/link";
 import { BarChart3, BriefcaseBusiness, ExternalLink, FileText, Loader2, RotateCcw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { AuthMenu } from "@/components/auth-menu";
+import { getAuthHeaders } from "@/lib/auth-client";
 import { AnalysisResult } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -51,7 +52,10 @@ export function UserDashboard() {
 
       const localReports = readLocalReports();
       try {
-        const response = await fetch("/api/reports?userId=test", { cache: "no-store" });
+        const response = await fetch("/api/reports", {
+          cache: "no-store",
+          headers: await getAuthHeaders(),
+        });
         const payload = await response.json();
         if (!response.ok) throw new Error(payload.message || "저장 리포트를 불러오지 못했습니다.");
 
@@ -103,6 +107,7 @@ export function UserDashboard() {
           <nav className="ml-auto flex items-center gap-3 text-xs font-extrabold drop-shadow md:gap-5 md:text-sm">
             <Link href="/analyze">새 분석</Link>
             <Link className="hidden sm:inline" href="/about">About</Link>
+            <Link className="hidden sm:inline" href="/admin/data-audit">데이터 감사</Link>
             <AuthMenu compact />
           </nav>
         </div>

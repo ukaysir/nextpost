@@ -9,7 +9,7 @@ test.use({
   },
 });
 
-const paths = ["/", "/login", "/about", "/analyze", "/dashboard", "/results"];
+const paths = ["/", "/login", "/about", "/analyze", "/dashboard", "/results", "/admin/data-audit"];
 
 for (const path of paths) {
   test(`mobile layout has no horizontal overflow: ${path}`, async ({ page }) => {
