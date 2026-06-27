@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { BarChart3, BriefcaseBusiness, ExternalLink, FileText, Loader2, RotateCcw } from "lucide-react";
+import { ExternalLink, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { AuthMenu } from "@/components/auth-menu";
 import { getAuthHeaders } from "@/lib/auth-client";
@@ -107,15 +107,13 @@ export function UserDashboard() {
           <nav className="ml-auto flex items-center gap-3 text-xs font-extrabold drop-shadow md:gap-5 md:text-sm">
             <Link href="/analyze">새 분석</Link>
             <Link className="hidden sm:inline" href="/about">About</Link>
-            <Link className="hidden sm:inline" href="/admin/data-audit">데이터 감사</Link>
             <AuthMenu compact />
           </nav>
         </div>
 
         <section className="page-shell pb-9 pt-5 md:pb-14 md:pt-8">
-          <p className="text-xs font-black tracking-[1px] text-white/80 md:text-sm">MY NEXTPOST</p>
-          <h1 className="mt-2 max-w-3xl text-[30px] font-black leading-tight tracking-normal md:mt-3 md:text-6xl">
-            저장한 리포트와 관심 기업을 한곳에서 봅니다
+          <h1 className="max-w-3xl text-[42px] font-black leading-tight tracking-normal md:text-7xl">
+            MY NEXTPOST
           </h1>
         </section>
       </header>
@@ -128,22 +126,10 @@ export function UserDashboard() {
         ) : null}
 
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
-          <MetricCard icon={FileText} label="저장 리포트" value={`${reports.length}개`} />
-          <MetricCard
-            icon={BriefcaseBusiness}
-            label="관심 기업"
-            value={`${companyCounts.length}개`}
-          />
-          <MetricCard
-            icon={BarChart3}
-            label="평균 적합도"
-            value={`${averageScore(reports) || "-"}${averageScore(reports) ? "점" : ""}`}
-          />
-          <MetricCard
-            icon={RotateCcw}
-            label="최근 분석"
-            value={reports[0] ? formatDate(reports[0].created_at) : "-"}
-          />
+          <MetricCard label="저장 리포트" value={`${reports.length}개`} />
+          <MetricCard label="관심 기업" value={`${companyCounts.length}개`} />
+          <MetricCard label="평균 적합도" value={`${averageScore(reports) || "-"}${averageScore(reports) ? "점" : ""}`} />
+          <MetricCard label="최근 분석" value={reports[0] ? formatDate(reports[0].created_at) : "-"} />
         </div>
 
         <div className="mt-5 grid gap-5 lg:grid-cols-[0.65fr_0.35fr]">
@@ -293,20 +279,15 @@ function formatDate(value?: string | null) {
 }
 
 function MetricCard({
-  icon: Icon,
   label,
   value,
 }: {
-  icon: typeof FileText;
   label: string;
   value: string;
 }) {
   return (
     <article className="np-card p-4 md:p-5">
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-xs font-extrabold text-[var(--caption)] md:text-sm">{label}</p>
-        <Icon className="text-[var(--primary)]" size={20} />
-      </div>
+      <p className="text-xs font-extrabold text-[var(--caption)] md:text-sm">{label}</p>
       <p className="mt-2 break-words text-2xl font-black tracking-normal md:mt-3 md:text-3xl">{value}</p>
     </article>
   );

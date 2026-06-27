@@ -5,30 +5,24 @@ import Link from "next/link";
 import {
   ArrowLeft,
   Award,
-  BarChart3,
   BookOpen,
   BriefcaseBusiness,
   CheckCircle2,
   ChevronDown,
   Copy,
-  Database,
   Download,
   ExternalLink,
-  FileText,
   GraduationCap,
-  LineChart,
   Loader2,
   Mail,
-  MapPin,
   RotateCcw,
   Save,
   Send,
-  ShieldCheck,
   Target,
   type LucideIcon,
 } from "lucide-react";
 import { AnalysisResult } from "@/lib/types";
-import { cn, formatWon } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { AuthMenu } from "@/components/auth-menu";
 import { DataChat } from "@/components/data-chat";
 import { getAuthHeaders } from "@/lib/auth-client";
@@ -135,9 +129,9 @@ export function ResultsDashboard({
   const companyDetails = result.company_details ?? [];
   const mobileTabs = [
     { href: "#report-summary", label: "요약" },
+    { href: "#report-matching", label: "직무근거" },
     { href: "#report-companies", label: "추천기업" },
-    { href: "#report-skills", label: "역량" },
-    { href: "#report-evidence", label: "근거" },
+    { href: "#report-skills", label: "준비도" },
     { href: "#report-chat", label: "AI상담" },
   ];
 
@@ -242,7 +236,7 @@ export function ResultsDashboard({
                       {result.matched_field} · {result.matched_job_group}
                     </p>
                     <h1 className="mt-2 text-[26px] font-black leading-tight tracking-normal md:mt-3 md:text-[35px] md:tracking-[-0.6px]">
-                      AI 방산 커리어 리포트
+                      MY 방산 커리어 리포트
                     </h1>
                     <p className="mt-3 text-sm font-medium leading-6 text-[var(--muted-foreground)] md:mt-4 md:text-[15px] md:leading-7">
                       {result.skill_translation.summary}
@@ -270,60 +264,37 @@ export function ResultsDashboard({
 
               <Divider />
 
-              <ReportSection icon={BriefcaseBusiness} id="report-companies" title="추천 기업">
+              <ReportSection icon={Target} id="report-matching" title="직무 매칭 근거">
                 <div className="grid gap-4">
-                  {result.recommended_companies.map((company) => {
-                    const detail = companyDetails.find(
-                      (item) => item.company_name === company.company_name,
-                    );
-                    const reliability = result.data_reliability?.find(
-                      (item) => item.company_name === company.company_name,
-                    );
-                    const evidence = result.recommendation_evidence?.find(
-                      (item) => item.company_name === company.company_name,
-                    );
-
-                    return (
-                      <CompanyCard
-                        company={company}
-                        detail={detail}
-                        evidence={evidence?.evidence_points ?? []}
-                        key={company.company_name}
-                        reliability={reliability}
-                      />
-                    );
-                  })}
-                </div>
-              </ReportSection>
-
-              <Divider />
-
-              <ReportSection icon={Target} title="직무 매칭 근거">
-                <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
-                  <div className="rounded-[12px] bg-[#F8FAFB] p-4">
+                  <div className="rounded-[12px] bg-[#F8FAFB] p-4 md:p-5">
                     <p className="text-sm font-black text-[var(--primary)]">군 경력 변환</p>
                     <h3 className="mt-2 text-xl font-black">{result.matched_job_group}</h3>
-                    <div className="mt-4 grid gap-2 text-sm font-semibold text-[var(--caption)]">
-                      <span>매칭 분야: {result.matched_field}</span>
+                    <p className="mt-3 text-sm font-medium leading-7 text-[var(--muted-foreground)]">
+                      입력한 병과, 보직, 전공, 자격 정보를 방산 직무 요구역량과 비교해 아래 직무
+                      후보로 변환했습니다. 추천 기업은 이 직무 후보와 채용 신호가 맞는 순서로
+                      정렬됩니다.
+                    </p>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-[var(--caption)]">
+                        매칭 분야 {result.matched_field}
+                      </span>
                       {result.matching_evidence?.specialty_keyword ? (
-                        <span>병과 키워드: {result.matching_evidence.specialty_keyword}</span>
+                        <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-[var(--caption)]">
+                          병과 {result.matching_evidence.specialty_keyword}
+                        </span>
                       ) : null}
-                      {result.matching_evidence?.matched_by?.length ? (
-                        <span>매칭 기준: {result.matching_evidence.matched_by.join(", ")}</span>
-                      ) : null}
+                      {result.matching_evidence?.matched_by?.map((item) => (
+                        <span
+                          className="rounded-full bg-white px-3 py-1 text-xs font-black text-[var(--caption)]"
+                          key={item}
+                        >
+                          {item}
+                        </span>
+                      ))}
                     </div>
-                    {result.matching_evidence?.position_keywords?.length ? (
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        {result.matching_evidence.position_keywords.map((keyword) => (
-                          <span className="np-pill px-3 py-1" key={keyword}>
-                            {keyword}
-                          </span>
-                        ))}
-                      </div>
-                    ) : null}
                   </div>
 
-                  <div className="grid gap-3">
+                  <div className="grid gap-3 md:grid-cols-2">
                     {(result.job_cards ?? []).map((job) => (
                       <article
                         className="rounded-[12px] border border-[var(--border)] bg-white p-4"
@@ -360,10 +331,37 @@ export function ResultsDashboard({
 
               <Divider />
 
-              <ReportSection icon={Target} id="report-skills" title="Skill Gap">
-                <div className="grid gap-5 md:grid-cols-[0.45fr_0.55fr]">
+              <ReportSection icon={BriefcaseBusiness} id="report-companies" title="추천 기업">
+                <div className="grid gap-4">
+                  {result.recommended_companies.map((company) => {
+                    const detail = companyDetails.find(
+                      (item) => item.company_name === company.company_name,
+                    );
+                    const reliability = result.data_reliability?.find(
+                      (item) => item.company_name === company.company_name,
+                    );
+                    const evidence = result.recommendation_evidence?.find(
+                      (item) => item.company_name === company.company_name,
+                    );
+
+                    return (
+                      <CompanyCard
+                        company={company}
+                        detail={detail}
+                        evidence={evidence?.evidence_points ?? []}
+                        key={company.company_name}
+                        reliability={reliability}
+                      />
+                    );
+                  })}
+                </div>
+              </ReportSection>
+
+              <Divider />
+
+              <ReportSection icon={Target} id="report-skills" title="직무 준비도">
+                <div className="grid gap-5">
                   <div>
-                    <h3 className="text-lg font-black">직무 준비도</h3>
                     <p className="mt-3 text-sm leading-7 text-[var(--muted-foreground)]">
                       {result.skill_gap.analysis}
                     </p>
@@ -376,23 +374,9 @@ export function ResultsDashboard({
                     </div>
                   </div>
                   <div className="grid gap-4 md:grid-cols-2">
-                    <SkillPills title="보유 역량" items={result.skill_gap.possessed} tone="green" />
-                    <SkillPills title="보완 필요" items={result.skill_gap.missing} tone="gold" />
+                    <SkillPills title="보유 역량" items={result.skill_gap.possessed} />
+                    <SkillPills title="보완 필요" items={result.skill_gap.missing} />
                   </div>
-                </div>
-              </ReportSection>
-
-              <Divider />
-
-              <ReportSection icon={RotateCcw} title="전역 타이밍">
-                <div className="grid gap-3 md:grid-cols-2">
-                  <TimingCard title="지금 전역" body={result.discharge_timing.now} />
-                  <TimingCard title="추가 복무" body={result.discharge_timing.later} />
-                </div>
-                <div className="mt-4 rounded-[12px] border border-[#E1E8E6] bg-[#FAFBFC] p-4">
-                  <p className="text-base font-extrabold leading-7">
-                    추천: {result.discharge_timing.recommendation}
-                  </p>
                 </div>
               </ReportSection>
 
@@ -431,6 +415,20 @@ export function ResultsDashboard({
                 </div>
               </ReportSection>
 
+              <Divider />
+
+              <ReportSection icon={RotateCcw} title="전역 타이밍">
+                <div className="grid gap-3 md:grid-cols-2">
+                  <TimingCard title="지금 전역" body={result.discharge_timing.now} />
+                  <TimingCard title="추가 복무" body={result.discharge_timing.later} />
+                </div>
+                <div className="mt-4 rounded-[12px] border border-[#E1E8E6] bg-[#FAFBFC] p-4">
+                  <p className="text-base font-extrabold leading-7">
+                    추천: {result.discharge_timing.recommendation}
+                  </p>
+                </div>
+              </ReportSection>
+
               {result.glossary_matches?.length ? (
                 <>
                   <Divider />
@@ -455,35 +453,7 @@ export function ResultsDashboard({
                 </>
               ) : null}
 
-              <Divider />
-
-              <ReportSection icon={Database} id="report-evidence" title="데이터 근거">
-                <DataCoverage result={result} />
-              </ReportSection>
             </article>
-
-            {result.career_centers?.length ? (
-              <section className="np-card mt-5 p-4 md:p-6">
-                <div className="flex items-center gap-2">
-                  <MapPin className="text-[var(--primary)]" size={22} />
-                  <h2 className="text-lg font-black">병역진로설계지원센터</h2>
-                </div>
-                <div className="mt-5 grid gap-3 md:grid-cols-3">
-                  {result.career_centers.map((center) => (
-                    <article
-                      className="rounded-[12px] border border-[var(--border)] bg-[#F8FAFB] p-4"
-                      key={center.id}
-                    >
-                      <p className="font-black">{center.name}</p>
-                      <p className="mt-2 text-sm leading-6 text-[var(--caption)]">
-                        {center.address}
-                      </p>
-                      <p className="mt-3 font-black text-[var(--primary)]">{center.phone}</p>
-                    </article>
-                  ))}
-                </div>
-              </section>
-            ) : null}
           </div>
 
           <aside className="no-print min-h-0 scroll-mt-28 xl:sticky xl:top-[92px]" id="report-chat">
@@ -527,27 +497,16 @@ function saveReportLocally(result: ResultPayload, input: Record<string, unknown>
 
 function ReportSummary({ result }: { result: AnalysisResult }) {
   const coverage = result.data_coverage_summary;
-  const market = result.field_market_summary;
-  const growth = result.industry_growth;
 
   return (
     <div className="mt-5 grid grid-cols-2 gap-2 md:mt-6 md:grid-cols-4 md:gap-3">
       <MetricTile label="추천 기업" value={`${result.recommended_companies.length}개`} />
-      <MetricTile label="분야 기업" value={market ? `${market.company_count}개` : "정보 없음"} />
-      <MetricTile label="분야 계약" value={market ? formatWon(market.total_contract_amount) : "정보 없음"} />
+      <MetricTile label="직무 후보" value={`${result.job_cards?.length ?? 0}개`} />
+      <MetricTile label="추천 자격" value={`${result.recommended_certs.length}개`} />
       <MetricTile
         label="근거 확보"
         value={coverage ? `${coverage.with_sources}/${coverage.recommended_company_count}` : "정보 없음"}
       />
-      {growth ? (
-        <MetricTile
-          label={`${growth.latest_year} 산업 매출`}
-          value={formatWon(growth.latest_sales ? growth.latest_sales * 100_000_000 : null)}
-        />
-      ) : null}
-      {growth?.sales_growth_rate !== null && growth?.sales_growth_rate !== undefined ? (
-        <MetricTile label="전년 대비" value={`${growth.sales_growth_rate}%`} />
-      ) : null}
     </div>
   );
 }
@@ -563,9 +522,6 @@ function CompanyCard({
   evidence: string[];
   reliability?: NonNullable<AnalysisResult["data_reliability"]>[number];
 }) {
-  const sourceCounts = countSourceGrades(detail);
-  const financial = detail?.financials?.[0];
-  const topContract = detail?.contracts?.[0];
   const topJob = detail?.job_postings?.[0];
   const homepageUrl = detail?.homepage_url;
   const careerUrl = detail?.careers_page_url ?? company.careers_page_url;
@@ -605,27 +561,15 @@ function CompanyCard({
             ))}
           </div>
 
-          <div className="mt-4 grid gap-2 text-xs font-bold text-[var(--caption)] md:grid-cols-4">
-            <span>누적 계약 {formatWon(company.total_contract_amount)}</span>
-            <span>최근 계약 {company.recent_contract_year ?? "정보 없음"}</span>
+          <div className="mt-4 grid gap-2 text-xs font-bold text-[var(--caption)] md:grid-cols-3">
+            <span>추천 직무 {company.recommended_positions.slice(0, 2).join(", ") || "직무 확인 필요"}</span>
+            <span>채용 신호 {detail?.job_postings?.length ?? 0}건</span>
             <span>
-              평균연봉{" "}
-              {company.avg_salary ? `${company.avg_salary.toLocaleString("ko-KR")}만원` : "공시 없음"}
+              평균연봉 {company.avg_salary ? `${company.avg_salary.toLocaleString("ko-KR")}만원` : "공시 없음"}
             </span>
-            <span>출처 {detail?.sources.length ?? 0}건</span>
           </div>
 
-          <div className="mt-4 grid gap-2 lg:grid-cols-3 lg:gap-3">
-            <SignalBox
-              icon={FileText}
-              label="대표 계약"
-              value={topContract?.contract_name ?? "개별 계약명 없음"}
-              meta={[
-                topContract?.contract_year ? `${topContract.contract_year}년` : null,
-                formatWon(topContract?.contract_amount),
-                topContract?.buyer,
-              ]}
-            />
+          <div className="mt-4">
             <SignalBox
               icon={BriefcaseBusiness}
               label="채용 신호"
@@ -636,22 +580,6 @@ function CompanyCard({
                 topJob?.is_active === false ? "과거/참고 공고" : null,
               ]}
             />
-            <SignalBox
-              icon={LineChart}
-              label="재무 신호"
-              value={financial ? `${financial.fiscal_year} 매출 ${formatWon(financial.revenue)}` : "OpenDART 공시 없음"}
-              meta={[
-                financial?.operating_profit ? `영업이익 ${formatWon(financial.operating_profit)}` : null,
-                financial?.employee_count ? `직원 ${financial.employee_count.toLocaleString("ko-KR")}명` : null,
-              ]}
-            />
-          </div>
-
-          <div className="mt-4 flex flex-wrap gap-2">
-            <SourceBadge label="정부" value={sourceCounts.A_GOV_OFFICIAL} />
-            <SourceBadge label="기업공식" value={sourceCounts.B_COMPANY_OFFICIAL} />
-            <SourceBadge label="공공/파트너" value={sourceCounts.C_PUBLIC_OR_PARTNER} />
-            <SourceBadge label="외부" value={sourceCounts.D_SECONDARY_OR_COMMERCIAL} />
           </div>
 
           <div className="mt-4 flex flex-wrap gap-2">
@@ -659,21 +587,11 @@ function CompanyCard({
               <ExternalButton href={homepageUrl} label="공식 홈페이지" />
             ) : null}
             {careerUrl ? <ExternalButton href={careerUrl} label="채용 페이지" /> : null}
-            {detail?.stock_code ? (
-              <span className="rounded-full border border-[var(--border)] px-3 py-2 text-xs font-black text-[var(--caption)]">
-                종목코드 {detail.stock_code}
-              </span>
-            ) : null}
-            {detail?.dart_corp_code ? (
-              <span className="rounded-full border border-[var(--border)] px-3 py-2 text-xs font-black text-[var(--caption)]">
-                DART {detail.dart_corp_code}
-              </span>
-            ) : null}
           </div>
 
           <details className="group mt-5 rounded-[14px] border border-[var(--border)] bg-[#FAFBFC]">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 font-black">
-              <span>기업 상세 데이터 보기</span>
+              <span>보직 기반 추천 이유</span>
               <ChevronDown
                 className="text-[var(--caption)] transition-transform group-open:rotate-180"
                 size={18}
@@ -682,12 +600,7 @@ function CompanyCard({
             <div className="grid gap-4 border-t border-[var(--border)] p-3 md:gap-5 md:p-4">
               <CompanyMeta detail={detail} company={company} reliability={reliability} />
               {evidence.length ? <EvidenceList evidence={evidence} /> : null}
-              <div className="grid gap-5 xl:grid-cols-2">
-                <ContractList contracts={detail?.contracts ?? []} />
-                <JobSignalList postings={detail?.job_postings ?? []} />
-              </div>
-              <FinancialTrend financials={detail?.financials ?? []} />
-              <SourceList sources={detail?.sources ?? []} />
+              <JobSignalList postings={detail?.job_postings ?? []} />
             </div>
           </details>
         </div>
@@ -708,14 +621,25 @@ function CompanyMeta({
   reliability?: NonNullable<AnalysisResult["data_reliability"]>[number];
 }) {
   return (
-    <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
-      <MetricTile label="신뢰도" value={reliability ? `${reliability.score}점` : "정보 없음"} />
-      <MetricTile label="방산 지정일" value={formatDate(detail?.designation_date)} />
-      <MetricTile label="프로필 주소" value={detail?.address ?? "정보 없음"} />
-      <MetricTile
-        label="연봉 출처"
-        value={company.salary_source ?? (company.avg_salary ? "OpenDART/프로필" : "공시 없음")}
-      />
+    <div className="rounded-[12px] bg-white p-4">
+      <p className="text-sm font-black text-[var(--primary)]">보직 기반 해석</p>
+      <p className="mt-2 text-sm font-medium leading-7 text-[var(--muted-foreground)]">
+        이 기업은 {company.recommended_positions.slice(0, 3).join(", ") || "관련 직무"}와 연결됩니다.
+        채용 신호, 추천 직무, 계약 분야를 함께 보되 화면에서는 사용자가 준비할 직무 중심으로
+        압축했습니다.
+      </p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {company.recommended_positions.map((position) => (
+          <span className="rounded-full bg-[#F4F6F8] px-3 py-1 text-xs font-black text-[#5b6b82]" key={position}>
+            {position}
+          </span>
+        ))}
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold text-[var(--caption)]">
+        {reliability ? <span>데이터 신뢰도 {reliability.score}점</span> : null}
+        {detail?.designation_date ? <span>방산 지정 {formatDate(detail.designation_date)}</span> : null}
+        {company.salary_source ? <span>연봉 출처 {company.salary_source}</span> : null}
+      </div>
     </div>
   );
 }
@@ -733,36 +657,6 @@ function EvidenceList({ evidence }: { evidence: string[] }) {
         ))}
       </ul>
     </div>
-  );
-}
-
-function ContractList({ contracts }: { contracts: CompanyDetail["contracts"] }) {
-  return (
-    <section>
-      <h4 className="mb-3 flex items-center gap-2 text-sm font-black">
-        <FileText size={16} className="text-[var(--primary)]" />
-        계약 근거
-      </h4>
-      <div className="grid gap-2">
-        {contracts.length ? (
-          contracts.map((contract, index) => (
-            <article className="rounded-[12px] bg-white p-3" key={`${contract.contract_name}-${index}`}>
-              <p className="font-black leading-6">{contract.contract_name ?? "계약명 미확보"}</p>
-              <p className="mt-1 text-xs font-bold text-[var(--caption)]">
-                {[formatDate(contract.contract_date), contract.buyer, contract.product_category]
-                  .filter(Boolean)
-                  .join(" · ")}
-              </p>
-              <p className="mt-2 text-sm font-black text-[var(--primary)]">
-                {formatWon(contract.contract_amount)}
-              </p>
-            </article>
-          ))
-        ) : (
-          <EmptyText text="개별 계약 원천이 없습니다." />
-        )}
-      </div>
-    </section>
   );
 }
 
@@ -815,143 +709,6 @@ function JobSignalList({ postings }: { postings: CompanyDetail["job_postings"] }
         )}
       </div>
     </section>
-  );
-}
-
-function FinancialTrend({ financials }: { financials: NonNullable<CompanyDetail["financials"]> }) {
-  const sorted = [...financials].sort((a, b) => a.fiscal_year - b.fiscal_year);
-  const maxRevenue = Math.max(...sorted.map((item) => item.revenue ?? 0), 0);
-
-  return (
-    <section>
-      <h4 className="mb-3 flex items-center gap-2 text-sm font-black">
-        <BarChart3 size={16} className="text-[var(--primary)]" />
-        재무/임직원 추이
-      </h4>
-      {sorted.length ? (
-        <div className="rounded-[12px] bg-white p-4">
-          <div className="grid gap-3">
-            {sorted.map((item) => {
-              const width = maxRevenue ? Math.max(8, ((item.revenue ?? 0) / maxRevenue) * 100) : 0;
-              return (
-                <div className="grid gap-2 md:grid-cols-[64px_1fr_180px]" key={item.fiscal_year}>
-                  <p className="text-sm font-black">{item.fiscal_year}</p>
-                  <div className="h-7 overflow-hidden rounded-full bg-[#EEF1F3]">
-                    <div
-                      className="h-full rounded-full bg-[var(--primary)]"
-                      style={{ width: `${width}%` }}
-                    />
-                  </div>
-                  <p className="text-sm font-bold text-[var(--caption)]">
-                    매출 {formatWon(item.revenue)} · 직원{" "}
-                    {item.employee_count?.toLocaleString("ko-KR") ?? "정보 없음"}명
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-          <div className="mt-4 grid gap-2 text-xs font-bold text-[var(--caption)] md:grid-cols-3">
-            {sorted.slice(-1).map((latest) => (
-              <span key={latest.fiscal_year}>
-                최근 영업이익 {formatWon(latest.operating_profit)} / 순이익 {formatWon(latest.net_income)}
-              </span>
-            ))}
-            {sorted.slice(-1).map((latest) => (
-              <span key={`${latest.fiscal_year}-salary`}>
-                평균급여 {latest.avg_salary ? `${latest.avg_salary.toLocaleString("ko-KR")}만원` : "정보 없음"}
-              </span>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <EmptyText text="OpenDART 재무 공시가 없습니다." />
-      )}
-    </section>
-  );
-}
-
-function SourceList({ sources }: { sources: CompanyDetail["sources"] }) {
-  return (
-    <section>
-      <h4 className="mb-3 flex items-center gap-2 text-sm font-black">
-        <ShieldCheck size={16} className="text-[var(--primary)]" />
-        출처 링크
-      </h4>
-      <div className="grid gap-2 md:grid-cols-2">
-        {sources.length ? (
-          sources.map((source) => (
-            <a
-              className="rounded-[12px] border border-[var(--border)] bg-white p-3 transition hover:border-[var(--primary)]"
-              href={source.source_url}
-              key={`${source.source_type}-${source.source_url}`}
-              rel="noreferrer"
-              target="_blank"
-            >
-              <div className="flex items-center justify-between gap-3">
-                <p className="min-w-0 truncate font-black">{source.title ?? source.publisher ?? source.source_type}</p>
-                <ExternalLink className="shrink-0 text-[var(--primary)]" size={14} />
-              </div>
-              <p className="mt-1 text-xs font-bold text-[var(--caption)]">
-                {sourceGradeLabel(source.source_grade)} · {source.publisher ?? source.source_type}
-              </p>
-            </a>
-          ))
-        ) : (
-          <EmptyText text="출처 링크가 없습니다." />
-        )}
-      </div>
-    </section>
-  );
-}
-
-function DataCoverage({ result }: { result: AnalysisResult }) {
-  const coverage = result.data_coverage_summary;
-  const freshness = result.data_freshness;
-  const details = result.company_details ?? [];
-  const allSources = details.flatMap((detail) => detail.sources);
-  const sourceCounts = allSources.reduce<Record<string, number>>((acc, source) => {
-    acc[source.source_grade] = (acc[source.source_grade] ?? 0) + 1;
-    return acc;
-  }, {});
-
-  return (
-    <div className="grid gap-5">
-      <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
-        <MetricTile
-          label="추천 기업"
-          value={coverage ? `${coverage.recommended_company_count}개` : `${result.recommended_companies.length}개`}
-        />
-        <MetricTile label="채용 URL" value={coverage ? `${coverage.with_careers_url}개` : "정보 없음"} />
-        <MetricTile label="계약 원천" value={coverage ? `${coverage.with_contract_records}개` : "정보 없음"} />
-        <MetricTile label="출처 링크" value={`${allSources.length}건`} />
-      </div>
-      <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
-        <SourceBadge label="정부 공식" value={sourceCounts.A_GOV_OFFICIAL ?? 0} large />
-        <SourceBadge label="기업 공식" value={sourceCounts.B_COMPANY_OFFICIAL ?? 0} large />
-        <SourceBadge label="공공/파트너" value={sourceCounts.C_PUBLIC_OR_PARTNER ?? 0} large />
-        <SourceBadge label="외부/상업" value={sourceCounts.D_SECONDARY_OR_COMMERCIAL ?? 0} large />
-      </div>
-      {freshness ? (
-        <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
-          <MetricTile label="최근 출처 수집" value={formatDate(freshness.latest_source_at)} />
-          <MetricTile label="최근 계약 기준" value={formatDate(freshness.latest_contract_date)} />
-          <MetricTile label="채용 신호 수집" value={formatDate(freshness.latest_job_posting_at)} />
-          <MetricTile
-            label="재무 기준연도"
-            value={freshness.latest_financial_year ? `${freshness.latest_financial_year}년` : "정보 없음"}
-          />
-        </div>
-      ) : null}
-      {coverage?.known_gaps?.length ? (
-        <div className="rounded-[12px] bg-[#FFF7E8] p-4 text-sm font-bold leading-7 text-[#7A4A00]">
-          {coverage.known_gaps.join(" · ")}
-        </div>
-      ) : (
-        <div className="rounded-[12px] bg-[#E9F6EF] p-4 text-sm font-bold leading-7 text-[var(--success)]">
-          추천 기업 기준 주요 채용 URL, 계약 근거, 출처 링크가 확보되어 있습니다.
-        </div>
-      )}
-    </div>
   );
 }
 
@@ -1079,21 +836,16 @@ function FitGauge({ score }: { score: number }) {
 function SkillPills({
   items,
   title,
-  tone,
 }: {
   items: string[];
   title: string;
-  tone: "green" | "gold";
 }) {
-  const color = tone === "green" ? "var(--success)" : "var(--warning)";
   return (
-    <div className="rounded-[12px] bg-[#F8FAFB] p-3 md:p-4">
-      <h3 className="font-black" style={{ color }}>
-        {title}
-      </h3>
-      <div className="mt-3 flex flex-wrap gap-2">
+    <div className="rounded-[12px] border border-[var(--border)] bg-white p-3 md:p-4">
+      <h3 className="font-black text-[var(--foreground)]">{title}</h3>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
         {items.map((item) => (
-          <span className="rounded-full bg-white px-3 py-1 text-xs font-extrabold" key={item}>
+          <span className="rounded-full bg-[#F4F6F8] px-3 py-1 text-xs font-extrabold text-[var(--foreground)]" key={item}>
             {item}
           </span>
         ))}
@@ -1145,20 +897,6 @@ function SignalBox({
   );
 }
 
-function SourceBadge({ label, large, value }: { label: string; value: number; large?: boolean }) {
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center justify-between gap-2 rounded-full bg-[#EBEFF5] font-black text-[#5b6b82]",
-        large ? "px-4 py-3 text-sm" : "px-3 py-1 text-xs",
-      )}
-    >
-      {label}
-      <b>{value}</b>
-    </span>
-  );
-}
-
 function ExternalButton({ compact, href, label }: { compact?: boolean; href: string; label: string }) {
   return (
     <a
@@ -1182,31 +920,6 @@ function EmptyText({ text }: { text: string }) {
       {text}
     </div>
   );
-}
-
-function countSourceGrades(detail?: CompanyDetail) {
-  return (detail?.sources ?? []).reduce<Record<string, number>>(
-    (acc, source) => {
-      acc[source.source_grade] = (acc[source.source_grade] ?? 0) + 1;
-      return acc;
-    },
-    {
-      A_GOV_OFFICIAL: 0,
-      B_COMPANY_OFFICIAL: 0,
-      C_PUBLIC_OR_PARTNER: 0,
-      D_SECONDARY_OR_COMMERCIAL: 0,
-    },
-  );
-}
-
-function sourceGradeLabel(grade: string) {
-  const labels: Record<string, string> = {
-    A_GOV_OFFICIAL: "A 정부 공식",
-    B_COMPANY_OFFICIAL: "B 기업 공식",
-    C_PUBLIC_OR_PARTNER: "C 공공/파트너",
-    D_SECONDARY_OR_COMMERCIAL: "D 외부/상업",
-  };
-  return labels[grade] ?? grade;
 }
 
 function formatDate(value?: string | null) {

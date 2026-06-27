@@ -118,19 +118,19 @@ export function DataChat({
         className,
       )}
     >
-      <div className="shrink-0 border-b border-[var(--border)] bg-[var(--primary-soft)] px-4 py-3 md:px-6 md:py-4">
+      <div className="shrink-0 border-b border-[#303846] bg-[#252C36] px-4 py-3 text-white md:px-6 md:py-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="flex items-center gap-2 text-xs font-semibold text-[var(--accent)] md:text-sm">
+            <p className="flex items-center gap-2 text-xs font-semibold text-white/75 md:text-sm">
               <Sparkles size={15} />
-              Puter AI 상담
+              NEXTPOST AI 상담
             </p>
-            <h2 className="mt-1 text-base font-black text-[var(--foreground)] md:text-xl">
+            <h2 className="mt-1 text-base font-black text-white md:text-xl">
               리포트를 보면서 바로 질문하기
             </h2>
           </div>
           {provider ? (
-            <span className="shrink-0 rounded-full border border-white bg-white px-3 py-1 text-xs font-bold text-[var(--caption)]">
+            <span className="shrink-0 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-bold text-white/80">
               Puter.js
             </span>
           ) : null}
@@ -149,7 +149,7 @@ export function DataChat({
                 key={`${message.role}-${index}`}
               >
                 {message.role === "assistant" ? (
-                  <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--primary-soft)] text-[var(--primary)]">
+                  <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#252C36] text-white">
                     <Bot size={17} />
                   </div>
                 ) : null}
@@ -157,7 +157,7 @@ export function DataChat({
                   className={cn(
                     "min-w-0 max-w-[94%] overflow-hidden rounded-xl px-3 py-2.5 text-sm leading-6 md:max-w-[84%] md:px-4 md:py-3 md:leading-7",
                     message.role === "user"
-                      ? "whitespace-pre-wrap bg-[var(--primary)] text-white"
+                      ? "whitespace-pre-wrap bg-[#252C36] text-white"
                       : "border border-[var(--border)] bg-white text-[var(--foreground)]",
                   )}
                 >
@@ -168,7 +168,7 @@ export function DataChat({
                   )}
                 </div>
                 {message.role === "user" ? (
-                  <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#e8f7eb] text-[var(--accent)]">
+                  <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#EEF1F3] text-[#252C36]">
                     <UserRound size={17} />
                   </div>
                 ) : null}
@@ -177,7 +177,7 @@ export function DataChat({
             {isLoading ? (
               <div className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-medium text-[var(--muted-foreground)]">
                 <Loader2 className="animate-spin" size={16} />
-                Puter AI가 리포트 내용을 확인하는 중입니다.
+                NEXTPOST AI가 리포트 내용을 확인하는 중입니다.
               </div>
             ) : null}
             <div ref={messagesEndRef} />
@@ -229,7 +229,7 @@ export function DataChat({
               }}
             />
             <button
-              className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[var(--accent)] px-5 font-semibold text-white transition hover:bg-[#087d1b] disabled:cursor-not-allowed disabled:opacity-50 md:h-12 md:self-end"
+              className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#252C36] px-5 font-semibold text-white transition hover:bg-[#1C232C] disabled:cursor-not-allowed disabled:opacity-50 md:h-12 md:self-end"
               disabled={!canSend}
               type="button"
               onClick={() => sendMessage()}

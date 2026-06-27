@@ -136,19 +136,6 @@ export function AnalyzeForm() {
   const [isAnalysisComplete, setIsAnalysisComplete] = useState(false);
 
   const specialtyPreset = specialtyPresets[form.specialty];
-  const completionItems = useMemo(
-    () => [
-      { label: "군 경력", done: Boolean(form.military_branch && form.rank && form.specialty) },
-      { label: "보직 경험", done: Boolean(form.position && Number(form.years_served) >= 1) },
-      { label: "직무 목표", done: Boolean(form.major && form.desired_field) },
-      { label: "자격/교육", done: certifications.length > 0 },
-    ],
-    [certifications.length, form],
-  );
-  const completionRate = Math.round(
-    (completionItems.filter((item) => item.done).length / completionItems.length) * 100,
-  );
-
   const isValid = useMemo(() => {
     const yearsServed = Number(form.years_served);
     return (
@@ -255,35 +242,6 @@ export function AnalyzeForm() {
         </div>
 
         <section className="np-card mt-6 p-4 md:mt-7 md:p-7">
-          <div className="mb-5 grid gap-3 rounded-[12px] bg-[#F8FAFB] p-3 md:mb-6 md:grid-cols-[150px_1fr] md:items-center md:p-4">
-            <div>
-              <p className="text-sm font-black text-[var(--primary)]">입력 완성도</p>
-              <p className="mt-1 text-2xl font-black tracking-normal md:text-3xl">{completionRate}%</p>
-            </div>
-            <div>
-              <div className="h-2.5 overflow-hidden rounded-full bg-[#E5E8EB] md:h-3">
-                <div
-                  className="h-full rounded-full bg-[var(--accent)] transition-all"
-                  style={{ width: `${completionRate}%` }}
-                />
-              </div>
-              <div className="mt-2 flex flex-wrap gap-1.5 md:mt-3 md:gap-2">
-                {completionItems.map((item) => (
-                  <span
-                    className={`rounded-full px-2.5 py-1 text-[11px] font-black md:px-3 md:text-xs ${
-                      item.done
-                        ? "bg-[#E9F6EF] text-[var(--success)]"
-                        : "bg-white text-[var(--caption)]"
-                    }`}
-                    key={item.label}
-                  >
-                    {item.done ? "완료" : "필요"} · {item.label}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-
           <FormSection number="1" title="기본 군 정보">
             <div className="grid gap-4 md:grid-cols-2">
               <Field label="군별" required>
