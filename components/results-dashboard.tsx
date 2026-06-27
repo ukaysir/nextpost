@@ -114,7 +114,7 @@ export function ResultsDashboard({
   if (!result) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[var(--background)] px-4">
-        <section className="np-card max-w-md p-8 text-center">
+        <section className="np-card max-w-md p-6 text-center md:p-8">
           <Target className="mx-auto text-[var(--primary)]" size={38} />
           <h1 className="mt-5 text-2xl font-black">분석 결과가 없습니다</h1>
           <p className="mt-3 text-sm leading-7 text-[var(--muted-foreground)]">
@@ -136,13 +136,13 @@ export function ResultsDashboard({
   return (
     <main className="min-h-screen bg-[var(--background)]">
       <header className="np-image-nav sticky top-0 z-30 border-b border-white/10 text-white no-print">
-        <div className="page-shell flex items-center py-5">
-          <Link className="text-xl font-black tracking-[1px]" href="/">
+        <div className="page-shell flex items-center py-4 md:py-5">
+          <Link className="text-lg font-black tracking-[1px] md:text-xl" href="/">
             NEXTPOST
           </Link>
-          <nav className="ml-auto flex items-center gap-5 text-sm font-extrabold">
+          <nav className="ml-auto flex items-center gap-3 text-xs font-extrabold md:gap-5 md:text-sm">
             <Link href="/analyze">다시 입력</Link>
-            <a href="mailto:?subject=NEXTPOST 리포트&body=NEXTPOST 분석 리포트 링크를 공유합니다.">
+            <a className="hidden sm:inline" href="mailto:?subject=NEXTPOST 리포트&body=NEXTPOST 분석 리포트 링크를 공유합니다.">
               공유
             </a>
             <AuthMenu compact />
@@ -151,21 +151,21 @@ export function ResultsDashboard({
       </header>
 
       {toast ? (
-        <div className="fixed bottom-8 left-1/2 z-50 -translate-x-1/2 rounded-[11px] bg-[#191F28] px-5 py-3 text-sm font-bold text-white shadow-[0_10px_30px_rgba(0,0,0,.28)]">
+        <div className="fixed bottom-5 left-3 right-3 z-50 rounded-[11px] bg-[#191F28] px-4 py-3 text-center text-sm font-bold text-white shadow-[0_10px_30px_rgba(0,0,0,.28)] sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:px-5">
           {toast}
         </div>
       ) : null}
 
-      <div className="mx-auto max-w-[1480px] px-4 py-8 md:px-6 md:py-10">
-        <div className="mb-4 flex flex-wrap items-center gap-2 no-print">
+      <div className="mx-auto max-w-[1480px] px-3 py-5 md:px-6 md:py-10">
+        <div className="mb-4 grid gap-2 no-print sm:flex sm:flex-wrap sm:items-center">
           <Link
-            className="focus-ring inline-flex h-10 items-center gap-2 rounded-[9px] border border-[var(--border)] bg-white px-3 text-sm font-extrabold text-[var(--caption)]"
+            className="focus-ring inline-flex h-10 items-center justify-center gap-2 rounded-[9px] border border-[var(--border)] bg-white px-3 text-sm font-extrabold text-[var(--caption)] sm:justify-start"
             href="/analyze"
           >
             <ArrowLeft size={16} />
             다시 입력하기
           </Link>
-          <div className="ml-auto flex flex-wrap gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:ml-auto sm:flex sm:flex-wrap">
             {!readOnly ? (
               <ActionButton
                 icon={Save}
@@ -179,15 +179,17 @@ export function ResultsDashboard({
             <ActionButton
               icon={Copy}
               label="링크 복사"
+              doneLabel="복사 완료"
               onClick={async () => {
                 await navigator.clipboard.writeText(reportUrl);
                 showToast("리포트 링크를 복사했습니다.");
               }}
             />
-            <ActionButton icon={Download} label="PDF 저장" onClick={() => window.print()} />
+            <ActionButton icon={Download} label="PDF 저장" doneLabel="PDF 준비" onClick={() => window.print()} />
             <ActionButton
               icon={Mail}
               label="메일"
+              doneLabel="메일 열림"
               onClick={() => {
                 window.location.href = `mailto:?subject=NEXTPOST 리포트&body=${encodeURIComponent(reportUrl)}`;
               }}
@@ -195,6 +197,8 @@ export function ResultsDashboard({
             <ActionButton
               icon={Send}
               label="전송"
+              pendingLabel="전송 중"
+              doneLabel="전송 완료"
               primary
               onClick={async () => {
                 if (navigator.share) {
@@ -211,29 +215,29 @@ export function ResultsDashboard({
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(380px,480px)] xl:items-start">
           <div className="min-w-0">
             <article className="np-card overflow-hidden">
-              <section className="p-6 md:p-8">
-                <div className="grid gap-6 md:grid-cols-[1fr_220px] md:items-start">
+              <section className="p-4 md:p-8">
+                <div className="grid gap-4 md:grid-cols-[1fr_220px] md:items-start md:gap-6">
                   <div>
-                    <p className="text-sm font-black tracking-[1px] text-[var(--primary)]">
+                    <p className="text-xs font-black tracking-[1px] text-[var(--primary)] md:text-sm">
                       {result.matched_field} · {result.matched_job_group}
                     </p>
-                    <h1 className="mt-3 text-3xl font-black tracking-[-0.6px] md:text-[35px]">
+                    <h1 className="mt-2 text-[26px] font-black leading-tight tracking-normal md:mt-3 md:text-[35px] md:tracking-[-0.6px]">
                       AI 방산 커리어 리포트
                     </h1>
-                    <p className="mt-4 text-sm font-medium leading-7 text-[var(--muted-foreground)] md:text-[15px]">
+                    <p className="mt-3 text-sm font-medium leading-6 text-[var(--muted-foreground)] md:mt-4 md:text-[15px] md:leading-7">
                       {result.skill_translation.summary}
                     </p>
                   </div>
-                  <div className="rounded-[14px] bg-white p-5 text-center">
-                    <p className="text-sm font-extrabold text-[#5b6b82]">최상위 기업 적합도</p>
-                    <p className="mt-2 text-[64px] font-black leading-none tracking-[-1px]">
+                  <div className="rounded-[12px] bg-white p-4 text-center md:rounded-[14px] md:p-5">
+                    <p className="text-xs font-extrabold text-[#5b6b82] md:text-sm">최상위 기업 적합도</p>
+                    <p className="mt-2 text-[48px] font-black leading-none tracking-normal md:text-[64px] md:tracking-[-1px]">
                       {topScore}
                     </p>
                     <p className="mt-2 text-xs font-black text-[var(--caption)]">점</p>
                   </div>
                 </div>
 
-                <div className="mt-6 flex flex-wrap gap-2">
+                <div className="mt-5 flex flex-wrap gap-2 md:mt-6">
                   {result.skill_translation.keywords.map((keyword) => (
                     <span className="np-pill px-3 py-1" key={keyword}>
                       {keyword}
@@ -439,7 +443,7 @@ export function ResultsDashboard({
             </article>
 
             {result.career_centers?.length ? (
-              <section className="np-card mt-5 p-6">
+              <section className="np-card mt-5 p-4 md:p-6">
                 <div className="flex items-center gap-2">
                   <MapPin className="text-[var(--primary)]" size={22} />
                   <h2 className="text-lg font-black">병역진로설계지원센터</h2>
@@ -463,7 +467,10 @@ export function ResultsDashboard({
           </div>
 
           <aside className="no-print min-h-0 xl:sticky xl:top-[92px]">
-            <DataChat analysisResult={result} className="xl:h-[calc(100dvh-188px)]" />
+            <DataChat
+              analysisResult={result}
+              className="mt-5 h-[620px] min-h-[500px] xl:mt-0 xl:h-[calc(100dvh-188px)]"
+            />
           </aside>
         </div>
       </div>
@@ -504,7 +511,7 @@ function ReportSummary({ result }: { result: AnalysisResult }) {
   const growth = result.industry_growth;
 
   return (
-    <div className="mt-6 grid gap-3 md:grid-cols-4">
+    <div className="mt-5 grid grid-cols-2 gap-2 md:mt-6 md:grid-cols-4 md:gap-3">
       <MetricTile label="추천 기업" value={`${result.recommended_companies.length}개`} />
       <MetricTile label="분야 기업" value={market ? `${market.company_count}개` : "정보 없음"} />
       <MetricTile label="분야 계약" value={market ? formatWon(market.total_contract_amount) : "정보 없음"} />
@@ -544,11 +551,11 @@ function CompanyCard({
   const careerUrl = detail?.careers_page_url ?? company.careers_page_url;
 
   return (
-    <article className="rounded-[16px] border border-[var(--border)] bg-white p-5 md:p-6">
+    <article className="rounded-[14px] border border-[var(--border)] bg-white p-4 md:rounded-[16px] md:p-6">
       <div className="grid gap-5 lg:grid-cols-[1fr_104px]">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-xl font-black">{company.company_name}</h3>
+            <h3 className="text-lg font-black md:text-xl">{company.company_name}</h3>
             {company.defense_field ? <span className="np-pill px-2.5 py-1">{company.defense_field}</span> : null}
             {company.is_cost_certified ? (
               <span className="inline-flex items-center gap-1 rounded-full bg-[#E9F6EF] px-2.5 py-1 text-xs font-black text-[var(--success)]">
@@ -588,7 +595,7 @@ function CompanyCard({
             <span>출처 {detail?.sources.length ?? 0}건</span>
           </div>
 
-          <div className="mt-4 grid gap-3 lg:grid-cols-3">
+          <div className="mt-4 grid gap-2 lg:grid-cols-3 lg:gap-3">
             <SignalBox
               icon={FileText}
               label="대표 계약"
@@ -652,7 +659,7 @@ function CompanyCard({
                 size={18}
               />
             </summary>
-            <div className="grid gap-5 border-t border-[var(--border)] p-4">
+            <div className="grid gap-4 border-t border-[var(--border)] p-3 md:gap-5 md:p-4">
               <CompanyMeta detail={detail} company={company} reliability={reliability} />
               {evidence.length ? <EvidenceList evidence={evidence} /> : null}
               <div className="grid gap-5 xl:grid-cols-2">
@@ -681,7 +688,7 @@ function CompanyMeta({
   reliability?: NonNullable<AnalysisResult["data_reliability"]>[number];
 }) {
   return (
-    <div className="grid gap-3 md:grid-cols-4">
+    <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
       <MetricTile label="신뢰도" value={reliability ? `${reliability.score}점` : "정보 없음"} />
       <MetricTile label="방산 지정일" value={formatDate(detail?.designation_date)} />
       <MetricTile label="프로필 주소" value={detail?.address ?? "정보 없음"} />
@@ -889,7 +896,7 @@ function DataCoverage({ result }: { result: AnalysisResult }) {
 
   return (
     <div className="grid gap-5">
-      <div className="grid gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
         <MetricTile
           label="추천 기업"
           value={coverage ? `${coverage.recommended_company_count}개` : `${result.recommended_companies.length}개`}
@@ -898,14 +905,14 @@ function DataCoverage({ result }: { result: AnalysisResult }) {
         <MetricTile label="계약 원천" value={coverage ? `${coverage.with_contract_records}개` : "정보 없음"} />
         <MetricTile label="출처 링크" value={`${allSources.length}건`} />
       </div>
-      <div className="grid gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
         <SourceBadge label="정부 공식" value={sourceCounts.A_GOV_OFFICIAL ?? 0} large />
         <SourceBadge label="기업 공식" value={sourceCounts.B_COMPANY_OFFICIAL ?? 0} large />
         <SourceBadge label="공공/파트너" value={sourceCounts.C_PUBLIC_OR_PARTNER ?? 0} large />
         <SourceBadge label="외부/상업" value={sourceCounts.D_SECONDARY_OR_COMMERCIAL ?? 0} large />
       </div>
       {freshness ? (
-        <div className="grid gap-3 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
           <MetricTile label="최근 출처 수집" value={formatDate(freshness.latest_source_at)} />
           <MetricTile label="최근 계약 기준" value={formatDate(freshness.latest_contract_date)} />
           <MetricTile label="채용 신호 수집" value={formatDate(freshness.latest_job_posting_at)} />
@@ -929,7 +936,7 @@ function DataCoverage({ result }: { result: AnalysisResult }) {
 }
 
 function Divider() {
-  return <div className="mx-6 h-px bg-[#EEF1F3] md:mx-8" />;
+  return <div className="mx-4 h-px bg-[#EEF1F3] md:mx-8" />;
 }
 
 function ReportSection({
@@ -942,10 +949,10 @@ function ReportSection({
   title: string;
 }) {
   return (
-    <section className="p-6 md:p-8">
-      <div className="mb-5 flex items-center gap-3">
-        <Icon className="text-[var(--primary)]" size={24} />
-        <h2 className="text-2xl font-black tracking-[-0.4px]">{title}</h2>
+    <section className="p-4 md:p-8">
+      <div className="mb-4 flex items-center gap-2 md:mb-5 md:gap-3">
+        <Icon className="text-[var(--primary)]" size={21} />
+        <h2 className="text-xl font-black tracking-normal md:text-2xl md:tracking-[-0.4px]">{title}</h2>
       </div>
       {children}
     </section>
@@ -958,6 +965,8 @@ function ActionButton({
   icon: Icon,
   label,
   onClick,
+  pendingLabel,
+  doneLabel,
   primary,
 }: {
   busy?: boolean;
@@ -965,11 +974,14 @@ function ActionButton({
   icon: LucideIcon;
   label: string;
   onClick: () => void | Promise<void>;
+  pendingLabel?: string;
+  doneLabel?: string;
   primary?: boolean;
 }) {
   const [feedback, setFeedback] = useState<"idle" | "pending" | "done">("idle");
   const isBusy = busy || feedback === "pending";
   const isDone = done || feedback === "done";
+  const visibleLabel = isBusy ? (pendingLabel ?? "처리 중") : isDone ? (doneLabel ?? label) : label;
 
   async function handleClick() {
     if (isBusy) return;
@@ -987,13 +999,15 @@ function ActionButton({
   return (
     <button
       className={cn(
-        "focus-ring inline-flex h-10 items-center gap-2 rounded-[9px] px-3 text-sm font-extrabold transition duration-150 active:scale-[0.97]",
+        "focus-ring inline-flex h-10 min-w-0 items-center justify-center gap-2 rounded-[9px] px-3 text-sm font-extrabold transition duration-150 active:scale-[0.97]",
         "shadow-[0_1px_0_rgba(15,23,42,.04)] hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(15,23,42,.10)]",
         primary || isDone
           ? "bg-[var(--accent)] text-white"
           : "border border-[var(--border)] bg-white text-[var(--caption)] hover:border-[var(--primary)] hover:text-[var(--foreground)]",
         isBusy ? "cursor-wait opacity-80" : "",
       )}
+      aria-busy={isBusy}
+      aria-live="polite"
       disabled={isBusy}
       type="button"
       onClick={handleClick}
@@ -1005,7 +1019,7 @@ function ActionButton({
       ) : (
         <Icon size={16} />
       )}
-      {label}
+      {visibleLabel}
     </button>
   );
 }
@@ -1022,7 +1036,7 @@ function FitGauge({ score }: { score: number }) {
   const tier = score >= 85 ? "매우 높음" : score >= 78 ? "높음" : score >= 70 ? "보통" : "검토";
 
   return (
-    <div className="flex flex-col items-center border-t border-[#F0F2F4] pt-4 lg:border-l lg:border-t-0 lg:pl-4 lg:pt-0">
+    <div className="flex flex-row items-center justify-center gap-3 border-t border-[#F0F2F4] pt-4 lg:flex-col lg:border-l lg:border-t-0 lg:gap-0 lg:pl-4 lg:pt-0">
       <div
         className="grid h-[78px] w-[78px] place-items-center rounded-full"
         style={{
@@ -1051,7 +1065,7 @@ function SkillPills({
 }) {
   const color = tone === "green" ? "var(--success)" : "var(--warning)";
   return (
-    <div className="rounded-[12px] bg-[#F8FAFB] p-4">
+    <div className="rounded-[12px] bg-[#F8FAFB] p-3 md:p-4">
       <h3 className="font-black" style={{ color }}>
         {title}
       </h3>
@@ -1068,7 +1082,7 @@ function SkillPills({
 
 function TimingCard({ body, title }: { body: string; title: string }) {
   return (
-    <article className="rounded-[12px] border border-[var(--border)] bg-[#F8FAFB] p-4">
+    <article className="rounded-[12px] border border-[var(--border)] bg-[#F8FAFB] p-3 md:p-4">
       <h3 className="font-black">{title}</h3>
       <p className="mt-2 text-sm font-medium leading-7 text-[var(--muted-foreground)]">{body}</p>
     </article>
@@ -1077,9 +1091,9 @@ function TimingCard({ body, title }: { body: string; title: string }) {
 
 function MetricTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[12px] border border-[var(--border)] bg-white p-4">
+    <div className="rounded-[12px] border border-[var(--border)] bg-white p-3 md:p-4">
       <p className="text-xs font-black text-[var(--caption)]">{label}</p>
-      <p className="mt-2 break-words text-lg font-black text-[var(--foreground)]">{value}</p>
+      <p className="mt-2 break-words text-base font-black text-[var(--foreground)] md:text-lg">{value}</p>
     </div>
   );
 }

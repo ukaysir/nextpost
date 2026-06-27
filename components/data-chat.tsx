@@ -114,18 +114,18 @@ export function DataChat({
   return (
     <section
       className={cn(
-        "np-card flex h-[min(760px,calc(100vh-112px))] min-h-[560px] flex-col overflow-hidden p-0",
+        "np-card flex h-[560px] min-h-[500px] flex-col overflow-hidden p-0 md:h-[min(760px,calc(100vh-112px))] md:min-h-[560px]",
         className,
       )}
     >
-      <div className="shrink-0 border-b border-[var(--border)] bg-[var(--primary-soft)] px-5 py-4 md:px-6">
+      <div className="shrink-0 border-b border-[var(--border)] bg-[var(--primary-soft)] px-4 py-3 md:px-6 md:py-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="flex items-center gap-2 text-sm font-semibold text-[var(--accent)]">
+            <p className="flex items-center gap-2 text-xs font-semibold text-[var(--accent)] md:text-sm">
               <Sparkles size={15} />
               Puter AI 상담
             </p>
-            <h2 className="mt-1 text-lg font-black text-[var(--foreground)] md:text-xl">
+            <h2 className="mt-1 text-base font-black text-[var(--foreground)] md:text-xl">
               리포트를 보면서 바로 질문하기
             </h2>
           </div>
@@ -138,8 +138,8 @@ export function DataChat({
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col">
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-5 md:px-5">
-          <div className="grid content-start gap-4">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-4 md:px-5 md:py-5">
+          <div className="grid content-start gap-3 md:gap-4">
             {messages.map((message, index) => (
               <div
                 className={cn(
@@ -155,7 +155,7 @@ export function DataChat({
                 ) : null}
                 <div
                   className={cn(
-                    "min-w-0 max-w-[92%] overflow-hidden rounded-xl px-4 py-3 text-sm leading-7 md:max-w-[84%]",
+                    "min-w-0 max-w-[94%] overflow-hidden rounded-xl px-3 py-2.5 text-sm leading-6 md:max-w-[84%] md:px-4 md:py-3 md:leading-7",
                     message.role === "user"
                       ? "whitespace-pre-wrap bg-[var(--primary)] text-white"
                       : "border border-[var(--border)] bg-white text-[var(--foreground)]",
@@ -184,7 +184,7 @@ export function DataChat({
           </div>
         </div>
 
-        <div className="shrink-0 border-t border-[var(--border)] bg-white px-4 py-4 md:px-5">
+        <div className="shrink-0 border-t border-[var(--border)] bg-white px-3 py-3 md:px-5 md:py-4">
           <div className="mb-3">
             <button
               className="focus-ring inline-flex h-9 items-center gap-2 rounded-lg border border-[var(--border)] bg-[#f8fafc] px-3 text-xs font-bold text-[var(--caption)]"
@@ -201,7 +201,7 @@ export function DataChat({
               <div className="mt-2 grid gap-2">
                 {suggestions.map((suggestion) => (
                   <button
-                    className="focus-ring rounded-full border border-[var(--border)] bg-white px-3 py-2 text-left text-sm font-medium text-[var(--caption)] transition hover:border-[var(--primary)] hover:text-[var(--foreground)]"
+                    className="focus-ring rounded-[10px] border border-[var(--border)] bg-white px-3 py-2 text-left text-xs font-medium text-[var(--caption)] transition hover:border-[var(--primary)] hover:text-[var(--foreground)] md:rounded-full md:text-sm"
                     key={suggestion}
                     type="button"
                     onClick={() => sendMessage(suggestion)}
@@ -215,7 +215,7 @@ export function DataChat({
 
           <div className="grid gap-2 md:grid-cols-[1fr_auto]">
             <textarea
-              className="focus-ring min-h-24 w-full resize-none rounded-lg border border-[var(--border)] bg-[#f9fafb] p-3 text-sm leading-6 outline-none"
+              className="focus-ring min-h-20 w-full resize-none rounded-lg border border-[var(--border)] bg-[#f9fafb] p-3 text-sm leading-6 outline-none md:min-h-24"
               maxLength={1200}
               placeholder="예: 한화에어로스페이스와 LIG넥스원 중 내 경력에는 어디가 더 맞아?"
               ref={inputRef}
@@ -229,7 +229,7 @@ export function DataChat({
               }}
             />
             <button
-              className="focus-ring inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-[var(--accent)] px-5 font-semibold text-white transition hover:bg-[#087d1b] disabled:cursor-not-allowed disabled:opacity-50 md:self-end"
+              className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[var(--accent)] px-5 font-semibold text-white transition hover:bg-[#087d1b] disabled:cursor-not-allowed disabled:opacity-50 md:h-12 md:self-end"
               disabled={!canSend}
               type="button"
               onClick={() => sendMessage()}

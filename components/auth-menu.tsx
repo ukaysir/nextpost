@@ -24,15 +24,11 @@ export function AuthMenu({ compact = false }: { compact?: boolean }) {
 
   if (!user) {
     const nextPath = pathname && pathname !== "/login" ? pathname : "/analyze";
-    return (
-      <Link href={`/login?next=${encodeURIComponent(nextPath)}`}>
-        로그인
-      </Link>
-    );
+    return <Link href={`/login?next=${encodeURIComponent(nextPath)}`}>로그인</Link>;
   }
 
   return (
-    <span className="inline-flex items-center gap-3">
+    <span className="inline-flex items-center gap-2 md:gap-3">
       {compact ? null : (
         <span className="hidden items-center gap-1 md:inline-flex">
           <UserRound size={15} />
@@ -40,9 +36,10 @@ export function AuthMenu({ compact = false }: { compact?: boolean }) {
         </span>
       )}
       <Link className="inline-flex items-center gap-1 font-extrabold" href="/dashboard">
-        대시보드
+        {compact ? "My" : "대시보드"}
       </Link>
       <button
+        aria-label="로그아웃"
         className="inline-flex items-center gap-1 font-extrabold"
         type="button"
         onClick={() => {
@@ -51,7 +48,7 @@ export function AuthMenu({ compact = false }: { compact?: boolean }) {
         }}
       >
         <LogOut size={15} />
-        로그아웃
+        <span className={compact ? "sr-only md:not-sr-only" : ""}>로그아웃</span>
       </button>
     </span>
   );

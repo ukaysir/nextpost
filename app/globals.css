@@ -35,6 +35,7 @@ body {
   color: var(--foreground);
   font-family: "Noto Sans KR", -apple-system, BlinkMacSystemFont, sans-serif;
   font-weight: 500;
+  overflow-x: hidden;
 }
 
 body > main {
@@ -81,7 +82,7 @@ textarea {
 }
 
 .input-with-icon {
-  padding-left: 44px;
+  padding-left: 50px;
 }
 
 .np-card {
@@ -141,6 +142,41 @@ textarea {
 
   body > main {
     animation: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .page-shell {
+    width: min(100% - 24px, 420px);
+  }
+
+  .np-card {
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(20, 40, 38, 0.045);
+  }
+
+  .input {
+    height: 42px;
+    min-height: 42px;
+    border-radius: 8px;
+    padding-inline: 12px;
+    font-size: 14px;
+  }
+
+  .input-with-icon {
+    padding-left: 46px;
+  }
+
+  .np-pill {
+    font-size: 11px;
+  }
+
+  a,
+  button,
+  input,
+  select,
+  textarea {
+    -webkit-tap-highlight-color: transparent;
   }
 }
 

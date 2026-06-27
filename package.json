@@ -11,7 +11,8 @@
     "enrich:opendart": "node scripts/generate-opendart-financials-sql.mjs",
     "audit:data": "node scripts/audit-data-coverage.mjs",
     "audit:data:remote": "node scripts/audit-data-coverage.mjs --remote",
-    "verify:analysis": "node scripts/verify-analysis-output.mjs"
+    "verify:analysis": "node scripts/verify-analysis-output.mjs",
+    "test:mobile": "playwright test scripts/mobile-overflow-check.spec.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -32,6 +33,7 @@
     "zod": "^4.2.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@tailwindcss/postcss": "^4.1.18",
     "@types/node": "^24.10.3",
     "@types/papaparse": "^5.3.16",

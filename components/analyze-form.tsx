@@ -232,45 +232,45 @@ export function AnalyzeForm() {
     <main className="min-h-screen overflow-x-hidden bg-[linear-gradient(rgba(18,22,28,.38),rgba(18,22,28,.50)),url('/assets/kf21-hero.jpg')] bg-cover bg-center">
       {isLoading ? <AnalysisProgressOverlay isComplete={isAnalysisComplete} progress={progress} /> : null}
 
-      <header className="page-shell flex items-center py-7 text-white">
-        <Link className="text-[22px] font-black tracking-[1px] drop-shadow" href="/">
+      <header className="page-shell flex items-center py-5 text-white md:py-7">
+        <Link className="text-[20px] font-black tracking-[1px] drop-shadow md:text-[22px]" href="/">
           NEXTPOST
         </Link>
-        <nav className="ml-auto flex items-center gap-5 text-sm font-extrabold drop-shadow">
+        <nav className="ml-auto flex items-center gap-3 text-xs font-extrabold drop-shadow md:gap-5 md:text-sm">
           <Link href="/">홈으로</Link>
           <AuthMenu compact />
         </nav>
       </header>
 
-      <div className="mx-auto max-w-[358px] px-4 pb-14 pt-3 sm:max-w-[920px]">
+      <div className="mx-auto max-w-[420px] px-3 pb-12 pt-2 sm:max-w-[920px] sm:px-4 md:pb-14 md:pt-3">
         <div className="text-center text-white">
-          <p className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/15 px-3 py-1 text-sm font-extrabold backdrop-blur">
+          <p className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/15 px-3 py-1 text-xs font-extrabold backdrop-blur md:text-sm">
             <Radar size={16} />
             AI 방산 커리어 분석
           </p>
-          <h1 className="mt-5 max-w-full text-3xl font-black leading-tight tracking-normal drop-shadow sm:text-4xl md:text-5xl">
+          <h1 className="mt-4 max-w-full text-[30px] font-black leading-tight tracking-normal drop-shadow sm:text-4xl md:mt-5 md:text-5xl">
             <span className="sm:hidden">군 경력 입력</span>
             <span className="hidden sm:inline">군 경력 정보를 입력하세요</span>
           </h1>
         </div>
 
-        <section className="np-card mt-7 p-5 md:p-7">
-          <div className="mb-6 grid gap-3 rounded-[14px] bg-[#F8FAFB] p-4 md:grid-cols-[150px_1fr] md:items-center">
+        <section className="np-card mt-6 p-4 md:mt-7 md:p-7">
+          <div className="mb-5 grid gap-3 rounded-[12px] bg-[#F8FAFB] p-3 md:mb-6 md:grid-cols-[150px_1fr] md:items-center md:p-4">
             <div>
               <p className="text-sm font-black text-[var(--primary)]">입력 완성도</p>
-              <p className="mt-1 text-3xl font-black tracking-normal">{completionRate}%</p>
+              <p className="mt-1 text-2xl font-black tracking-normal md:text-3xl">{completionRate}%</p>
             </div>
             <div>
-              <div className="h-3 overflow-hidden rounded-full bg-[#E5E8EB]">
+              <div className="h-2.5 overflow-hidden rounded-full bg-[#E5E8EB] md:h-3">
                 <div
                   className="h-full rounded-full bg-[var(--accent)] transition-all"
                   style={{ width: `${completionRate}%` }}
                 />
               </div>
-              <div className="mt-3 flex flex-wrap gap-2">
+              <div className="mt-2 flex flex-wrap gap-1.5 md:mt-3 md:gap-2">
                 {completionItems.map((item) => (
                   <span
-                    className={`rounded-full px-3 py-1 text-xs font-black ${
+                    className={`rounded-full px-2.5 py-1 text-[11px] font-black md:px-3 md:text-xs ${
                       item.done
                         ? "bg-[#E9F6EF] text-[var(--success)]"
                         : "bg-white text-[var(--caption)]"
@@ -287,12 +287,12 @@ export function AnalyzeForm() {
           <FormSection number="1" title="기본 군 정보">
             <div className="grid gap-4 md:grid-cols-2">
               <Field label="군별" required>
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-4">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                   {branchOptions.map((branch) => {
                     const selected = form.military_branch === branch.value;
                     return (
                       <button
-                        className={`focus-ring h-[42px] rounded-[9px] border-[1.5px] text-sm font-extrabold ${
+                        className={`focus-ring h-[40px] rounded-[9px] border-[1.5px] text-sm font-extrabold md:h-[42px] ${
                           selected
                             ? "border-[var(--primary)] bg-[var(--primary)] text-white"
                             : "border-[#E5E8EB] bg-[#F9FAFB] text-[var(--muted-foreground)]"
@@ -351,7 +351,7 @@ export function AnalyzeForm() {
               {specialtyPreset ? (
                 <div className="rounded-[12px] bg-[#F8FAFB] px-3 py-2 md:col-span-2">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="mr-1 text-xs font-black text-[var(--primary)]">
+                    <span className="mr-1 w-full text-xs font-black text-[var(--primary)] sm:w-auto">
                       {form.specialty} 추천 보직
                     </span>
                     {specialtyPreset.positions.map((position) => (
@@ -481,7 +481,7 @@ export function AnalyzeForm() {
           ) : null}
 
           <button
-            className="focus-ring mt-7 inline-flex h-[56px] w-full items-center justify-center gap-3 rounded-[10px] bg-[#001025d9] px-6 text-lg font-black text-white disabled:cursor-not-allowed disabled:opacity-50"
+            className="focus-ring mt-6 inline-flex h-[52px] w-full items-center justify-center gap-3 rounded-[10px] bg-[#001025d9] px-5 text-base font-black text-white disabled:cursor-not-allowed disabled:opacity-50 md:mt-7 md:h-[56px] md:px-6 md:text-lg"
             disabled={!isValid || isLoading}
             type="button"
             onClick={submit}
@@ -491,7 +491,7 @@ export function AnalyzeForm() {
           </button>
         </section>
 
-        <p className="mt-5 text-center text-sm font-bold leading-6 text-white drop-shadow">
+        <p className="mt-4 text-center text-xs font-bold leading-5 text-white drop-shadow md:mt-5 md:text-sm md:leading-6">
           입력 정보는 방산 직무 분석과 추천 리포트 생성을 위해서만 사용됩니다.
         </p>
       </div>
@@ -508,15 +508,15 @@ function AnalysisProgressOverlay({ isComplete, progress }: { isComplete: boolean
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(25,31,40,0.46)] px-4 backdrop-blur-[3px]">
-      <div className="np-card w-full max-w-[560px] p-8 text-center">
-        <div className="mx-auto grid h-[118px] w-[118px] place-items-center rounded-full border-[9px] border-[#EDEFF2] border-r-[var(--primary)] border-t-[var(--primary)]">
+      <div className="np-card w-full max-w-[560px] p-6 text-center md:p-8">
+        <div className="mx-auto grid h-[96px] w-[96px] place-items-center rounded-full border-[8px] border-[#EDEFF2] border-r-[var(--primary)] border-t-[var(--primary)] md:h-[118px] md:w-[118px] md:border-[9px]">
           {isComplete ? (
             <CheckCircle2 className="text-[var(--accent)]" size={48} />
           ) : (
             <Loader2 className="animate-spin text-[var(--primary)]" size={48} />
           )}
         </div>
-        <h2 className="mt-7 text-2xl font-black">{isComplete ? "리포트 생성 완료" : "분석 진행 중"}</h2>
+        <h2 className="mt-5 text-xl font-black md:mt-7 md:text-2xl">{isComplete ? "리포트 생성 완료" : "분석 진행 중"}</h2>
         <p className="mt-3 text-sm font-bold leading-6 text-[var(--muted-foreground)]">
           {isComplete ? "결과 화면으로 이동합니다." : loadingMessages[messageIndex]}
         </p>
@@ -543,11 +543,11 @@ function FormSection({
 }) {
   return (
     <section>
-      <div className="mb-4 flex items-center gap-3">
+      <div className="mb-3 flex items-center gap-2 md:mb-4 md:gap-3">
         <span className="grid h-[26px] w-[26px] place-items-center rounded-[7px] bg-[var(--primary)] text-[13px] font-black text-white">
           {number}
         </span>
-        <h2 className="text-lg font-black">{title}</h2>
+        <h2 className="text-base font-black md:text-lg">{title}</h2>
       </div>
       {children}
     </section>
@@ -564,7 +564,7 @@ function Field({
   required?: boolean;
 }) {
   return (
-    <div className="grid gap-2 text-[13.5px] font-black text-[var(--muted-foreground)]">
+    <div className="grid gap-1.5 text-[13px] font-black text-[var(--muted-foreground)] md:gap-2 md:text-[13.5px]">
       <span>
         {label} {required ? <span className="text-[var(--required)]">*</span> : null}
       </span>

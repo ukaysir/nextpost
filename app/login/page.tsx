@@ -34,50 +34,50 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[linear-gradient(rgba(18,22,28,.44),rgba(18,22,28,.56)),url('/assets/kf21-hero.jpg')] bg-cover bg-center">
-      <header className="page-shell flex items-center py-7 text-white">
-        <Link className="text-[22px] font-black tracking-[1px] drop-shadow" href="/">
+    <main className="min-h-dvh overflow-x-hidden bg-[linear-gradient(rgba(18,22,28,.46),rgba(18,22,28,.6)),url('/assets/kf21-hero.jpg')] bg-cover bg-center">
+      <header className="page-shell flex items-center py-5 text-white sm:py-7">
+        <Link className="text-[19px] font-black tracking-[1px] drop-shadow sm:text-[22px]" href="/">
           NEXTPOST
         </Link>
-        <Link className="ml-auto inline-flex items-center gap-2 text-sm font-extrabold drop-shadow" href="/">
-          <ArrowLeft size={16} />
+        <Link className="ml-auto inline-flex h-10 items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 text-xs font-extrabold backdrop-blur sm:text-sm" href="/">
+          <ArrowLeft size={15} />
           홈으로
         </Link>
       </header>
 
-      <section className="mx-auto flex min-h-[calc(100dvh-92px)] w-full max-w-[980px] items-center px-4 pb-16">
-        <div className="grid w-full gap-6 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
+      <section className="mx-auto flex w-full max-w-[980px] items-center px-3 pb-8 pt-2 sm:min-h-[calc(100dvh-92px)] sm:px-4 sm:pb-16 sm:pt-0">
+        <div className="grid w-full gap-4 sm:gap-6 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
           <div className="text-white">
-            <p className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/15 px-3 py-1 text-sm font-extrabold backdrop-blur">
-              <ShieldCheck size={16} />
+            <p className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/15 px-3 py-1 text-xs font-extrabold backdrop-blur sm:text-sm">
+              <ShieldCheck size={15} />
               NEXTPOST 테스트 로그인
             </p>
-            <h1 className="mt-5 text-4xl font-black leading-tight tracking-normal drop-shadow-[0_2px_18px_rgba(0,0,0,.35)] md:text-5xl">
+            <h1 className="mt-4 text-[32px] font-black leading-[1.16] tracking-normal drop-shadow-[0_2px_18px_rgba(0,0,0,.35)] sm:mt-5 sm:text-4xl md:text-5xl">
               방산 커리어 분석을
               <br />
               시작합니다
             </h1>
-            <p className="mt-5 max-w-[520px] text-base font-bold leading-8 text-white/90">
+            <p className="mt-3 max-w-[520px] text-[13.5px] font-bold leading-6 text-white/90 sm:mt-5 sm:text-base sm:leading-8">
               현재는 내부 테스트 계정으로만 접근합니다. 이후 Gmail 등 외부 계정 로그인을 연결할 수 있도록 인증 영역을 분리해 두었습니다.
             </p>
           </div>
 
-          <form className="np-card p-6 md:p-8" onSubmit={submit}>
+          <form className="np-card p-5 sm:p-6 md:p-8" onSubmit={submit}>
             <div className="flex items-center gap-3">
-              <span className="grid h-11 w-11 place-items-center rounded-[13px] bg-[var(--primary)] text-white">
-                <LockKeyhole size={21} />
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[12px] bg-[var(--primary)] text-white sm:h-11 sm:w-11 sm:rounded-[13px]">
+                <LockKeyhole size={20} />
               </span>
               <div>
-                <h2 className="text-2xl font-black tracking-normal">로그인</h2>
-                <p className="mt-1 text-sm font-bold text-[var(--caption)]">테스트 계정: test / test</p>
+                <h2 className="text-xl font-black tracking-normal sm:text-2xl">로그인</h2>
+                <p className="mt-1 text-xs font-bold text-[var(--caption)] sm:text-sm">테스트 계정: test / test</p>
               </div>
             </div>
 
-            <div className="mt-7 grid gap-5">
-              <label className="grid gap-2 text-[13.5px] font-black text-[var(--muted-foreground)]">
+            <div className="mt-5 grid gap-4 sm:mt-7 sm:gap-5">
+              <label className="grid gap-2 text-[13px] font-black text-[var(--muted-foreground)] sm:text-[13.5px]">
                 아이디 또는 이메일
                 <span className="relative">
-                  <UserRound className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[var(--caption)]" size={18} />
+                  <UserRound className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[var(--caption)]" size={17} />
                   <input
                     className="input input-with-icon"
                     autoComplete="username"
@@ -89,10 +89,10 @@ export default function LoginPage() {
                 </span>
               </label>
 
-              <label className="grid gap-2 text-[13.5px] font-black text-[var(--muted-foreground)]">
+              <label className="grid gap-2 text-[13px] font-black text-[var(--muted-foreground)] sm:text-[13.5px]">
                 비밀번호
                 <span className="relative">
-                  <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[var(--caption)]" size={18} />
+                  <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[var(--caption)]" size={17} />
                   <input
                     className="input input-with-icon"
                     autoComplete="current-password"
@@ -106,13 +106,13 @@ export default function LoginPage() {
             </div>
 
             {error ? (
-              <div className="mt-5 rounded-[11px] border border-[#F0C2C2] bg-[#FFF2F2] px-4 py-3 text-sm font-bold text-[var(--danger)]">
+              <div className="mt-4 rounded-[10px] border border-[#F0C2C2] bg-[#FFF2F2] px-3 py-2.5 text-[13px] font-bold text-[var(--danger)] sm:mt-5 sm:px-4 sm:py-3 sm:text-sm">
                 {error}
               </div>
             ) : null}
 
             <button
-              className="focus-ring mt-7 inline-flex h-[54px] w-full items-center justify-center gap-3 rounded-[10px] bg-[var(--accent)] px-6 text-base font-black text-white disabled:cursor-not-allowed disabled:opacity-50"
+              className="focus-ring mt-5 inline-flex h-[50px] w-full items-center justify-center gap-3 rounded-[10px] bg-[var(--accent)] px-5 text-[15px] font-black text-white disabled:cursor-not-allowed disabled:opacity-50 sm:mt-7 sm:h-[54px] sm:px-6 sm:text-base"
               disabled={!identifier || !password}
               type="submit"
             >
