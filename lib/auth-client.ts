@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Session, User } from "@supabase/supabase-js";
-import { getSupabaseAuthSettings, getSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { getAuthPublicConfig, getSupabaseAuthSettings, getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { getCurrentTestUser, signOutTestUser } from "@/lib/test-auth";
 
 export type AppUser = {
@@ -121,9 +121,9 @@ export async function signInWithGoogle(nextPath: string) {
     );
   }
 
-  const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(
-    getSafeNextPath(nextPath),
-  )}`;
+  const config = await getAuthPublicConfig();
+  const origin = config.siteUrl || window.location.origin;
+  const redirectTo = `${origin.replace(/\/$/, "")}/auth/callback?next=${encodeURIComponent(getSafeNextPath(nextPath))}`;
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {

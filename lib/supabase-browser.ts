@@ -5,6 +5,7 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 type AuthPublicConfig = {
   supabaseUrl: string;
   supabasePublishableKey: string;
+  siteUrl: string;
 };
 
 let configPromise: Promise<AuthPublicConfig> | null = null;
@@ -19,6 +20,10 @@ async function loadAuthConfig() {
   }
 
   return configPromise;
+}
+
+export async function getAuthPublicConfig() {
+  return loadAuthConfig();
 }
 
 export async function getSupabaseBrowserClient() {
