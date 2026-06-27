@@ -17,6 +17,7 @@ import {
   FileText,
   GraduationCap,
   LineChart,
+  Loader2,
   Mail,
   MapPin,
   RotateCcw,
@@ -170,6 +171,8 @@ export function ResultsDashboard({
                 icon={Save}
                 label={isSaving ? "저장 중" : savedSharePath ? "저장 완료" : "리포트 저장"}
                 onClick={saveReport}
+                busy={isSaving}
+                done={Boolean(savedSharePath)}
                 primary={!savedSharePath}
               />
             ) : null}
@@ -950,28 +953,58 @@ function ReportSection({
 }
 
 function ActionButton({
+  busy = false,
+  done = false,
   icon: Icon,
   label,
   onClick,
   primary,
 }: {
+  busy?: boolean;
+  done?: boolean;
   icon: LucideIcon;
   label: string;
-  onClick: () => void;
+  onClick: () => void | Promise<void>;
   primary?: boolean;
 }) {
+  const [feedback, setFeedback] = useState<"idle" | "pending" | "done">("idle");
+  const isBusy = busy || feedback === "pending";
+  const isDone = done || feedback === "done";
+
+  async function handleClick() {
+    if (isBusy) return;
+    setFeedback("pending");
+    try {
+      await onClick();
+      setFeedback("done");
+      window.setTimeout(() => setFeedback("idle"), 1400);
+    } catch (error) {
+      setFeedback("idle");
+      throw error;
+    }
+  }
+
   return (
     <button
       className={cn(
-        "focus-ring inline-flex h-10 items-center gap-2 rounded-[9px] px-3 text-sm font-extrabold",
-        primary
+        "focus-ring inline-flex h-10 items-center gap-2 rounded-[9px] px-3 text-sm font-extrabold transition duration-150 active:scale-[0.97]",
+        "shadow-[0_1px_0_rgba(15,23,42,.04)] hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(15,23,42,.10)]",
+        primary || isDone
           ? "bg-[var(--accent)] text-white"
-          : "border border-[var(--border)] bg-white text-[var(--caption)]",
+          : "border border-[var(--border)] bg-white text-[var(--caption)] hover:border-[var(--primary)] hover:text-[var(--foreground)]",
+        isBusy ? "cursor-wait opacity-80" : "",
       )}
+      disabled={isBusy}
       type="button"
-      onClick={onClick}
+      onClick={handleClick}
     >
-      <Icon size={16} />
+      {isBusy ? (
+        <Loader2 className="animate-spin" size={16} />
+      ) : isDone ? (
+        <CheckCircle2 size={16} />
+      ) : (
+        <Icon size={16} />
+      )}
       {label}
     </button>
   );
