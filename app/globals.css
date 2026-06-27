@@ -1,16 +1,24 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f8f4;
-  --foreground: #18201f;
-  --muted: #eef1ea;
-  --muted-foreground: #64716d;
-  --border: #d8ded4;
-  --primary: #155e63;
+  --background: #f4f6f8;
+  --foreground: #191f28;
+  --muted: #f8fafb;
+  --muted-foreground: #4e5968;
+  --caption: #8b95a1;
+  --border: #e8ebee;
+  --border-strong: #dde3ea;
+  --primary: #849bba;
   --primary-foreground: #ffffff;
-  --accent: #c2452d;
+  --primary-soft: #ebeff5;
+  --accent: #099a21;
   --accent-foreground: #ffffff;
   --surface: #ffffff;
+  --success: #047a3d;
+  --blue-score: #1442b0;
+  --warning: #d98a00;
+  --danger: #c32a2a;
+  --required: #f04452;
 }
 
 * {
@@ -25,7 +33,13 @@ body {
   margin: 0;
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Noto Sans KR", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 500;
+}
+
+body > main {
+  animation: np-page-reveal 520ms cubic-bezier(0.2, 0.72, 0.2, 1) both;
+  transform-origin: top center;
 }
 
 a {
@@ -46,21 +60,91 @@ textarea {
 }
 
 .focus-ring:focus-visible {
-  outline: 3px solid rgba(21, 94, 99, 0.35);
+  outline: 3px solid rgba(132, 155, 186, 0.38);
   outline-offset: 2px;
 }
 
 .input {
-  min-height: 44px;
+  min-height: 46px;
   width: 100%;
-  border-radius: 6px;
-  border: 1px solid var(--border);
-  background: #ffffff;
-  padding: 0 12px;
+  border-radius: 9px;
+  border: 1.5px solid #e5e8eb;
+  background: #f9fafb;
+  padding: 0 14px;
   color: var(--foreground);
 }
 
 .input:focus {
-  outline: 3px solid rgba(21, 94, 99, 0.22);
+  outline: 3px solid rgba(132, 155, 186, 0.24);
   outline-offset: 1px;
+}
+
+.input-with-icon {
+  padding-left: 44px;
+}
+
+.np-card {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: 0 10px 34px rgba(20, 40, 38, 0.05);
+}
+
+.np-hero-bg {
+  background-image:
+    linear-gradient(100deg, rgba(16, 22, 30, 0.64) 0%, rgba(16, 22, 30, 0.36) 38%, rgba(16, 22, 30, 0.08) 72%),
+    url("/assets/kf21-hero.jpg");
+  background-position: center;
+  background-size: cover;
+}
+
+.np-image-nav {
+  background-image:
+    linear-gradient(90deg, rgba(25, 31, 40, 0.72), rgba(25, 31, 40, 0.38)),
+    url("/assets/kf21-hero.jpg");
+  background-position: center 42%;
+  background-size: cover;
+}
+
+.np-pill {
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: #5b6b82;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.np-divider {
+  height: 1px;
+  background: #eef1f3;
+}
+
+@keyframes np-page-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+    clip-path: inset(0 0 100% 0 round 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    clip-path: inset(0 0 0 0 round 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  body > main {
+    animation: none;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
 }

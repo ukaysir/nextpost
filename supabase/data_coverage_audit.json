@@ -1,0 +1,440 @@
+{
+  "mode": "remote_supabase",
+  "totals": {
+    "companies": 85,
+    "companies_with_careers_url": 85,
+    "profiles": 85,
+    "profiles_with_careers_url": 85,
+    "profiles_with_homepage": 84,
+    "profiles_with_avg_salary": 37,
+    "companies_with_avg_salary": 38,
+    "company_financials": 189,
+    "companies_with_financials": 39,
+    "contract_records": 658,
+    "companies_with_contract_records": 69,
+    "job_postings": 86,
+    "companies_with_job_postings": 80,
+    "company_sources": 581,
+    "companies_with_sources": 85,
+    "education_rows": 126,
+    "common_education_rows": 18,
+    "job_requirement_rows": 35,
+    "career_mapping_rows": 44,
+    "legacy_air_field_rows": 1
+  },
+  "field_counts": {
+    "탄약": 9,
+    "화력": 8,
+    "통신전자": 15,
+    "기동": 14,
+    "기타": 10,
+    "항공유도": 17,
+    "함정": 9,
+    "화생방": 3
+  },
+  "missing": {
+    "careers_url_missing_by_contract": [],
+    "financials_missing_by_contract": [
+      {
+        "id": 25,
+        "company_name": "삼양화학공업",
+        "defense_field": "탄약",
+        "total_contract_amount": 109720152820
+      },
+      {
+        "id": 2,
+        "company_name": "고려화공",
+        "defense_field": "탄약",
+        "total_contract_amount": 18911100661
+      },
+      {
+        "id": 44,
+        "company_name": "유아이헬리콥터",
+        "defense_field": "항공유도",
+        "total_contract_amount": 10022367310
+      },
+      {
+        "id": 45,
+        "company_name": "유텍",
+        "defense_field": "기타",
+        "total_contract_amount": 9534742440
+      },
+      {
+        "id": 43,
+        "company_name": "우리별",
+        "defense_field": "통신전자",
+        "total_contract_amount": 9195775640
+      },
+      {
+        "id": 41,
+        "company_name": "연합정밀",
+        "defense_field": "통신전자",
+        "total_contract_amount": 8770218501
+      },
+      {
+        "id": 34,
+        "company_name": "신정개발특장차",
+        "defense_field": "기동",
+        "total_contract_amount": 7975976800
+      },
+      {
+        "id": 5,
+        "company_name": "다산기공",
+        "defense_field": "화력",
+        "total_contract_amount": 7201483478
+      },
+      {
+        "id": 42,
+        "company_name": "우경광학",
+        "defense_field": "기타",
+        "total_contract_amount": 5143563740
+      },
+      {
+        "id": 8,
+        "company_name": "대명",
+        "defense_field": "기타",
+        "total_contract_amount": 3752592345
+      },
+      {
+        "id": 38,
+        "company_name": "아이펙",
+        "defense_field": "기타",
+        "total_contract_amount": 1867654630
+      },
+      {
+        "id": 11,
+        "company_name": "대영에스텍",
+        "defense_field": "통신전자",
+        "total_contract_amount": 1329485540
+      },
+      {
+        "id": 61,
+        "company_name": "한국특수전지",
+        "defense_field": "함정",
+        "total_contract_amount": 1290000000
+      },
+      {
+        "id": 60,
+        "company_name": "풍산FNS",
+        "defense_field": "탄약",
+        "total_contract_amount": 1157428300
+      },
+      {
+        "id": 33,
+        "company_name": "시공사",
+        "defense_field": "기동",
+        "total_contract_amount": 1091480000
+      },
+      {
+        "id": 70,
+        "company_name": "현대제이콤",
+        "defense_field": "통신전자",
+        "total_contract_amount": 971625200
+      },
+      {
+        "id": 20,
+        "company_name": "미래엠텍",
+        "defense_field": "통신전자",
+        "total_contract_amount": 915354460
+      },
+      {
+        "id": 56,
+        "company_name": "티에스택",
+        "defense_field": "통신전자",
+        "total_contract_amount": 675883570
+      },
+      {
+        "id": 6,
+        "company_name": "다윈프릭션",
+        "defense_field": "항공유도",
+        "total_contract_amount": 458350000
+      },
+      {
+        "id": 49,
+        "company_name": "인소팩",
+        "defense_field": "통신전자",
+        "total_contract_amount": 417015500
+      },
+      {
+        "id": 29,
+        "company_name": "삼주기업",
+        "defense_field": "기동",
+        "total_contract_amount": 338283450
+      },
+      {
+        "id": 53,
+        "company_name": "캐스",
+        "defense_field": "항공유도",
+        "total_contract_amount": 307985610
+      },
+      {
+        "id": 72,
+        "company_name": "화인정밀",
+        "defense_field": "항공유도",
+        "total_contract_amount": 225678530
+      },
+      {
+        "id": 15,
+        "company_name": "동양정공",
+        "defense_field": "탄약",
+        "total_contract_amount": 165926240
+      },
+      {
+        "id": 16,
+        "company_name": "동인광학",
+        "defense_field": "기타",
+        "total_contract_amount": 69597000
+      },
+      {
+        "id": 46,
+        "company_name": "은성사",
+        "defense_field": "기타",
+        "total_contract_amount": 63630040
+      },
+      {
+        "id": 51,
+        "company_name": "인피니티에코",
+        "defense_field": "기타",
+        "total_contract_amount": 58378430
+      },
+      {
+        "id": 19,
+        "company_name": "엠엔씨솔루션",
+        "defense_field": "기동",
+        "total_contract_amount": 57446610
+      },
+      {
+        "id": 54,
+        "company_name": "코리아디펜스인더스트리",
+        "defense_field": "탄약",
+        "total_contract_amount": 47199000
+      },
+      {
+        "id": 50,
+        "company_name": "스페이스프로",
+        "defense_field": "항공유도",
+        "total_contract_amount": 41863010
+      },
+      {
+        "id": 1,
+        "company_name": "강남",
+        "defense_field": "함정",
+        "total_contract_amount": 39600000
+      },
+      {
+        "id": 30,
+        "company_name": "성진테크윈",
+        "defense_field": "항공유도",
+        "total_contract_amount": 33832000
+      },
+      {
+        "id": 52,
+        "company_name": "진영정기",
+        "defense_field": "화력",
+        "total_contract_amount": 31300000
+      },
+      {
+        "id": 39,
+        "company_name": "에비오시스테크놀러지스",
+        "defense_field": "항공유도",
+        "total_contract_amount": 18936600
+      },
+      {
+        "id": 36,
+        "company_name": "씨앤지",
+        "defense_field": "화력",
+        "total_contract_amount": 12656160
+      },
+      {
+        "id": 14,
+        "company_name": "데크카본",
+        "defense_field": "항공유도",
+        "total_contract_amount": 11942190
+      },
+      {
+        "id": 27,
+        "company_name": "삼정터빈",
+        "defense_field": "기동",
+        "total_contract_amount": 7379000
+      },
+      {
+        "id": 21,
+        "company_name": "비츠로밀텍",
+        "defense_field": "통신전자",
+        "total_contract_amount": 0
+      },
+      {
+        "id": 23,
+        "company_name": "삼양정밀화학",
+        "defense_field": "탄약",
+        "total_contract_amount": 0
+      },
+      {
+        "id": 31,
+        "company_name": "세아항공방산소재",
+        "defense_field": "탄약",
+        "total_contract_amount": 0
+      },
+      {
+        "id": 7,
+        "company_name": "단암시스템즈",
+        "defense_field": "항공유도",
+        "total_contract_amount": 0
+      },
+      {
+        "id": 9,
+        "company_name": "대신금속",
+        "defense_field": "기타",
+        "total_contract_amount": 0
+      },
+      {
+        "id": 28,
+        "company_name": "삼정티비엠",
+        "defense_field": "함정",
+        "total_contract_amount": 0
+      },
+      {
+        "id": 79,
+        "company_name": "LS엠트론",
+        "defense_field": "기동",
+        "total_contract_amount": 0
+      },
+      {
+        "id": 80,
+        "company_name": "SG생활안전",
+        "defense_field": "화생방",
+        "total_contract_amount": 0
+      },
+      {
+        "id": 81,
+        "company_name": "SG솔루션",
+        "defense_field": "화력",
+        "total_contract_amount": 0
+      }
+    ],
+    "careers_url_top20_by_contract": [],
+    "financials_top20_by_contract": [
+      {
+        "id": 25,
+        "company_name": "삼양화학공업",
+        "defense_field": "탄약",
+        "total_contract_amount": 109720152820
+      },
+      {
+        "id": 2,
+        "company_name": "고려화공",
+        "defense_field": "탄약",
+        "total_contract_amount": 18911100661
+      },
+      {
+        "id": 44,
+        "company_name": "유아이헬리콥터",
+        "defense_field": "항공유도",
+        "total_contract_amount": 10022367310
+      },
+      {
+        "id": 45,
+        "company_name": "유텍",
+        "defense_field": "기타",
+        "total_contract_amount": 9534742440
+      },
+      {
+        "id": 43,
+        "company_name": "우리별",
+        "defense_field": "통신전자",
+        "total_contract_amount": 9195775640
+      },
+      {
+        "id": 41,
+        "company_name": "연합정밀",
+        "defense_field": "통신전자",
+        "total_contract_amount": 8770218501
+      },
+      {
+        "id": 34,
+        "company_name": "신정개발특장차",
+        "defense_field": "기동",
+        "total_contract_amount": 7975976800
+      },
+      {
+        "id": 5,
+        "company_name": "다산기공",
+        "defense_field": "화력",
+        "total_contract_amount": 7201483478
+      },
+      {
+        "id": 42,
+        "company_name": "우경광학",
+        "defense_field": "기타",
+        "total_contract_amount": 5143563740
+      },
+      {
+        "id": 8,
+        "company_name": "대명",
+        "defense_field": "기타",
+        "total_contract_amount": 3752592345
+      },
+      {
+        "id": 38,
+        "company_name": "아이펙",
+        "defense_field": "기타",
+        "total_contract_amount": 1867654630
+      },
+      {
+        "id": 11,
+        "company_name": "대영에스텍",
+        "defense_field": "통신전자",
+        "total_contract_amount": 1329485540
+      },
+      {
+        "id": 61,
+        "company_name": "한국특수전지",
+        "defense_field": "함정",
+        "total_contract_amount": 1290000000
+      },
+      {
+        "id": 60,
+        "company_name": "풍산FNS",
+        "defense_field": "탄약",
+        "total_contract_amount": 1157428300
+      },
+      {
+        "id": 33,
+        "company_name": "시공사",
+        "defense_field": "기동",
+        "total_contract_amount": 1091480000
+      },
+      {
+        "id": 70,
+        "company_name": "현대제이콤",
+        "defense_field": "통신전자",
+        "total_contract_amount": 971625200
+      },
+      {
+        "id": 20,
+        "company_name": "미래엠텍",
+        "defense_field": "통신전자",
+        "total_contract_amount": 915354460
+      },
+      {
+        "id": 56,
+        "company_name": "티에스택",
+        "defense_field": "통신전자",
+        "total_contract_amount": 675883570
+      },
+      {
+        "id": 6,
+        "company_name": "다윈프릭션",
+        "defense_field": "항공유도",
+        "total_contract_amount": 458350000
+      },
+      {
+        "id": 49,
+        "company_name": "인소팩",
+        "defense_field": "통신전자",
+        "total_contract_amount": 417015500
+      }
+    ]
+  },
+  "priority_gaps": []
+}

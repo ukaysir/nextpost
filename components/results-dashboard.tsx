@@ -5,293 +5,1045 @@ import Link from "next/link";
 import {
   ArrowLeft,
   Award,
+  BarChart3,
+  BookOpen,
   BriefcaseBusiness,
   CheckCircle2,
+  ChevronDown,
+  Copy,
+  Database,
+  Download,
   ExternalLink,
+  FileText,
   GraduationCap,
+  LineChart,
+  Mail,
   MapPin,
   RotateCcw,
+  Send,
   ShieldCheck,
   Target,
+  type LucideIcon,
 } from "lucide-react";
 import { AnalysisResult } from "@/lib/types";
-import { formatWon } from "@/lib/utils";
+import { cn, formatWon } from "@/lib/utils";
+import { AuthMenu } from "@/components/auth-menu";
 import { DataChat } from "@/components/data-chat";
 
 type ResultPayload = AnalysisResult & {
   ai_provider?: "openai" | "fallback";
 };
 
+type CompanyDetail = NonNullable<AnalysisResult["company_details"]>[number];
+type RecommendedCompany = AnalysisResult["recommended_companies"][number];
+
 export function ResultsDashboard() {
   const [result, setResult] = useState<ResultPayload | null>(null);
+  const [toast, setToast] = useState("");
 
   useEffect(() => {
     const raw = sessionStorage.getItem("nextpost:last-result");
-    if (raw) {
-      window.setTimeout(() => setResult(JSON.parse(raw)), 0);
-    }
+    if (raw) window.setTimeout(() => setResult(JSON.parse(raw)), 0);
   }, []);
 
-  const topScore = useMemo(
-    () => result?.recommended_companies?.[0]?.fit_score ?? 0,
-    [result],
-  );
+  function showToast(message: string) {
+    setToast(message);
+    window.setTimeout(() => setToast(""), 2400);
+  }
+
+  const topScore = useMemo(() => result?.recommended_companies?.[0]?.fit_score ?? 0, [result]);
+  const reportUrl = typeof window !== "undefined" ? window.location.href : "";
 
   if (!result) {
     return (
-      <main className="page-shell flex min-h-screen items-center justify-center py-10">
-        <div className="max-w-md rounded-lg border border-[var(--border)] bg-white p-8 text-center shadow-sm">
-          <Target className="mx-auto text-[var(--primary)]" size={36} />
-          <h1 className="mt-4 text-2xl font-semibold">분석 결과가 없습니다</h1>
-          <p className="mt-3 leading-7 text-[var(--muted-foreground)]">
-            입력 폼에서 분석을 먼저 실행하면 결과 대시보드를 볼 수 있습니다.
+      <main className="flex min-h-screen items-center justify-center bg-[var(--background)] px-4">
+        <section className="np-card max-w-md p-8 text-center">
+          <Target className="mx-auto text-[var(--primary)]" size={38} />
+          <h1 className="mt-5 text-2xl font-black">분석 결과가 없습니다</h1>
+          <p className="mt-3 text-sm leading-7 text-[var(--muted-foreground)]">
+            군 경력 정보를 입력하면 방산 커리어 리포트를 확인할 수 있습니다.
           </p>
           <Link
-            className="focus-ring mt-6 inline-flex h-11 items-center justify-center rounded-md bg-[var(--primary)] px-5 font-semibold text-white"
+            className="focus-ring mt-6 inline-flex h-11 items-center justify-center rounded-[10px] bg-[var(--accent)] px-5 font-black text-white"
             href="/analyze"
           >
             분석하러 가기
           </Link>
-        </div>
+        </section>
       </main>
     );
   }
 
+  const companyDetails = result.company_details ?? [];
+
   return (
-    <main className="page-shell py-8">
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <Link
-          className="focus-ring inline-flex items-center gap-2 text-sm font-semibold text-[var(--primary)]"
-          href="/analyze"
-        >
-          <ArrowLeft size={16} />
-          다시 입력하기
-        </Link>
-        <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white px-3 py-1 text-sm text-[var(--muted-foreground)]">
-          <ShieldCheck size={16} />
-          {result.ai_provider === "fallback" ? "로컬 규칙 분석" : "OpenAI 분석"}
+    <main className="min-h-screen bg-[var(--background)]">
+      <header className="np-image-nav sticky top-0 z-30 border-b border-white/10 text-white no-print">
+        <div className="page-shell flex items-center py-5">
+          <Link className="text-xl font-black tracking-[1px]" href="/">
+            NEXTPOST
+          </Link>
+          <nav className="ml-auto flex items-center gap-5 text-sm font-extrabold">
+            <Link href="/analyze">다시 입력</Link>
+            <a href="mailto:?subject=NEXTPOST 리포트&body=NEXTPOST 분석 리포트 링크를 공유합니다.">
+              공유
+            </a>
+            <AuthMenu compact />
+          </nav>
         </div>
-      </div>
+      </header>
 
-      <section className="rounded-lg border border-[var(--border)] bg-white p-6 shadow-sm md:p-8">
-        <div className="grid gap-6 lg:grid-cols-[0.7fr_0.3fr] lg:items-center">
-          <div>
-            <p className="text-sm font-semibold text-[var(--accent)]">
-              {result.matched_field} · {result.matched_job_group}
-            </p>
-            <h1 className="mt-2 text-3xl font-semibold">AI 방산 커리어 리포트</h1>
-            <p className="mt-4 leading-8 text-[var(--muted-foreground)]">
-              {result.skill_translation.summary}
-            </p>
-          </div>
-          <div className="rounded-lg bg-[#eef5f2] p-5">
-            <p className="text-sm text-[var(--muted-foreground)]">최상위 기업 적합도</p>
-            <p className="mt-2 text-5xl font-semibold text-[var(--primary)]">{topScore}%</p>
-          </div>
+      {toast ? (
+        <div className="fixed bottom-8 left-1/2 z-50 -translate-x-1/2 rounded-[11px] bg-[#191F28] px-5 py-3 text-sm font-bold text-white shadow-[0_10px_30px_rgba(0,0,0,.28)]">
+          {toast}
         </div>
-        <div className="mt-6 flex flex-wrap gap-2">
-          {result.skill_translation.keywords.map((keyword) => (
-            <span className="rounded-full bg-[#e7eee8] px-3 py-1 text-sm" key={keyword}>
-              {keyword}
-            </span>
-          ))}
-        </div>
-      </section>
+      ) : null}
 
-      <section className="mt-6">
-        <div className="mb-4 flex items-center gap-2">
-          <BriefcaseBusiness className="text-[var(--primary)]" size={22} />
-          <h2 className="text-2xl font-semibold">추천 기업</h2>
+      <div className="mx-auto max-w-[1480px] px-4 py-8 md:px-6 md:py-10">
+        <div className="mb-4 flex flex-wrap items-center gap-2 no-print">
+          <Link
+            className="focus-ring inline-flex h-10 items-center gap-2 rounded-[9px] border border-[var(--border)] bg-white px-3 text-sm font-extrabold text-[var(--caption)]"
+            href="/analyze"
+          >
+            <ArrowLeft size={16} />
+            다시 입력하기
+          </Link>
+          <div className="ml-auto flex flex-wrap gap-2">
+            <ActionButton
+              icon={Copy}
+              label="링크 복사"
+              onClick={async () => {
+                await navigator.clipboard.writeText(reportUrl);
+                showToast("리포트 링크를 복사했습니다.");
+              }}
+            />
+            <ActionButton icon={Download} label="PDF 저장" onClick={() => window.print()} />
+            <ActionButton
+              icon={Mail}
+              label="메일"
+              onClick={() => {
+                window.location.href = `mailto:?subject=NEXTPOST 리포트&body=${encodeURIComponent(reportUrl)}`;
+              }}
+            />
+            <ActionButton
+              icon={Send}
+              label="전송"
+              primary
+              onClick={async () => {
+                if (navigator.share) {
+                  await navigator.share({ title: "NEXTPOST 리포트", url: reportUrl });
+                } else {
+                  await navigator.clipboard.writeText(reportUrl);
+                  showToast("공유 기능 대신 링크를 복사했습니다.");
+                }
+              }}
+            />
+          </div>
         </div>
-        <div className="grid gap-4">
-          {result.recommended_companies.map((company) => (
-            <article
-              className="rounded-lg border border-[var(--border)] bg-white p-5 shadow-sm"
-              key={company.company_name}
-            >
-              <div className="grid gap-5 md:grid-cols-[1fr_140px] md:items-start">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="text-xl font-semibold">{company.company_name}</h3>
-                    {company.defense_field ? (
-                      <span className="rounded-full bg-[#eef1ea] px-2.5 py-1 text-xs">
-                        {company.defense_field}
-                      </span>
-                    ) : null}
-                    {company.is_cost_certified ? (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-[#e7f4ec] px-2.5 py-1 text-xs text-[#1f6c3d]">
-                        <CheckCircle2 size={13} />
-                        원가관리 인증
-                      </span>
+
+        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(380px,480px)] xl:items-start">
+          <div className="min-w-0">
+            <article className="np-card overflow-hidden">
+              <section className="p-6 md:p-8">
+                <div className="grid gap-6 md:grid-cols-[1fr_220px] md:items-start">
+                  <div>
+                    <p className="text-sm font-black tracking-[1px] text-[var(--primary)]">
+                      {result.matched_field} · {result.matched_job_group}
+                    </p>
+                    <h1 className="mt-3 text-3xl font-black tracking-[-0.6px] md:text-[35px]">
+                      AI 방산 커리어 리포트
+                    </h1>
+                    <p className="mt-4 text-sm font-medium leading-7 text-[var(--muted-foreground)] md:text-[15px]">
+                      {result.skill_translation.summary}
+                    </p>
+                  </div>
+                  <div className="rounded-[14px] bg-white p-5 text-center">
+                    <p className="text-sm font-extrabold text-[#5b6b82]">최상위 기업 적합도</p>
+                    <p className="mt-2 text-[64px] font-black leading-none tracking-[-1px]">
+                      {topScore}
+                    </p>
+                    <p className="mt-2 text-xs font-black text-[var(--caption)]">점</p>
+                  </div>
+                </div>
+
+                <div className="mt-6 flex flex-wrap gap-2">
+                  {result.skill_translation.keywords.map((keyword) => (
+                    <span className="np-pill px-3 py-1" key={keyword}>
+                      {keyword}
+                    </span>
+                  ))}
+                </div>
+
+                <ReportSummary result={result} />
+              </section>
+
+              <Divider />
+
+              <ReportSection icon={BriefcaseBusiness} title="추천 기업">
+                <div className="grid gap-4">
+                  {result.recommended_companies.map((company) => {
+                    const detail = companyDetails.find(
+                      (item) => item.company_name === company.company_name,
+                    );
+                    const reliability = result.data_reliability?.find(
+                      (item) => item.company_name === company.company_name,
+                    );
+                    const evidence = result.recommendation_evidence?.find(
+                      (item) => item.company_name === company.company_name,
+                    );
+
+                    return (
+                      <CompanyCard
+                        company={company}
+                        detail={detail}
+                        evidence={evidence?.evidence_points ?? []}
+                        key={company.company_name}
+                        reliability={reliability}
+                      />
+                    );
+                  })}
+                </div>
+              </ReportSection>
+
+              <Divider />
+
+              <ReportSection icon={Target} title="직무 매칭 근거">
+                <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+                  <div className="rounded-[12px] bg-[#F8FAFB] p-4">
+                    <p className="text-sm font-black text-[var(--primary)]">군 경력 변환</p>
+                    <h3 className="mt-2 text-xl font-black">{result.matched_job_group}</h3>
+                    <div className="mt-4 grid gap-2 text-sm font-semibold text-[var(--caption)]">
+                      <span>매칭 분야: {result.matched_field}</span>
+                      {result.matching_evidence?.specialty_keyword ? (
+                        <span>병과 키워드: {result.matching_evidence.specialty_keyword}</span>
+                      ) : null}
+                      {result.matching_evidence?.matched_by?.length ? (
+                        <span>매칭 기준: {result.matching_evidence.matched_by.join(", ")}</span>
+                      ) : null}
+                    </div>
+                    {result.matching_evidence?.position_keywords?.length ? (
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {result.matching_evidence.position_keywords.map((keyword) => (
+                          <span className="np-pill px-3 py-1" key={keyword}>
+                            {keyword}
+                          </span>
+                        ))}
+                      </div>
                     ) : null}
                   </div>
-                  <p className="mt-3 leading-7 text-[var(--muted-foreground)]">
-                    {company.reason}
-                  </p>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {company.recommended_positions.map((position) => (
-                      <span
-                        className="rounded-full bg-[#fff0ec] px-3 py-1 text-sm text-[#88311f]"
-                        key={position}
+
+                  <div className="grid gap-3">
+                    {(result.job_cards ?? []).map((job) => (
+                      <article
+                        className="rounded-[12px] border border-[var(--border)] bg-white p-4"
+                        key={job.job_title}
                       >
-                        {position}
-                      </span>
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <h3 className="font-black">{job.job_title}</h3>
+                          {job.related_weapon_system ? (
+                            <span className="rounded-full bg-[#EEF4FA] px-3 py-1 text-xs font-black text-[#506580]">
+                              {job.related_weapon_system}
+                            </span>
+                          ) : null}
+                        </div>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {job.required_skills.map((skill) => (
+                            <span
+                              className="rounded-full bg-[#F4F6F8] px-3 py-1 text-xs font-extrabold text-[#5b6b82]"
+                              key={skill}
+                            >
+                              {skill}
+                            </span>
+                          ))}
+                        </div>
+                        {job.preferred_military_exp ? (
+                          <p className="mt-3 text-sm leading-6 text-[var(--muted-foreground)]">
+                            {job.preferred_military_exp}
+                          </p>
+                        ) : null}
+                      </article>
                     ))}
                   </div>
-                  <div className="mt-4 flex flex-wrap gap-4 text-sm text-[var(--muted-foreground)]">
-                    <span>계약 규모: {formatWon(company.total_contract_amount)}</span>
-                    <span>최근 계약년도: {company.recent_contract_year ?? "정보 없음"}</span>
-                    <span>
-                      평균연봉:{" "}
-                      {company.avg_salary
-                        ? `${company.avg_salary.toLocaleString("ko-KR")}만원`
-                        : "공시정보 없음"}
-                    </span>
+                </div>
+              </ReportSection>
+
+              <Divider />
+
+              <ReportSection icon={Target} title="Skill Gap">
+                <div className="grid gap-5 md:grid-cols-[0.45fr_0.55fr]">
+                  <div>
+                    <h3 className="text-lg font-black">직무 준비도</h3>
+                    <p className="mt-3 text-sm leading-7 text-[var(--muted-foreground)]">
+                      {result.skill_gap.analysis}
+                    </p>
+                    <div className="mt-5 h-4 overflow-hidden rounded-full bg-[#EDEFF2]">
+                      <div className="h-full w-[62%] bg-[var(--accent)]" />
+                    </div>
+                    <div className="mt-2 flex justify-between text-xs font-black text-[var(--caption)]">
+                      <span>현재 62%</span>
+                      <span>보완 후 88%</span>
+                    </div>
                   </div>
-                  {company.careers_page_url ? (
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <SkillPills title="보유 역량" items={result.skill_gap.possessed} tone="green" />
+                    <SkillPills title="보완 필요" items={result.skill_gap.missing} tone="gold" />
+                  </div>
+                </div>
+              </ReportSection>
+
+              <Divider />
+
+              <ReportSection icon={RotateCcw} title="전역 타이밍">
+                <div className="grid gap-3 md:grid-cols-2">
+                  <TimingCard title="지금 전역" body={result.discharge_timing.now} />
+                  <TimingCard title="추가 복무" body={result.discharge_timing.later} />
+                </div>
+                <div className="mt-4 rounded-[12px] border border-[#E1E8E6] bg-[#FAFBFC] p-4">
+                  <p className="text-base font-extrabold leading-7">
+                    추천: {result.discharge_timing.recommendation}
+                  </p>
+                </div>
+              </ReportSection>
+
+              <Divider />
+
+              <ReportSection icon={GraduationCap} title="교육 · 자격증 로드맵">
+                <div className="grid gap-3">
+                  {result.education_roadmap.map((item) => (
                     <a
-                      className="focus-ring mt-4 inline-flex h-10 items-center gap-2 rounded-md border border-[var(--border)] bg-white px-4 text-sm font-semibold"
-                      href={company.careers_page_url}
+                      className="grid gap-3 rounded-[12px] border border-[var(--border)] p-4 hover:border-[var(--primary)] md:grid-cols-[86px_1fr]"
+                      href={item.education_link}
+                      key={`${item.step}-${item.education_name}`}
                       rel="noreferrer"
                       target="_blank"
                     >
-                      채용 공고 보러가기
-                      <ExternalLink size={15} />
+                      <div className="text-sm font-black text-[var(--blue-score)]">
+                        STEP {item.step}
+                        <div className="mt-1 text-xs text-[var(--caption)]">{item.level}</div>
+                      </div>
+                      <div>
+                        <p className="font-black">{item.education_name}</p>
+                        <p className="mt-2 text-sm leading-6 text-[var(--muted-foreground)]">
+                          {item.reason}
+                        </p>
+                      </div>
                     </a>
-                  ) : null}
+                  ))}
                 </div>
-                <FitGauge score={company.fit_score} />
-              </div>
+                <div className="mt-5 flex flex-wrap items-center gap-2">
+                  <Award size={18} className="text-[var(--warning)]" />
+                  {result.recommended_certs.map((cert) => (
+                    <span className="np-pill px-3 py-1" key={cert}>
+                      {cert}
+                    </span>
+                  ))}
+                </div>
+              </ReportSection>
+
+              {result.glossary_matches?.length ? (
+                <>
+                  <Divider />
+                  <ReportSection icon={BookOpen} title="방산 용어 풀이">
+                    <div className="grid gap-3 md:grid-cols-2">
+                      {result.glossary_matches.map((item) => (
+                        <details className="group rounded-[12px] bg-[#F8FAFB] p-4" key={item.term}>
+                          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 font-black">
+                            <span>{item.term}</span>
+                            <ChevronDown
+                              className="text-[var(--caption)] transition-transform group-open:rotate-180"
+                              size={17}
+                            />
+                          </summary>
+                          <p className="mt-3 text-sm leading-6 text-[var(--muted-foreground)]">
+                            {item.description}
+                          </p>
+                        </details>
+                      ))}
+                    </div>
+                  </ReportSection>
+                </>
+              ) : null}
+
+              <Divider />
+
+              <ReportSection icon={Database} title="데이터 근거">
+                <DataCoverage result={result} />
+              </ReportSection>
             </article>
-          ))}
+
+            {result.career_centers?.length ? (
+              <section className="np-card mt-5 p-6">
+                <div className="flex items-center gap-2">
+                  <MapPin className="text-[var(--primary)]" size={22} />
+                  <h2 className="text-lg font-black">병역진로설계지원센터</h2>
+                </div>
+                <div className="mt-5 grid gap-3 md:grid-cols-3">
+                  {result.career_centers.map((center) => (
+                    <article
+                      className="rounded-[12px] border border-[var(--border)] bg-[#F8FAFB] p-4"
+                      key={center.id}
+                    >
+                      <p className="font-black">{center.name}</p>
+                      <p className="mt-2 text-sm leading-6 text-[var(--caption)]">
+                        {center.address}
+                      </p>
+                      <p className="mt-3 font-black text-[var(--primary)]">{center.phone}</p>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            ) : null}
+          </div>
+
+          <aside className="no-print min-h-0 xl:sticky xl:top-[92px]">
+            <DataChat analysisResult={result} className="xl:h-[calc(100dvh-188px)]" />
+          </aside>
         </div>
-      </section>
-
-      <section className="mt-6 grid gap-4 lg:grid-cols-2">
-        <article className="rounded-lg border border-[var(--border)] bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-2">
-            <Target className="text-[var(--primary)]" size={22} />
-            <h2 className="text-xl font-semibold">Skill Gap</h2>
-          </div>
-          <p className="mt-4 leading-7 text-[var(--muted-foreground)]">
-            {result.skill_gap.analysis}
-          </p>
-          <h3 className="mt-5 text-sm font-semibold">보유 역량</h3>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {result.skill_gap.possessed.map((item) => (
-              <span className="rounded-full bg-[#e7f4ec] px-3 py-1 text-sm text-[#1f6c3d]" key={item}>
-                {item}
-              </span>
-            ))}
-          </div>
-          <h3 className="mt-5 text-sm font-semibold">보완 필요</h3>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {result.skill_gap.missing.map((item) => (
-              <span className="rounded-full bg-[#fff0ec] px-3 py-1 text-sm text-[#88311f]" key={item}>
-                {item}
-              </span>
-            ))}
-          </div>
-        </article>
-
-        <article className="rounded-lg border border-[var(--border)] bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-2">
-            <RotateCcw className="text-[var(--primary)]" size={22} />
-            <h2 className="text-xl font-semibold">전역 타이밍</h2>
-          </div>
-          <div className="mt-5 grid gap-3 md:grid-cols-2">
-            <div className="rounded-md bg-[#f4f6f1] p-4">
-              <p className="font-semibold">지금 전역하면</p>
-              <p className="mt-2 text-sm leading-6 text-[var(--muted-foreground)]">
-                {result.discharge_timing.now}
-              </p>
-            </div>
-            <div className="rounded-md bg-[#f4f6f1] p-4">
-              <p className="font-semibold">더 복무하면</p>
-              <p className="mt-2 text-sm leading-6 text-[var(--muted-foreground)]">
-                {result.discharge_timing.later}
-              </p>
-            </div>
-          </div>
-          <p className="mt-4 rounded-md bg-[#eef5f2] p-4 leading-7 text-[#214844]">
-            {result.discharge_timing.recommendation}
-          </p>
-        </article>
-      </section>
-
-      <section className="mt-6 rounded-lg border border-[var(--border)] bg-white p-6 shadow-sm">
-        <div className="flex items-center gap-2">
-          <GraduationCap className="text-[var(--primary)]" size={22} />
-          <h2 className="text-xl font-semibold">교육·자격증 로드맵</h2>
-        </div>
-        <div className="mt-5 grid gap-3">
-          {result.education_roadmap.map((item) => (
-            <div
-              className="grid gap-3 rounded-md border border-[var(--border)] p-4 md:grid-cols-[84px_1fr]"
-              key={`${item.step}-${item.education_name}`}
-            >
-              <div className="text-sm font-semibold text-[var(--accent)]">
-                STEP {item.step}
-                <div className="mt-1 text-xs text-[var(--muted-foreground)]">{item.level}</div>
-              </div>
-              <div>
-                <a
-                  className="font-semibold text-[var(--primary)] underline-offset-4 hover:underline"
-                  href={item.education_link}
-                  rel="noreferrer"
-                  target="_blank"
-                >
-                  {item.education_name}
-                </a>
-                <p className="mt-2 text-sm leading-6 text-[var(--muted-foreground)]">
-                  {item.reason}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="mt-5 flex flex-wrap items-center gap-2">
-          <Award size={18} className="text-[var(--accent)]" />
-          {result.recommended_certs.map((cert) => (
-            <span className="rounded-full bg-[#eef1ea] px-3 py-1 text-sm" key={cert}>
-              {cert}
-            </span>
-          ))}
-        </div>
-      </section>
-
-      {result.career_centers?.length ? (
-        <section className="mt-6 rounded-lg border border-[var(--border)] bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-2">
-            <MapPin className="text-[var(--primary)]" size={22} />
-            <h2 className="text-xl font-semibold">병역진로설계지원센터</h2>
-          </div>
-          <div className="mt-5 grid gap-3 md:grid-cols-3">
-            {result.career_centers.map((center) => (
-              <div className="rounded-md bg-[#f4f6f1] p-4" key={center.id}>
-                <p className="font-semibold">{center.name}</p>
-                <p className="mt-2 text-sm leading-6 text-[var(--muted-foreground)]">
-                  {center.address}
-                </p>
-                <p className="mt-2 text-sm font-semibold">{center.phone}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-      ) : null}
-
-      <DataChat analysisResult={result} />
+      </div>
     </main>
   );
 }
 
-function FitGauge({ score }: { score: number }) {
+function ReportSummary({ result }: { result: AnalysisResult }) {
+  const coverage = result.data_coverage_summary;
+  const market = result.field_market_summary;
+  const growth = result.industry_growth;
+
   return (
-    <div className="rounded-lg bg-[#eef5f2] p-4 text-center">
-      <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full border-[10px] border-[#155e63] bg-white">
-        <span className="text-2xl font-semibold text-[var(--primary)]">{score}%</span>
-      </div>
-      <p className="mt-3 text-sm font-semibold">적합도</p>
+    <div className="mt-6 grid gap-3 md:grid-cols-4">
+      <MetricTile label="추천 기업" value={`${result.recommended_companies.length}개`} />
+      <MetricTile label="분야 기업" value={market ? `${market.company_count}개` : "정보 없음"} />
+      <MetricTile label="분야 계약" value={market ? formatWon(market.total_contract_amount) : "정보 없음"} />
+      <MetricTile
+        label="근거 확보"
+        value={coverage ? `${coverage.with_sources}/${coverage.recommended_company_count}` : "정보 없음"}
+      />
+      {growth ? (
+        <MetricTile
+          label={`${growth.latest_year} 산업 매출`}
+          value={formatWon(growth.latest_sales ? growth.latest_sales * 100_000_000 : null)}
+        />
+      ) : null}
+      {growth?.sales_growth_rate !== null && growth?.sales_growth_rate !== undefined ? (
+        <MetricTile label="전년 대비" value={`${growth.sales_growth_rate}%`} />
+      ) : null}
     </div>
   );
+}
+
+function CompanyCard({
+  company,
+  detail,
+  evidence,
+  reliability,
+}: {
+  company: RecommendedCompany;
+  detail?: CompanyDetail;
+  evidence: string[];
+  reliability?: NonNullable<AnalysisResult["data_reliability"]>[number];
+}) {
+  const sourceCounts = countSourceGrades(detail);
+  const financial = detail?.financials?.[0];
+  const topContract = detail?.contracts?.[0];
+  const topJob = detail?.job_postings?.[0];
+  const homepageUrl = detail?.homepage_url;
+  const careerUrl = detail?.careers_page_url ?? company.careers_page_url;
+
+  return (
+    <article className="rounded-[16px] border border-[var(--border)] bg-white p-5 md:p-6">
+      <div className="grid gap-5 lg:grid-cols-[1fr_104px]">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="text-xl font-black">{company.company_name}</h3>
+            {company.defense_field ? <span className="np-pill px-2.5 py-1">{company.defense_field}</span> : null}
+            {company.is_cost_certified ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-[#E9F6EF] px-2.5 py-1 text-xs font-black text-[var(--success)]">
+                <CheckCircle2 size={13} />
+                원가관리 인증
+              </span>
+            ) : null}
+            {detail?.data_quality_score ? (
+              <span className="rounded-full bg-[#EEF4FA] px-2.5 py-1 text-xs font-black text-[#506580]">
+                데이터 {detail.data_quality_score}점
+              </span>
+            ) : null}
+          </div>
+
+          <p className="mt-3 text-sm font-medium leading-7 text-[var(--muted-foreground)]">
+            {company.reason}
+          </p>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            {company.recommended_positions.map((position) => (
+              <span
+                className="rounded-full bg-[#F4F6F8] px-3 py-1 text-xs font-extrabold text-[#5b6b82]"
+                key={position}
+              >
+                {position}
+              </span>
+            ))}
+          </div>
+
+          <div className="mt-4 grid gap-2 text-xs font-bold text-[var(--caption)] md:grid-cols-4">
+            <span>누적 계약 {formatWon(company.total_contract_amount)}</span>
+            <span>최근 계약 {company.recent_contract_year ?? "정보 없음"}</span>
+            <span>
+              평균연봉{" "}
+              {company.avg_salary ? `${company.avg_salary.toLocaleString("ko-KR")}만원` : "공시 없음"}
+            </span>
+            <span>출처 {detail?.sources.length ?? 0}건</span>
+          </div>
+
+          <div className="mt-4 grid gap-3 lg:grid-cols-3">
+            <SignalBox
+              icon={FileText}
+              label="대표 계약"
+              value={topContract?.contract_name ?? "개별 계약명 없음"}
+              meta={[
+                topContract?.contract_year ? `${topContract.contract_year}년` : null,
+                formatWon(topContract?.contract_amount),
+                topContract?.buyer,
+              ]}
+            />
+            <SignalBox
+              icon={BriefcaseBusiness}
+              label="채용 신호"
+              value={topJob?.title ?? "채용 링크 확인"}
+              meta={[
+                topJob?.job_function,
+                topJob?.experience_level,
+                topJob?.is_active === false ? "과거/참고 공고" : null,
+              ]}
+            />
+            <SignalBox
+              icon={LineChart}
+              label="재무 신호"
+              value={financial ? `${financial.fiscal_year} 매출 ${formatWon(financial.revenue)}` : "OpenDART 공시 없음"}
+              meta={[
+                financial?.operating_profit ? `영업이익 ${formatWon(financial.operating_profit)}` : null,
+                financial?.employee_count ? `직원 ${financial.employee_count.toLocaleString("ko-KR")}명` : null,
+              ]}
+            />
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            <SourceBadge label="정부" value={sourceCounts.A_GOV_OFFICIAL} />
+            <SourceBadge label="기업공식" value={sourceCounts.B_COMPANY_OFFICIAL} />
+            <SourceBadge label="공공/파트너" value={sourceCounts.C_PUBLIC_OR_PARTNER} />
+            <SourceBadge label="외부" value={sourceCounts.D_SECONDARY_OR_COMMERCIAL} />
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            {homepageUrl ? (
+              <ExternalButton href={homepageUrl} label="공식 홈페이지" />
+            ) : null}
+            {careerUrl ? <ExternalButton href={careerUrl} label="채용 페이지" /> : null}
+            {detail?.stock_code ? (
+              <span className="rounded-full border border-[var(--border)] px-3 py-2 text-xs font-black text-[var(--caption)]">
+                종목코드 {detail.stock_code}
+              </span>
+            ) : null}
+            {detail?.dart_corp_code ? (
+              <span className="rounded-full border border-[var(--border)] px-3 py-2 text-xs font-black text-[var(--caption)]">
+                DART {detail.dart_corp_code}
+              </span>
+            ) : null}
+          </div>
+
+          <details className="group mt-5 rounded-[14px] border border-[var(--border)] bg-[#FAFBFC]">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 font-black">
+              <span>기업 상세 데이터 보기</span>
+              <ChevronDown
+                className="text-[var(--caption)] transition-transform group-open:rotate-180"
+                size={18}
+              />
+            </summary>
+            <div className="grid gap-5 border-t border-[var(--border)] p-4">
+              <CompanyMeta detail={detail} company={company} reliability={reliability} />
+              {evidence.length ? <EvidenceList evidence={evidence} /> : null}
+              <div className="grid gap-5 xl:grid-cols-2">
+                <ContractList contracts={detail?.contracts ?? []} />
+                <JobSignalList postings={detail?.job_postings ?? []} />
+              </div>
+              <FinancialTrend financials={detail?.financials ?? []} />
+              <SourceList sources={detail?.sources ?? []} />
+            </div>
+          </details>
+        </div>
+
+        <FitGauge score={company.fit_score} />
+      </div>
+    </article>
+  );
+}
+
+function CompanyMeta({
+  company,
+  detail,
+  reliability,
+}: {
+  company: RecommendedCompany;
+  detail?: CompanyDetail;
+  reliability?: NonNullable<AnalysisResult["data_reliability"]>[number];
+}) {
+  return (
+    <div className="grid gap-3 md:grid-cols-4">
+      <MetricTile label="신뢰도" value={reliability ? `${reliability.score}점` : "정보 없음"} />
+      <MetricTile label="방산 지정일" value={formatDate(detail?.designation_date)} />
+      <MetricTile label="프로필 주소" value={detail?.address ?? "정보 없음"} />
+      <MetricTile
+        label="연봉 출처"
+        value={company.salary_source ?? (company.avg_salary ? "OpenDART/프로필" : "공시 없음")}
+      />
+    </div>
+  );
+}
+
+function EvidenceList({ evidence }: { evidence: string[] }) {
+  return (
+    <div className="rounded-[12px] bg-white p-4">
+      <p className="text-sm font-black text-[var(--primary)]">왜 이 기업인가</p>
+      <ul className="mt-3 grid gap-2 text-sm leading-6 text-[var(--muted-foreground)]">
+        {evidence.map((item) => (
+          <li className="flex gap-2" key={item}>
+            <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--primary)]" />
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function ContractList({ contracts }: { contracts: CompanyDetail["contracts"] }) {
+  return (
+    <section>
+      <h4 className="mb-3 flex items-center gap-2 text-sm font-black">
+        <FileText size={16} className="text-[var(--primary)]" />
+        계약 근거
+      </h4>
+      <div className="grid gap-2">
+        {contracts.length ? (
+          contracts.map((contract, index) => (
+            <article className="rounded-[12px] bg-white p-3" key={`${contract.contract_name}-${index}`}>
+              <p className="font-black leading-6">{contract.contract_name ?? "계약명 미확보"}</p>
+              <p className="mt-1 text-xs font-bold text-[var(--caption)]">
+                {[formatDate(contract.contract_date), contract.buyer, contract.product_category]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+              <p className="mt-2 text-sm font-black text-[var(--primary)]">
+                {formatWon(contract.contract_amount)}
+              </p>
+            </article>
+          ))
+        ) : (
+          <EmptyText text="개별 계약 원천이 없습니다." />
+        )}
+      </div>
+    </section>
+  );
+}
+
+function JobSignalList({ postings }: { postings: CompanyDetail["job_postings"] }) {
+  return (
+    <section>
+      <h4 className="mb-3 flex items-center gap-2 text-sm font-black">
+        <BriefcaseBusiness size={16} className="text-[var(--primary)]" />
+        채용 신호
+      </h4>
+      <div className="grid gap-2">
+        {postings.length ? (
+          postings.map((posting, index) => (
+            <article className="rounded-[12px] bg-white p-3" key={`${posting.title}-${index}`}>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="font-black leading-6">{posting.title}</p>
+                {posting.posting_url ? <ExternalButton href={posting.posting_url} label="공고" compact /> : null}
+              </div>
+              <p className="mt-1 text-sm leading-6 text-[var(--muted-foreground)]">
+                {posting.job_function ?? "직무 상세 미확보"}
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {[
+                  posting.employment_type,
+                  posting.experience_level,
+                  posting.location,
+                  posting.deadline_at ? `마감 ${formatDate(posting.deadline_at)}` : null,
+                  posting.is_active === false ? "과거/참고" : null,
+                ]
+                  .filter(Boolean)
+                  .map((item) => (
+                    <span className="rounded-full bg-[#F4F6F8] px-2.5 py-1 text-xs font-bold text-[var(--caption)]" key={item}>
+                      {item}
+                    </span>
+                  ))}
+              </div>
+              {posting.required_skills?.length || posting.preferred_skills?.length ? (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {[...(posting.required_skills ?? []), ...(posting.preferred_skills ?? [])].slice(0, 8).map((skill) => (
+                    <span className="rounded-full bg-[#EEF4FA] px-2.5 py-1 text-xs font-bold text-[#506580]" key={skill}>
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+            </article>
+          ))
+        ) : (
+          <EmptyText text="기업별 채용 신호가 없습니다." />
+        )}
+      </div>
+    </section>
+  );
+}
+
+function FinancialTrend({ financials }: { financials: NonNullable<CompanyDetail["financials"]> }) {
+  const sorted = [...financials].sort((a, b) => a.fiscal_year - b.fiscal_year);
+  const maxRevenue = Math.max(...sorted.map((item) => item.revenue ?? 0), 0);
+
+  return (
+    <section>
+      <h4 className="mb-3 flex items-center gap-2 text-sm font-black">
+        <BarChart3 size={16} className="text-[var(--primary)]" />
+        재무/임직원 추이
+      </h4>
+      {sorted.length ? (
+        <div className="rounded-[12px] bg-white p-4">
+          <div className="grid gap-3">
+            {sorted.map((item) => {
+              const width = maxRevenue ? Math.max(8, ((item.revenue ?? 0) / maxRevenue) * 100) : 0;
+              return (
+                <div className="grid gap-2 md:grid-cols-[64px_1fr_180px]" key={item.fiscal_year}>
+                  <p className="text-sm font-black">{item.fiscal_year}</p>
+                  <div className="h-7 overflow-hidden rounded-full bg-[#EEF1F3]">
+                    <div
+                      className="h-full rounded-full bg-[var(--primary)]"
+                      style={{ width: `${width}%` }}
+                    />
+                  </div>
+                  <p className="text-sm font-bold text-[var(--caption)]">
+                    매출 {formatWon(item.revenue)} · 직원{" "}
+                    {item.employee_count?.toLocaleString("ko-KR") ?? "정보 없음"}명
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+          <div className="mt-4 grid gap-2 text-xs font-bold text-[var(--caption)] md:grid-cols-3">
+            {sorted.slice(-1).map((latest) => (
+              <span key={latest.fiscal_year}>
+                최근 영업이익 {formatWon(latest.operating_profit)} / 순이익 {formatWon(latest.net_income)}
+              </span>
+            ))}
+            {sorted.slice(-1).map((latest) => (
+              <span key={`${latest.fiscal_year}-salary`}>
+                평균급여 {latest.avg_salary ? `${latest.avg_salary.toLocaleString("ko-KR")}만원` : "정보 없음"}
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <EmptyText text="OpenDART 재무 공시가 없습니다." />
+      )}
+    </section>
+  );
+}
+
+function SourceList({ sources }: { sources: CompanyDetail["sources"] }) {
+  return (
+    <section>
+      <h4 className="mb-3 flex items-center gap-2 text-sm font-black">
+        <ShieldCheck size={16} className="text-[var(--primary)]" />
+        출처 링크
+      </h4>
+      <div className="grid gap-2 md:grid-cols-2">
+        {sources.length ? (
+          sources.map((source) => (
+            <a
+              className="rounded-[12px] border border-[var(--border)] bg-white p-3 transition hover:border-[var(--primary)]"
+              href={source.source_url}
+              key={`${source.source_type}-${source.source_url}`}
+              rel="noreferrer"
+              target="_blank"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <p className="min-w-0 truncate font-black">{source.title ?? source.publisher ?? source.source_type}</p>
+                <ExternalLink className="shrink-0 text-[var(--primary)]" size={14} />
+              </div>
+              <p className="mt-1 text-xs font-bold text-[var(--caption)]">
+                {sourceGradeLabel(source.source_grade)} · {source.publisher ?? source.source_type}
+              </p>
+            </a>
+          ))
+        ) : (
+          <EmptyText text="출처 링크가 없습니다." />
+        )}
+      </div>
+    </section>
+  );
+}
+
+function DataCoverage({ result }: { result: AnalysisResult }) {
+  const coverage = result.data_coverage_summary;
+  const details = result.company_details ?? [];
+  const allSources = details.flatMap((detail) => detail.sources);
+  const sourceCounts = allSources.reduce<Record<string, number>>((acc, source) => {
+    acc[source.source_grade] = (acc[source.source_grade] ?? 0) + 1;
+    return acc;
+  }, {});
+
+  return (
+    <div className="grid gap-5">
+      <div className="grid gap-3 md:grid-cols-4">
+        <MetricTile
+          label="추천 기업"
+          value={coverage ? `${coverage.recommended_company_count}개` : `${result.recommended_companies.length}개`}
+        />
+        <MetricTile label="채용 URL" value={coverage ? `${coverage.with_careers_url}개` : "정보 없음"} />
+        <MetricTile label="계약 원천" value={coverage ? `${coverage.with_contract_records}개` : "정보 없음"} />
+        <MetricTile label="출처 링크" value={`${allSources.length}건`} />
+      </div>
+      <div className="grid gap-3 md:grid-cols-4">
+        <SourceBadge label="정부 공식" value={sourceCounts.A_GOV_OFFICIAL ?? 0} large />
+        <SourceBadge label="기업 공식" value={sourceCounts.B_COMPANY_OFFICIAL ?? 0} large />
+        <SourceBadge label="공공/파트너" value={sourceCounts.C_PUBLIC_OR_PARTNER ?? 0} large />
+        <SourceBadge label="외부/상업" value={sourceCounts.D_SECONDARY_OR_COMMERCIAL ?? 0} large />
+      </div>
+      {coverage?.known_gaps?.length ? (
+        <div className="rounded-[12px] bg-[#FFF7E8] p-4 text-sm font-bold leading-7 text-[#7A4A00]">
+          {coverage.known_gaps.join(" · ")}
+        </div>
+      ) : (
+        <div className="rounded-[12px] bg-[#E9F6EF] p-4 text-sm font-bold leading-7 text-[var(--success)]">
+          추천 기업 기준 주요 채용 URL, 계약 근거, 출처 링크가 확보되어 있습니다.
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Divider() {
+  return <div className="mx-6 h-px bg-[#EEF1F3] md:mx-8" />;
+}
+
+function ReportSection({
+  children,
+  icon: Icon,
+  title,
+}: {
+  children: React.ReactNode;
+  icon: LucideIcon;
+  title: string;
+}) {
+  return (
+    <section className="p-6 md:p-8">
+      <div className="mb-5 flex items-center gap-3">
+        <Icon className="text-[var(--primary)]" size={24} />
+        <h2 className="text-2xl font-black tracking-[-0.4px]">{title}</h2>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function ActionButton({
+  icon: Icon,
+  label,
+  onClick,
+  primary,
+}: {
+  icon: LucideIcon;
+  label: string;
+  onClick: () => void;
+  primary?: boolean;
+}) {
+  return (
+    <button
+      className={cn(
+        "focus-ring inline-flex h-10 items-center gap-2 rounded-[9px] px-3 text-sm font-extrabold",
+        primary
+          ? "bg-[var(--accent)] text-white"
+          : "border border-[var(--border)] bg-white text-[var(--caption)]",
+      )}
+      type="button"
+      onClick={onClick}
+    >
+      <Icon size={16} />
+      {label}
+    </button>
+  );
+}
+
+function FitGauge({ score }: { score: number }) {
+  const color =
+    score >= 85
+      ? "var(--success)"
+      : score >= 78
+        ? "var(--blue-score)"
+        : score >= 70
+          ? "var(--warning)"
+          : "var(--danger)";
+  const tier = score >= 85 ? "매우 높음" : score >= 78 ? "높음" : score >= 70 ? "보통" : "검토";
+
+  return (
+    <div className="flex flex-col items-center border-t border-[#F0F2F4] pt-4 lg:border-l lg:border-t-0 lg:pl-4 lg:pt-0">
+      <div
+        className="grid h-[78px] w-[78px] place-items-center rounded-full"
+        style={{
+          background: `conic-gradient(${color} ${score * 3.6}deg, #EDEFF2 0)`,
+        }}
+      >
+        <div className="grid h-[58px] w-[58px] place-items-center rounded-full bg-white text-base font-black">
+          {score}
+        </div>
+      </div>
+      <p className="mt-2 text-xs font-black" style={{ color }}>
+        {tier}
+      </p>
+    </div>
+  );
+}
+
+function SkillPills({
+  items,
+  title,
+  tone,
+}: {
+  items: string[];
+  title: string;
+  tone: "green" | "gold";
+}) {
+  const color = tone === "green" ? "var(--success)" : "var(--warning)";
+  return (
+    <div className="rounded-[12px] bg-[#F8FAFB] p-4">
+      <h3 className="font-black" style={{ color }}>
+        {title}
+      </h3>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {items.map((item) => (
+          <span className="rounded-full bg-white px-3 py-1 text-xs font-extrabold" key={item}>
+            {item}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TimingCard({ body, title }: { body: string; title: string }) {
+  return (
+    <article className="rounded-[12px] border border-[var(--border)] bg-[#F8FAFB] p-4">
+      <h3 className="font-black">{title}</h3>
+      <p className="mt-2 text-sm font-medium leading-7 text-[var(--muted-foreground)]">{body}</p>
+    </article>
+  );
+}
+
+function MetricTile({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-[12px] border border-[var(--border)] bg-white p-4">
+      <p className="text-xs font-black text-[var(--caption)]">{label}</p>
+      <p className="mt-2 break-words text-lg font-black text-[var(--foreground)]">{value}</p>
+    </div>
+  );
+}
+
+function SignalBox({
+  icon: Icon,
+  label,
+  meta,
+  value,
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: string;
+  meta: Array<string | null | undefined>;
+}) {
+  return (
+    <div className="rounded-[12px] bg-[#F8FAFB] p-3">
+      <p className="flex items-center gap-2 text-xs font-black text-[var(--primary)]">
+        <Icon size={15} />
+        {label}
+      </p>
+      <p className="mt-2 line-clamp-2 text-sm font-black leading-6">{value}</p>
+      <p className="mt-2 text-xs font-bold leading-5 text-[var(--caption)]">
+        {meta.filter(Boolean).join(" · ") || "세부 정보 없음"}
+      </p>
+    </div>
+  );
+}
+
+function SourceBadge({ label, large, value }: { label: string; value: number; large?: boolean }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center justify-between gap-2 rounded-full bg-[#EBEFF5] font-black text-[#5b6b82]",
+        large ? "px-4 py-3 text-sm" : "px-3 py-1 text-xs",
+      )}
+    >
+      {label}
+      <b>{value}</b>
+    </span>
+  );
+}
+
+function ExternalButton({ compact, href, label }: { compact?: boolean; href: string; label: string }) {
+  return (
+    <a
+      className={cn(
+        "focus-ring inline-flex items-center gap-2 rounded-[9px] border border-[var(--border)] bg-white font-extrabold",
+        compact ? "px-2.5 py-1 text-xs" : "px-4 py-2 text-sm",
+      )}
+      href={href}
+      rel="noreferrer"
+      target="_blank"
+    >
+      {label}
+      <ExternalLink size={compact ? 12 : 15} />
+    </a>
+  );
+}
+
+function EmptyText({ text }: { text: string }) {
+  return (
+    <div className="rounded-[12px] border border-dashed border-[var(--border)] bg-white p-4 text-sm font-bold text-[var(--caption)]">
+      {text}
+    </div>
+  );
+}
+
+function countSourceGrades(detail?: CompanyDetail) {
+  return (detail?.sources ?? []).reduce<Record<string, number>>(
+    (acc, source) => {
+      acc[source.source_grade] = (acc[source.source_grade] ?? 0) + 1;
+      return acc;
+    },
+    {
+      A_GOV_OFFICIAL: 0,
+      B_COMPANY_OFFICIAL: 0,
+      C_PUBLIC_OR_PARTNER: 0,
+      D_SECONDARY_OR_COMMERCIAL: 0,
+    },
+  );
+}
+
+function sourceGradeLabel(grade: string) {
+  const labels: Record<string, string> = {
+    A_GOV_OFFICIAL: "A 정부 공식",
+    B_COMPANY_OFFICIAL: "B 기업 공식",
+    C_PUBLIC_OR_PARTNER: "C 공공/파트너",
+    D_SECONDARY_OR_COMMERCIAL: "D 외부/상업",
+  };
+  return labels[grade] ?? grade;
+}
+
+function formatDate(value?: string | null) {
+  if (!value) return "정보 없음";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString("ko-KR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
 }

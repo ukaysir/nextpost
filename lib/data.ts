@@ -3,11 +3,20 @@ import path from "path";
 import iconv from "iconv-lite";
 import Papa from "papaparse";
 import {
+  localCompanyProfileEnrichment,
+  localJobPostingEnrichment,
+} from "@/lib/company-enrichment";
+import {
   CareerCenter,
   CareerMapping,
   Company,
+  CompanyFinancial,
+  CompanyProfile,
+  CompanySource,
+  ContractRecord,
   EducationCert,
   IndustryStat,
+  JobPosting,
   JobRequirement,
 } from "@/lib/types";
 import { normalizeCompanyName } from "@/lib/utils";
@@ -37,6 +46,11 @@ export type AppData = {
   educationCerts: EducationCert[];
   careerCenters: CareerCenter[];
   industryStats: IndustryStat[];
+  companyProfiles: CompanyProfile[];
+  companyFinancials: CompanyFinancial[];
+  companySources: CompanySource[];
+  contractRecords: ContractRecord[];
+  jobPostings: JobPosting[];
   glossaryTerms: string;
 };
 
@@ -165,6 +179,9 @@ function loadCompanies(): Company[] {
     const companyName = (row["업체명"] ?? "").trim();
     const contract = findContractForCompany(companyName, contractIndex);
     const enrichment = manualEnrichment[companyName] ?? {};
+    const localProfile = localCompanyProfileEnrichment.find(
+      (profile) => profile.company_id === index + 1,
+    );
 
     return {
       id: index + 1,
@@ -175,6 +192,9 @@ function loadCompanies(): Company[] {
       recent_contract_year: contract.recentYear,
       is_cost_certified: costCertified.has(normalizeCompanyName(companyName)),
       ...enrichment,
+      careers_page_url: enrichment.careers_page_url ?? localProfile?.careers_page_url,
+      avg_salary: enrichment.avg_salary ?? localProfile?.avg_salary,
+      salary_source: enrichment.salary_source ?? null,
     };
   });
 }
@@ -261,6 +281,11 @@ export function getAppData(): AppData {
     educationCerts: loadEducationCerts(),
     careerCenters: loadCareerCenters(),
     industryStats: loadIndustryStats(),
+    companyProfiles: localCompanyProfileEnrichment,
+    companyFinancials: [],
+    companySources: [],
+    contractRecords: [],
+    jobPostings: localJobPostingEnrichment,
     glossaryTerms: loadGlossaryTerms(),
   };
 

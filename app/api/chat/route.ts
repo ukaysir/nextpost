@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { buildFallbackChat, runOpenAiChat } from "@/lib/chat";
+import { buildFallbackChat, runOllamaChat, runOpenAiChat } from "@/lib/chat";
 import { analysisResultSchema } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -19,21 +19,47 @@ const chatRequestSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const body = chatRequestSchema.parse(await request.json());
-    let provider: "openai" | "fallback" = "openai";
+    let provider: "ollama" | "openai" | "fallback" = process.env.OLLAMA_SERVER
+      ? "ollama"
+      : "openai";
     let answer: string;
 
     try {
-      answer = await runOpenAiChat({
-        messages: body.messages,
-        analysisResult: body.analysisResult,
-      });
+      if (process.env.OLLAMA_SERVER) {
+        answer = await runOllamaChat({
+          messages: body.messages,
+          analysisResult: body.analysisResult,
+        });
+      } else {
+        answer = await runOpenAiChat({
+          messages: body.messages,
+          analysisResult: body.analysisResult,
+        });
+      }
     } catch (error) {
-      console.error("OpenAI chat failed, using deterministic fallback:", error);
-      provider = "fallback";
-      answer = await buildFallbackChat({
-        messages: body.messages,
-        analysisResult: body.analysisResult,
-      });
+      console.error("Primary chat provider failed:", error);
+      if (process.env.OLLAMA_SERVER && process.env.OPENAI_API_KEY) {
+        try {
+          provider = "openai";
+          answer = await runOpenAiChat({
+            messages: body.messages,
+            analysisResult: body.analysisResult,
+          });
+        } catch (openAiError) {
+          console.error("OpenAI chat failed, using deterministic fallback:", openAiError);
+          provider = "fallback";
+          answer = await buildFallbackChat({
+            messages: body.messages,
+            analysisResult: body.analysisResult,
+          });
+        }
+      } else {
+        provider = "fallback";
+        answer = await buildFallbackChat({
+          messages: body.messages,
+          analysisResult: body.analysisResult,
+        });
+      }
     }
 
     return NextResponse.json({ answer, provider });

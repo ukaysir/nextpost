@@ -6,7 +6,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatWon(value?: number | null) {
-  if (!value || Number.isNaN(value)) return "계약정보 없음";
+  if (!value || Number.isNaN(value)) return "정보 없음";
   if (value >= 1_0000_0000_0000) {
     return `${(value / 1_0000_0000_0000).toFixed(1)}조원`;
   }
@@ -18,8 +18,16 @@ export function formatWon(value?: number | null) {
 
 export function normalizeCompanyName(value: string) {
   return value
+    .normalize("NFKC")
     .toLowerCase()
-    .replace(/\(주\)|주식회사|㈜|유한회사|재단법인|사단법인/g, "")
-    .replace(/[^0-9a-z가-힣]/g, "")
+    .replace(/주식회사|유한회사|합자회사|재단법인|사단법인|\(주\)|㈜/g, "")
+    .replace(/[^\p{L}\p{N}]/gu, "")
     .trim();
+}
+
+export function normalizeDefenseField(value?: string | null) {
+  const field = String(value ?? "").trim();
+  if (!field) return "기타";
+  if (field === "항공") return "항공유도";
+  return field;
 }
