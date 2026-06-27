@@ -19,9 +19,11 @@ const chatRequestSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const body = chatRequestSchema.parse(await request.json());
-    let provider: "ollama" | "openai" | "fallback" = process.env.OLLAMA_SERVER
+    let provider: "ollama" | "openai" | "swish" | "fallback" = process.env.OLLAMA_SERVER
       ? "ollama"
-      : "openai";
+      : process.env.OPENAI_BASE_URL?.includes("swishai")
+        ? "swish"
+        : "openai";
     let answer: string;
 
     try {
@@ -40,7 +42,7 @@ export async function POST(request: NextRequest) {
       console.error("Primary chat provider failed:", error);
       if (process.env.OLLAMA_SERVER && process.env.OPENAI_API_KEY) {
         try {
-          provider = "openai";
+          provider = process.env.OPENAI_BASE_URL?.includes("swishai") ? "swish" : "openai";
           answer = await runOpenAiChat({
             messages: body.messages,
             analysisResult: body.analysisResult,

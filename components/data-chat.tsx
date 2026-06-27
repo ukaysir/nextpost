@@ -35,6 +35,12 @@ type PuterMessage = {
   content: string;
 };
 
+type ServerChatResponse = {
+  answer?: string;
+  provider?: "ollama" | "openai" | "swish" | "fallback";
+  message?: string;
+};
+
 const suggestions = [
   "추천 기업 중 어디부터 준비하면 좋을까?",
   "추천 근거를 계약, 채용, 재무 데이터 기준으로 비교해줘.",
@@ -58,7 +64,7 @@ export function DataChat({
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [provider, setProvider] = useState<"puter" | null>(null);
+  const [provider, setProvider] = useState<"swish" | "openai" | "ollama" | "puter" | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -81,30 +87,27 @@ export function DataChat({
     setIsLoading(true);
 
     try {
-      const puter = await waitForPuter();
-      const modelMessages: PuterMessage[] = [
-        { role: "system", content: systemPrompt },
-        ...nextMessages.slice(-8).map((message) => ({
-          role: message.role,
-          content: message.content,
-        })),
-      ];
-
-      const reply = await puter.ai!.chat(modelMessages, { model: "gpt-5-nano" });
-      const answer = extractPuterText(reply);
-      setProvider("puter");
-      setMessages((current) => [...current, { role: "assistant", content: answer }]);
+      const serverReply = await askServerChat(nextMessages, analysisResult);
+      if (serverReply.provider === "fallback") {
+        throw new Error("Primary API returned fallback response.");
+      }
+      setProvider(serverReply.provider ?? "swish");
+      setMessages((current) => [...current, { role: "assistant", content: serverReply.answer }]);
     } catch (error) {
-      setMessages((current) => [
-        ...current,
-        {
-          role: "assistant",
-          content:
-            error instanceof Error
-              ? error.message
-              : "Puter AI 응답을 받지 못했습니다. 잠시 뒤 다시 시도해주세요.",
-        },
-      ]);
+      try {
+        const answer = await askPuterChat(nextMessages, systemPrompt);
+        setProvider("puter");
+        setMessages((current) => [...current, { role: "assistant", content: answer }]);
+      } catch (puterError) {
+        console.error("Both Swish API and Puter fallback failed:", error, puterError);
+        setMessages((current) => [
+          ...current,
+          {
+            role: "assistant",
+            content: "AI 응답을 받지 못했습니다. 잠시 뒤 다시 시도해주세요.",
+          },
+        ]);
+      }
     } finally {
       setIsLoading(false);
       inputRef.current?.focus();
@@ -131,7 +134,7 @@ export function DataChat({
           </div>
           {provider ? (
             <span className="shrink-0 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-bold text-white/80">
-              Puter.js
+              {providerLabel(provider)}
             </span>
           ) : null}
         </div>
@@ -274,6 +277,45 @@ function buildSystemPrompt(result: AnalysisResult) {
     "## 현재 커리어 리포트",
     JSON.stringify(compactReport),
   ].join("\n");
+}
+
+async function askServerChat(messages: ChatMessage[], analysisResult: AnalysisResult): Promise<{
+  answer: string;
+  provider?: "ollama" | "openai" | "swish" | "fallback";
+}> {
+  const response = await fetch("/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ messages, analysisResult }),
+  });
+  const payload = (await response.json()) as ServerChatResponse;
+  if (!response.ok) throw new Error(payload.message || "Swish API 응답을 받지 못했습니다.");
+  if (!payload.answer) throw new Error("Swish API 응답 본문이 비어 있습니다.");
+  return { answer: payload.answer, provider: payload.provider };
+}
+
+async function askPuterChat(messages: ChatMessage[], systemPrompt: string) {
+  const puter = await waitForPuter();
+  const modelMessages: PuterMessage[] = [
+    { role: "system", content: systemPrompt },
+    ...messages.slice(-8).map((message) => ({
+      role: message.role,
+      content: message.content,
+    })),
+  ];
+
+  const reply = await puter.ai!.chat(modelMessages, { model: "gpt-5-nano" });
+  return extractPuterText(reply);
+}
+
+function providerLabel(provider: "swish" | "openai" | "ollama" | "puter") {
+  const labels: Record<typeof provider, string> = {
+    swish: "Swish AI",
+    openai: "OpenAI",
+    ollama: "Ollama",
+    puter: "Puter.js",
+  };
+  return labels[provider] ?? provider;
 }
 
 async function waitForPuter() {
