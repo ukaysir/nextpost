@@ -3,7 +3,7 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, Chrome, LockKeyhole, ShieldCheck, UserRound } from "lucide-react";
+import { ArrowLeft, ArrowRight, LockKeyhole, ShieldCheck, UserRound } from "lucide-react";
 import { signInWithGoogle } from "@/lib/auth-client";
 import { isTestCredential, signInTestUser } from "@/lib/test-auth";
 
@@ -87,14 +87,24 @@ export default function LoginPage() {
             </div>
 
             <button
-              className="focus-ring mt-6 inline-flex h-[52px] w-full items-center justify-center gap-3 rounded-[10px] bg-[var(--accent)] px-5 text-[15px] font-black text-white disabled:cursor-wait disabled:opacity-70 sm:h-[56px] sm:text-base"
+              className="focus-ring mt-6 inline-flex h-[46px] w-full items-center justify-center gap-3 rounded-full border border-[#8B95A1] bg-white px-5 text-[15px] font-black text-[var(--foreground)] shadow-[0_1px_0_rgba(15,23,42,.04)] transition hover:border-[var(--foreground)] hover:bg-[#F8FAFB] active:scale-[0.98] disabled:cursor-wait disabled:opacity-70 sm:h-[48px] sm:text-base"
               disabled={isGoogleLoading}
               type="button"
               onClick={startGoogleLogin}
             >
-              <Chrome size={19} />
-              {isGoogleLoading ? "Gmail 연결 중" : "Gmail로 계속하기"}
-              <ArrowRight size={18} />
+              <span
+                aria-hidden="true"
+                className="grid h-6 w-6 place-items-center rounded-full text-[21px] font-black leading-none"
+                style={{
+                  background:
+                    "conic-gradient(from -40deg, #4285F4 0 25%, #34A853 25% 48%, #FBBC05 48% 72%, #EA4335 72% 100%)",
+                  WebkitBackgroundClip: "text",
+                  color: "transparent",
+                }}
+              >
+                G
+              </span>
+              {isGoogleLoading ? "Google 연결 중" : "Google로 로그인"}
             </button>
 
             <div className="my-5 flex items-center gap-3">
