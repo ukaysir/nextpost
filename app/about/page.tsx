@@ -65,9 +65,27 @@ export default async function AboutPage() {
         </div>
       </section>
 
+      <section className="border-b border-[var(--border)] bg-[#F8FAFB]">
+        <div className="page-shell py-10 text-center md:py-16">
+          <p className="text-xs font-black tracking-[1.5px] text-[var(--primary)] md:text-sm">
+            WHY NEXTPOST
+          </p>
+          <h2 className="mx-auto mt-3 max-w-3xl text-[26px] font-black leading-tight tracking-normal md:text-4xl">
+            &quot;전역하면 무엇을 할 수 있을까?&quot;
+            <br />
+            그 막막함에서 시작했습니다
+          </h2>
+          <p className="mx-auto mt-5 max-w-3xl text-sm font-bold leading-7 text-[var(--muted-foreground)] md:mt-6 md:text-base md:leading-8">
+            군에서 쌓은 통신, 정비, 지휘통제 경험은 분명한 전문성입니다. 다만 그 경험을 사회의
+            채용 언어로 옮기기가 어렵습니다. NEXTPOST는 군 경력을 방산 직무 요건으로 번역하고,
+            공공데이터로 확인 가능한 기업과 준비 경로를 함께 제시합니다.
+          </p>
+        </div>
+      </section>
+
       <section className="page-shell py-8 md:py-16">
         <div className="mb-5 md:mb-8">
-          <p className="text-sm font-black tracking-[1px] text-[var(--primary)]">WHY NEXTPOST</p>
+          <p className="text-sm font-black tracking-[1px] text-[var(--primary)]">DATA FOUNDATION</p>
           <h2 className="mt-2 text-2xl font-black tracking-normal md:text-4xl">
             추천 근거를 공개 데이터로 남깁니다
           </h2>
