@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, ArrowLeft, BriefcaseBusiness, Database, FileWarning, Link2, Loader2 } from "lucide-react";
+import { AlertTriangle, ArrowLeft, BriefcaseBusiness, FileWarning, Link2, Loader2 } from "lucide-react";
 import { AuthMenu } from "@/components/auth-menu";
 import { getAuthHeaders } from "@/lib/auth-client";
 import type { AuditCompanyGap, DataCoverageAuditState } from "@/lib/data-audit";
@@ -118,11 +118,7 @@ export function AdminDataAudit() {
             <ArrowLeft size={15} />
             돌아가기
           </Link>
-          <p className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/15 px-3 py-1 text-xs font-black backdrop-blur md:text-sm">
-            <Database size={16} />
-            Admin Data Audit
-          </p>
-          <h1 className="mt-3 max-w-3xl text-[32px] font-black leading-tight tracking-normal md:text-6xl">
+          <h1 className="mt-6 max-w-3xl text-[32px] font-black leading-tight tracking-normal md:text-6xl">
             공개 데이터 커버리지와 보강 우선순위를 점검합니다
           </h1>
           <p className="mt-4 max-w-3xl text-sm font-bold leading-7 text-white/90 md:text-base">

@@ -230,10 +230,7 @@ export function AnalyzeForm() {
 
       <div className="mx-auto max-w-[420px] px-3 pb-12 pt-2 sm:max-w-[920px] sm:px-4 md:pb-14 md:pt-3">
         <div className="text-center text-white">
-          <p className="inline-flex rounded-full border border-white/30 bg-white/15 px-3 py-1 text-xs font-extrabold backdrop-blur md:text-sm">
-            AI 방산 커리어 분석
-          </p>
-          <h1 className="mt-4 max-w-full text-[30px] font-black leading-tight tracking-normal drop-shadow sm:text-4xl md:mt-5 md:text-5xl">
+          <h1 className="max-w-full text-[30px] font-black leading-tight tracking-normal drop-shadow sm:text-4xl md:text-5xl">
             <span className="sm:hidden">군 경력 입력</span>
             <span className="hidden sm:inline">군 경력 정보를 입력하세요</span>
           </h1>

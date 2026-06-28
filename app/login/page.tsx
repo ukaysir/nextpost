@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, LockKeyhole, ShieldCheck, UserRound } from "lucide-react";
+import { ArrowLeft, ArrowRight, LockKeyhole, UserRound } from "lucide-react";
 import { signInWithGoogle } from "@/lib/auth-client";
 import { getAuthPublicConfig } from "@/lib/supabase-browser";
 import { isTestCredential, signInTestUser } from "@/lib/test-auth";
@@ -84,11 +84,7 @@ export default function LoginPage() {
       <section className="mx-auto flex w-full max-w-[980px] items-center px-3 pb-8 pt-2 sm:min-h-[calc(100dvh-92px)] sm:px-4 sm:pb-16 sm:pt-0">
         <div className="grid w-full gap-4 sm:gap-6 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
           <div className="text-white">
-            <p className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/15 px-3 py-1 text-xs font-extrabold backdrop-blur sm:text-sm">
-              <ShieldCheck size={15} />
-              Supabase Gmail 로그인
-            </p>
-            <h1 className="mt-4 text-[32px] font-black leading-[1.16] tracking-normal drop-shadow-[0_2px_18px_rgba(0,0,0,.35)] sm:mt-5 sm:text-4xl md:text-5xl">
+            <h1 className="text-[32px] font-black leading-[1.16] tracking-normal drop-shadow-[0_2px_18px_rgba(0,0,0,.35)] sm:text-4xl md:text-5xl">
               방산 커리어 분석을
               <br />
               계속 이어갑니다

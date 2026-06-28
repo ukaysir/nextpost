@@ -44,9 +44,6 @@ export default async function AboutPage() {
               <ArrowLeft size={17} />
               랜딩으로
             </Link>
-            <span className="inline-flex h-10 items-center rounded-[10px] border border-white/30 bg-white/15 px-3 text-xs font-extrabold backdrop-blur md:h-11 md:px-4 md:text-sm">
-              About NEXTPOST
-            </span>
           </div>
           <h1 className="mt-4 max-w-4xl text-[32px] font-black leading-tight tracking-normal drop-shadow-[0_2px_18px_rgba(0,0,0,.35)] md:mt-5 md:text-6xl">
             감이 아니라,
