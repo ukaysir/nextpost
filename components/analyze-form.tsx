@@ -349,6 +349,20 @@ type AnalyzeFormState = {
 };
 
 type SectionKey = "military" | "career" | "certifications";
+type SelectOption = {
+  value: string;
+  label?: string;
+  detail?: string;
+};
+
+const yearOptions = Array.from({ length: 30 }, (_, index) => ({
+  value: String(index + 1),
+  label: `${index + 1}년`,
+}));
+
+function toOptions(values: string[]): SelectOption[] {
+  return values.map((value) => ({ value }));
+}
 
 export function AnalyzeForm() {
   const router = useRouter();
@@ -502,49 +516,33 @@ export function AnalyzeForm() {
           >
             <div className="grid gap-4 md:grid-cols-[0.85fr_0.85fr_1.25fr_0.65fr]">
               <Field label="군별" required>
-                <select
-                  className="input"
-                  value={form.military_branch}
-                  onChange={(event) => updateField("military_branch", event.target.value)}
-                >
-                  {branchOptions.map((item) => (
-                    <option key={item}>{item}</option>
-                  ))}
-                </select>
+                <OptionPicker
+                  options={toOptions(branchOptions)}
+                  selected={form.military_branch}
+                  onSelect={(value) => updateField("military_branch", value)}
+                />
               </Field>
               <Field label="계급" required>
-                <select className="input" value={form.rank} onChange={(e) => updateField("rank", e.target.value)}>
-                  {ranks.map((item) => (
-                    <option key={item}>{item}</option>
-                  ))}
-                </select>
+                <OptionPicker
+                  options={toOptions(ranks)}
+                  selected={form.rank}
+                  onSelect={(value) => updateField("rank", value)}
+                />
               </Field>
               <Field label="병과" required>
-                <input
-                  className="input"
-                  list="specialty-options"
-                  value={form.specialty}
-                  onChange={(event) => setSpecialtyValue(event.target.value)}
-                  placeholder="예: 정보, 통신, 항공정비"
+                <OptionPicker
+                  maxListHeight="max-h-[280px]"
+                  options={toOptions(specialties)}
+                  selected={form.specialty}
+                  onSelect={setSpecialtyValue}
                 />
-                <datalist id="specialty-options">
-                  {specialties.map((item) => (
-                    <option key={item} value={item} />
-                  ))}
-                </datalist>
               </Field>
               <Field label="복무연수" required>
-                <input
-                  className="input"
-                  max={30}
-                  min={1}
-                  inputMode="numeric"
-                  type="number"
-                  value={form.years_served}
-                  onChange={(event) => {
-                    const value = event.target.value;
-                    updateField("years_served", value === "" ? "" : Number(value));
-                  }}
+                <OptionPicker
+                  maxListHeight="max-h-[260px]"
+                  options={yearOptions}
+                  selected={String(form.years_served)}
+                  onSelect={(value) => updateField("years_served", Number(value))}
                 />
               </Field>
             </div>
@@ -561,59 +559,36 @@ export function AnalyzeForm() {
           >
             <div className="grid gap-4 md:grid-cols-2">
               <Field label="보직 / 주특기" required>
-                <input
-                  className="input"
-                  list="position-options"
-                  value={form.position}
-                  onChange={(event) => updateField("position", event.target.value)}
-                  placeholder="예: 신호정보(SIGINT), C4I 운용"
+                <OptionPicker
+                  maxListHeight="max-h-[320px]"
+                  options={toOptions(positionSuggestions)}
+                  selected={form.position}
+                  onSelect={(value) => updateField("position", value)}
                 />
-                <datalist id="position-options">
-                  {positionSuggestions.map((item) => (
-                    <option key={item} value={item} />
-                  ))}
-                </datalist>
               </Field>
               <Field label="전공" required>
-                <input
-                  className="input"
-                  list="major-options"
-                  value={form.major}
-                  onChange={(event) => updateField("major", event.target.value)}
-                  placeholder="예: 전자공학"
+                <OptionPicker
+                  maxListHeight="max-h-[300px]"
+                  options={toOptions(commonMajors)}
+                  selected={form.major}
+                  onSelect={(value) => updateField("major", value)}
                 />
-                <datalist id="major-options">
-                  {commonMajors.map((item) => (
-                    <option key={item} value={item} />
-                  ))}
-                </datalist>
               </Field>
               <Field label="희망 근무지역">
-                <input
-                  className="input"
-                  list="region-options"
-                  value={form.preferred_region}
-                  onChange={(event) => updateField("preferred_region", event.target.value)}
-                  placeholder="예: 대전, 경기 성남/판교, 창원"
+                <OptionPicker
+                  maxListHeight="max-h-[300px]"
+                  options={toOptions(commonRegions)}
+                  selected={form.preferred_region}
+                  onSelect={(value) => updateField("preferred_region", value)}
                 />
-                <datalist id="region-options">
-                  {commonRegions.map((item) => (
-                    <option key={item} value={item} />
-                  ))}
-                </datalist>
               </Field>
               <Field label="희망 방산분야">
-                <select
-                  className="input h-auto min-h-[44px] py-2"
-                  value={form.desired_field}
-                  onChange={(event) => updateField("desired_field", event.target.value)}
-                >
-                  {desiredFieldOptions.map((item) => (
-                    <option key={item.value} value={item.value}>
-                      {item.label} - {item.detail}
-                    </option>
-                  ))}
-                </select>
+                <OptionPicker
+                  maxListHeight="max-h-[320px]"
+                  options={desiredFieldOptions}
+                  selected={form.desired_field}
+                  onSelect={(value) => updateField("desired_field", value)}
+                />
               </Field>
             </div>
           </FormSection>
@@ -628,24 +603,16 @@ export function AnalyzeForm() {
             onToggle={() => toggleSection("certifications")}
           >
             <div className="grid gap-3 md:grid-cols-[1fr_auto]">
-              <input
-                className="input"
-                list="certification-options"
-                value={certInput}
-                onChange={(event) => setCertInput(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    event.preventDefault();
-                    addCertification();
-                  }
+              <OptionPicker
+                maxListHeight="max-h-[320px]"
+                options={toOptions(certificationSuggestions)}
+                placeholder="자격증 선택"
+                selected={certInput}
+                onSelect={(value) => {
+                  setCertInput(value);
+                  addCertification(value);
                 }}
-                placeholder="예: 정보처리기사, 품질경영기사"
               />
-              <datalist id="certification-options">
-                {certificationSuggestions.map((cert) => (
-                  <option key={cert} value={cert} />
-                ))}
-              </datalist>
               <button
                 className="focus-ring inline-flex h-[44px] items-center justify-center gap-2 rounded-[9px] border-[1.5px] border-[#DDE3EA] bg-[#F2F4F6] px-4 text-sm font-black text-[var(--muted-foreground)] md:min-w-[104px]"
                 type="button"
@@ -658,7 +625,10 @@ export function AnalyzeForm() {
             {certifications.length > 0 ? (
               <div className="mt-4 flex flex-wrap gap-2">
                 {certifications.map((cert) => (
-                  <span className="np-pill inline-flex items-center gap-1 px-3 py-1" key={cert}>
+                  <span
+                    className="inline-flex min-h-[34px] items-center gap-2 rounded-[7px] border border-[var(--border)] bg-[#F8FAFB] px-3 py-1 text-xs font-extrabold text-[var(--muted-foreground)]"
+                    key={cert}
+                  >
                     {cert}
                     <button
                       aria-label={`${cert} 삭제`}
@@ -791,11 +761,94 @@ function Field({
   required?: boolean;
 }) {
   return (
-    <label className="grid gap-1.5 text-[13px] font-black text-[var(--muted-foreground)] md:gap-2 md:text-[13.5px]">
+    <div className="grid gap-1.5 text-[13px] font-black text-[var(--muted-foreground)] md:gap-2 md:text-[13.5px]">
       <span>
         {label} {required ? <span className="text-[var(--required)]">*</span> : null}
       </span>
       {children}
-    </label>
+    </div>
+  );
+}
+
+function OptionPicker({
+  maxListHeight = "max-h-[240px]",
+  onSelect,
+  options,
+  placeholder = "선택",
+  selected,
+}: {
+  maxListHeight?: string;
+  onSelect: (value: string) => void;
+  options: SelectOption[];
+  placeholder?: string;
+  selected: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const selectedOption = options.find((option) => option.value === selected);
+
+  function handleSelect(value: string) {
+    onSelect(value);
+    setIsOpen(false);
+  }
+
+  return (
+    <div className="relative">
+      <button
+        aria-expanded={isOpen}
+        className="focus-ring flex min-h-[44px] w-full items-center justify-between gap-3 rounded-[9px] border-[1.5px] border-[#E5E8EB] bg-[#F9FAFB] px-3 text-left text-[14px] font-extrabold text-[var(--foreground)] transition hover:border-[#D5DCE5]"
+        type="button"
+        onClick={() => setIsOpen((current) => !current)}
+      >
+        <span className="min-w-0">
+          <span className="block truncate">{(selectedOption?.label ?? selected) || placeholder}</span>
+          {selectedOption?.detail ? (
+            <span className="mt-0.5 block truncate text-[11px] font-bold text-[var(--caption)]">
+              {selectedOption.detail}
+            </span>
+          ) : null}
+        </span>
+        <ChevronDown
+          className={`shrink-0 text-[var(--caption)] transition-transform ${isOpen ? "rotate-180" : ""}`}
+          size={18}
+        />
+      </button>
+      <div
+        className={`grid transition-[grid-template-rows,opacity] duration-200 ${
+          isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+        }`}
+      >
+        <div className="min-h-0 overflow-hidden">
+          <div
+            className={`mt-2 overflow-y-auto rounded-[9px] border border-[var(--border-strong)] bg-white p-1.5 shadow-[0_12px_26px_rgba(25,31,40,0.08)] ${maxListHeight}`}
+          >
+            {options.map((option) => {
+              const isSelected = option.value === selected;
+              return (
+                <button
+                  className={`focus-ring flex min-h-[38px] w-full items-center justify-between gap-3 rounded-[7px] px-3 py-2 text-left text-sm font-extrabold transition ${
+                    isSelected
+                      ? "bg-[var(--primary-soft)] text-[var(--foreground)]"
+                      : "text-[var(--muted-foreground)] hover:bg-[#F8FAFB] hover:text-[var(--foreground)]"
+                  }`}
+                  key={option.value}
+                  type="button"
+                  onClick={() => handleSelect(option.value)}
+                >
+                  <span className="min-w-0">
+                    <span className="block truncate">{option.label ?? option.value}</span>
+                    {option.detail ? (
+                      <span className="mt-0.5 block truncate text-[11px] font-bold text-[var(--caption)]">
+                        {option.detail}
+                      </span>
+                    ) : null}
+                  </span>
+                  {isSelected ? <span className="h-2 w-2 shrink-0 rounded-[3px] bg-[var(--primary)]" /> : null}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
