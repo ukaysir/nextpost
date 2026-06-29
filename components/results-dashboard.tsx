@@ -6,7 +6,6 @@ import Link from "next/link";
 import {
   ArrowLeft,
   Award,
-  BookOpen,
   BriefcaseBusiness,
   CheckCircle2,
   ChevronDown,
@@ -431,30 +430,6 @@ export function ResultsDashboard({
                 </div>
               </ReportSection>
 
-              {result.glossary_matches?.length ? (
-                <>
-                  <Divider />
-                  <ReportSection icon={BookOpen} title="방산 용어 풀이">
-                    <div className="grid gap-3 md:grid-cols-2">
-                      {result.glossary_matches.map((item) => (
-                        <details className="group rounded-[12px] bg-[#F8FAFB] p-4" key={item.term}>
-                          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 font-black">
-                            <span>{item.term}</span>
-                            <ChevronDown
-                              className="text-[var(--caption)] transition-transform group-open:rotate-180"
-                              size={17}
-                            />
-                          </summary>
-                          <p className="mt-3 text-sm leading-6 text-[var(--muted-foreground)]">
-                            {item.description}
-                          </p>
-                        </details>
-                      ))}
-                    </div>
-                  </ReportSection>
-                </>
-              ) : null}
-
             </article>
           </div>
 
@@ -543,9 +518,12 @@ function CompanyCard({
             ) : null}
           </div>
 
-          <p className="mt-3 text-sm font-medium leading-7 text-[var(--muted-foreground)]">
-            {company.reason}
-          </p>
+          <div className="mt-3 rounded-[12px] bg-[#F8FAFB] p-4">
+            <p className="text-sm font-black text-[var(--primary)]">AI 분석</p>
+            <p className="mt-2 text-sm font-medium leading-7 text-[var(--muted-foreground)]">
+              {company.reason}
+            </p>
+          </div>
 
           <div className="mt-4 flex flex-wrap gap-2">
             {company.recommended_positions.map((position) => (
@@ -584,14 +562,13 @@ function CompanyCard({
 
           <details className="group mt-5 rounded-[14px] border border-[var(--border)] bg-[#FAFBFC]">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 font-black">
-              <span>보직 기반 추천 이유</span>
+              <span>공개 데이터 근거</span>
               <ChevronDown
                 className="text-[var(--caption)] transition-transform group-open:rotate-180"
                 size={18}
               />
             </summary>
             <div className="grid gap-4 border-t border-[var(--border)] p-3 md:gap-5 md:p-4">
-              <CompanyMeta company={company} />
               {evidence.length ? <EvidenceList evidence={evidence} /> : null}
               <JobSignalList postings={detail?.job_postings ?? []} />
             </div>
@@ -601,31 +578,6 @@ function CompanyCard({
         <FitGauge score={company.fit_score} />
       </div>
     </article>
-  );
-}
-
-function CompanyMeta({
-  company,
-}: {
-  company: RecommendedCompany;
-}) {
-  return (
-    <div className="rounded-[12px] bg-white p-4">
-      <p className="text-sm font-black text-[var(--primary)]">AI 추천 이유</p>
-      <p className="mt-2 text-sm font-medium leading-7 text-[var(--muted-foreground)]">
-        {company.reason}
-      </p>
-      <p className="mt-3 text-xs font-black text-[var(--caption)]">
-        아래 포지션은 현재 군 경력과 연결해 우선 검토할 만한 직무입니다.
-      </p>
-      <div className="mt-3 flex flex-wrap gap-2">
-        {company.recommended_positions.map((position) => (
-          <span className="rounded-full bg-[#F4F6F8] px-3 py-1 text-xs font-black text-[#5b6b82]" key={position}>
-            {position}
-          </span>
-        ))}
-      </div>
-    </div>
   );
 }
 

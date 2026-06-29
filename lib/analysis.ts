@@ -624,7 +624,6 @@ function buildRecommendationEvidence(
 ) {
   const detail = companyDetails.find((item) => item.company_name === company.company_name);
   const evidence = [
-    `AI 해석: ${company.reason}`,
     `${company.defense_field ?? "매칭 분야"} 분야 추천 점수 ${company.fit_score}점`,
     company.total_contract_amount
       ? `누적 계약 규모 ${formatWon(company.total_contract_amount)}`
@@ -699,7 +698,7 @@ export async function runOpenAiAnalysis(input: AnalyzeInput, context: PreparedCo
     throw new Error("OPENAI_API_KEY 환경변수가 설정되지 않았습니다.");
   }
 
-  const model = process.env.OPENAI_MODEL || "gpt-4.1-mini";
+  const model = process.env.OPENAI_MODEL || "gpt-5.4-nano";
   const systemPrompt =
     "당신은 전역 간부의 방산 취업을 돕는 시니어 커리어 전략가입니다. 사용자의 군 경력과 제공된 공개 데이터를 함께 읽고, 각 결론마다 왜 그런 판단을 했는지 한국어로 분명하게 설명하세요. 데이터가 없는 항목은 없다고 적고 추측하지 마세요.";
   const userPrompt = buildPrompt(input, context, context.glossaryTerms);

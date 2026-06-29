@@ -193,7 +193,7 @@ export async function runOpenAiChat(input: ChatContextInput) {
     throw new Error("OPENAI_API_KEY 환경변수가 설정되지 않았습니다.");
   }
 
-  const model = process.env.OPENAI_MODEL || "gpt-4.1-mini";
+  const model = process.env.OPENAI_MODEL || "gpt-5.4-nano";
   const messages = await buildMessagesForModel(input);
   const client = new OpenAI({
     apiKey,

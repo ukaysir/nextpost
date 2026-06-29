@@ -17,7 +17,6 @@ import { DEFENSE_FIELDS } from "@/lib/types";
 const branchOptions = ["육군", "해군", "공군", "해병대"];
 
 const ranks = [
-  "병장",
   "하사",
   "중사",
   "상사",
