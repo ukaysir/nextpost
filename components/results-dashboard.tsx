@@ -613,7 +613,6 @@ function CompanyCard({
             <MetricBox label="방산 수주잔고" value={formatMoney(company.total_contract_amount)} />
             <MetricBox label="매출" value={formatMoney(latestRevenue)} />
             <MetricBox label="평균연봉" value={formatSalary(company.avg_salary)} />
-            <MetricBox label="채용 신호" value={`${detail?.job_postings?.length ?? 0}건`} />
           </div>
 
           <div className="flex flex-wrap gap-2.5">
