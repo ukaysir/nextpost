@@ -242,7 +242,7 @@ export function ResultsDashboard({
           ))}
         </nav>
 
-        <div className="grid gap-5 xl:grid-cols-[minmax(0,920px)_minmax(340px,420px)] xl:items-start xl:justify-center">
+        <div className="grid gap-5 xl:grid-cols-[920px_minmax(340px,420px)] xl:items-start xl:justify-center">
           <div className="min-w-0">
             <article className="space-y-6">
               <section className="scroll-mt-28" id="report-summary">
