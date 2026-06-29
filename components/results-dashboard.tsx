@@ -777,18 +777,45 @@ function SkillPills({
   items: string[];
   title: string;
 }) {
+  const displayItems = items.map(formatSkillPillText).filter(Boolean).slice(0, 8);
+
   return (
     <div className="grid gap-2 md:grid-cols-[90px_1fr] md:items-center">
       <h3 className="font-black text-[var(--foreground)]">{title}</h3>
-      <div className="flex flex-wrap items-center gap-2 md:flex-nowrap md:overflow-x-auto">
-        {items.map((item) => (
-          <span className="rounded-full bg-[#F4F6F8] px-3 py-1 text-xs font-extrabold text-[var(--foreground)]" key={item}>
+      <div className="flex flex-wrap items-center gap-2">
+        {displayItems.map((item) => (
+          <span
+            className="max-w-full rounded-full bg-[#F4F6F8] px-3 py-1 text-xs font-extrabold leading-5 text-[var(--foreground)]"
+            key={item}
+            title={item}
+          >
             {item}
           </span>
         ))}
       </div>
     </div>
   );
+}
+
+function formatSkillPillText(value: string) {
+  const cleaned = value
+    .replace(/\s*\((?:데이터\s*제공|데이터제공|제공\s*데이터|데이터가\s*제공됨|데이터\s*없음|확인\s*불가)[^)]+\)\s*/g, " ")
+    .replace(/\s*\((?:데이터\s*제공|데이터제공|제공\s*데이터|데이터가\s*제공됨|데이터\s*없음|확인\s*불가)\)\s*/g, " ")
+    .replace(/(?:보유\s*여부\s*)?(?:데이터\s*없음|확인\s*불가|데이터\s*미제공|데이터가\s*제공되지\s*않음)/g, "")
+    .replace(/[·•]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (cleaned.length <= 28) return cleaned;
+
+  const separators = [" 요구", " 직무", " 여부", " 능력", " 기술", " 스킬"];
+  const separatorIndex = separators
+    .map((separator) => cleaned.indexOf(separator))
+    .filter((index) => index > 8)
+    .sort((a, b) => a - b)[0];
+
+  const shortened = separatorIndex ? cleaned.slice(0, separatorIndex).trim() : cleaned.slice(0, 28).trim();
+  return shortened.length > 28 ? `${shortened.slice(0, 27)}…` : shortened;
 }
 
 function TimingCard({ body, title }: { body: string; title: string }) {

@@ -59,8 +59,8 @@ const responseSchema = {
       additionalProperties: false,
       required: ["possessed", "missing", "analysis"],
       properties: {
-        possessed: { type: "array", items: { type: "string" } },
-        missing: { type: "array", items: { type: "string" } },
+        possessed: { type: "array", maxItems: 8, items: { type: "string", maxLength: 24 } },
+        missing: { type: "array", maxItems: 8, items: { type: "string", maxLength: 24 } },
         analysis: { type: "string" },
       },
     },
@@ -679,12 +679,14 @@ ${compactGlossary}
 3. recommended_companies는 최대 3개만 추천하세요.
 4. 각 recommended_companies.reason은 2~3문장으로 작성하고, 반드시 사용자 배경 1개 이상 + 회사 데이터 근거 2개 이상(계약, 최근연도, 인증, 채용신호, 제품/프로필, 연봉, 출처 중)을 직접 언급하세요.
 5. skill_gap.analysis는 현재 강점, 부족역량, 왜 우선 보완해야 하는지까지 사용자가 납득할 수 있게 4~5문장으로 작성하세요.
-6. education_roadmap.reason은 해당 교육이 어떤 부족역량 또는 목표직무를 메우는지 구체적으로 적으세요.
-7. discharge_timing.now/later/recommendation은 현재 부족역량과 데이터상 준비상태를 근거로 비교해 작성하세요.
-8. 데이터가 없는 경우에는 없다고 명시하고 추측하지 마세요.
-9. 제공된 데이터 안에서만 회사, 직무, 교육, 자격증을 선택하세요. 제공되지 않은 회사, 교육명, 자격증명은 절대 생성하지 마세요.
-10. 사용자에게 내부 데이터 키, 영문 필드명, true/false 값, JSON 구조를 절대 노출하지 말고 쉬운 한국어 라벨로 풀어 쓰세요.
-11. 굵게 표시, 표, 코드블록 같은 마크다운 문법을 쓰지 말고 일반 문장으로 작성하세요.`;
+6. skill_gap.possessed와 skill_gap.missing은 설명문이 아니라 24자 이하의 짧은 역량 키워드만 넣으세요. 괄호 안에 "데이터 제공", "데이터 없음", "확인 불가" 같은 출처/상태 설명을 붙이지 마세요.
+7. education_roadmap.reason은 해당 교육이 어떤 부족역량 또는 목표직무를 메우는지 구체적으로 적으세요.
+8. discharge_timing.now/later/recommendation은 현재 부족역량과 데이터상 준비상태를 근거로 비교해 작성하세요.
+9. 데이터가 없는 경우에는 없다고 명시하고 추측하지 마세요.
+10. 제공된 데이터 안에서만 회사, 직무, 교육, 자격증을 선택하세요. 제공되지 않은 회사, 교육명, 자격증명은 절대 생성하지 마세요.
+11. 사용자에게 내부 데이터 키, 영문 필드명, true/false 값, JSON 구조를 절대 노출하지 말고 쉬운 한국어 라벨로 풀어 쓰세요.
+12. "데이터 제공", "데이터제공", "제공 데이터", "데이터가 제공됨" 같은 표현은 쓰지 마세요.
+13. 굵게 표시, 표, 코드블록 같은 마크다운 문법을 쓰지 말고 일반 문장으로 작성하세요.`;
 }
 
 

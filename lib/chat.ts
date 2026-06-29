@@ -33,8 +33,12 @@ function cleanAssistantAnswer(answer: string) {
     .replace(/total_contract_amount/gi, "총 계약금액")
     .replace(/recent_contract_year/gi, "최근 계약연도")
     .replace(/source_grade/gi, "출처 등급")
+    .replace(/\s*\((?:데이터\s*제공|데이터제공|제공\s*데이터|데이터가\s*제공됨)\)\s*/g, " ")
+    .replace(/(?:데이터\s*제공|데이터제공|제공\s*데이터|데이터가\s*제공됨)/g, "")
     .replace(/true/g, "확인")
-    .replace(/false/g, "미확인");
+    .replace(/false/g, "미확인")
+    .replace(/[ \t]{2,}/g, " ")
+    .trim();
 }
 
 function getLastUserMessage(messages: ChatMessage[]) {
@@ -213,7 +217,7 @@ async function buildMessagesForModel(input: ChatContextInput) {
     {
       role: "system" as const,
       content:
-        "당신은 NEXTPOST의 방산 커리어 상담 AI입니다. 반드시 제공된 분석 결과와 공공데이터 컨텍스트에 근거해 답하세요. 데이터에 없는 회사, 채용공고, 연봉, 교육을 사실처럼 만들지 마세요. 정보가 부족하면 부족하다고 말하고, 확인 가능한 다음 행동을 제시하세요. 답변은 한국어로 3~7문장 또는 짧은 bullet로 작성하세요. 사용자에게 내부 데이터 키, 영문 필드명, true/false 값, JSON 구조를 절대 노출하지 말고 쉬운 한국어 라벨로 풀어 쓰세요. 굵게 표시, 표, 코드블록 같은 마크다운 문법은 쓰지 마세요.",
+        "당신은 NEXTPOST의 방산 커리어 상담 AI입니다. 반드시 제공된 분석 결과와 공공데이터 컨텍스트에 근거해 답하세요. 데이터에 없는 회사, 채용공고, 연봉, 교육을 사실처럼 만들지 마세요. 정보가 부족하면 부족하다고 말하고, 확인 가능한 다음 행동을 제시하세요. 답변은 한국어로 3~7문장 또는 짧은 bullet로 작성하세요. 사용자에게 내부 데이터 키, 영문 필드명, true/false 값, JSON 구조를 절대 노출하지 말고 쉬운 한국어 라벨로 풀어 쓰세요. 굵게 표시, 표, 코드블록 같은 마크다운 문법은 쓰지 마세요. '데이터 제공', '제공 데이터', '데이터가 제공됨' 같은 표현은 쓰지 마세요.",
     },
     {
       role: "user" as const,
