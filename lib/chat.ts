@@ -4,7 +4,6 @@ import { AnalysisResult } from "@/lib/types";
 import { formatWon, normalizeDefenseField } from "@/lib/utils";
 
 const openAiTimeoutMs = Number(process.env.OPENAI_TIMEOUT_MS ?? 15000);
-const ollamaTimeoutMs = Number(process.env.OLLAMA_TIMEOUT_MS ?? 52000);
 
 export type ChatMessage = {
   role: "user" | "assistant";
@@ -187,45 +186,6 @@ ${recentMessages.map((message) => `${message.role}: ${message.content}`).join("\
   ];
 }
 
-async function buildPromptForOllama(input: ChatContextInput) {
-  const context = await selectRelevantContext(input);
-  const recentMessages = input.messages.slice(-6);
-  const compactContext = {
-    matched_field: context.analysisSummary?.matched_field ?? context.matchedField,
-    matched_job_group: context.analysisSummary?.matched_job_group,
-    skill_summary: context.analysisSummary?.skill_translation?.summary,
-    skill_keywords: context.analysisSummary?.skill_translation?.keywords?.slice(0, 8),
-    skill_gap: context.analysisSummary?.skill_gap,
-    recommended_companies: context.analysisSummary?.recommended_companies
-      ?.slice(0, 3)
-      .map((company) => ({
-        company_name: company.company_name,
-        fit_score: company.fit_score,
-        reason: company.reason,
-        recommended_positions: company.recommended_positions.slice(0, 3),
-        defense_field: company.defense_field,
-        contract_amount: formatWon(company.total_contract_amount),
-        recent_contract_year: company.recent_contract_year,
-      })),
-    companies: context.companies.slice(0, 5),
-    jobs: context.jobs.slice(0, 4),
-    educations: context.educations.slice(0, 4),
-    discharge_timing: context.analysisSummary?.discharge_timing,
-  };
-
-  return [
-    "당신은 NEXTPOST의 방산 커리어 상담 AI입니다.",
-    "반드시 제공된 분석 결과와 공개 데이터에 근거해 한국어로 답하세요.",
-    "데이터에 없는 회사, 채용공고, 연봉, 교육을 사실처럼 만들지 마세요.",
-    "답변은 3~6문장 또는 짧은 bullet로 간결하게 작성하세요.",
-    "",
-    "## 분석/데이터 컨텍스트",
-    JSON.stringify(compactContext),
-    "",
-    "## 최근 대화",
-    recentMessages.map((message) => `${message.role}: ${message.content}`).join("\n"),
-  ].join("\n");
-}
 
 export async function runOpenAiChat(input: ChatContextInput) {
   const apiKey = process.env.OPENAI_API_KEY;
@@ -233,26 +193,13 @@ export async function runOpenAiChat(input: ChatContextInput) {
     throw new Error("OPENAI_API_KEY 환경변수가 설정되지 않았습니다.");
   }
 
-  const model = process.env.OPENAI_MODEL || "gpt-5.4-mini";
+  const model = process.env.OPENAI_MODEL || "gpt-4.1-mini";
   const messages = await buildMessagesForModel(input);
   const client = new OpenAI({
     apiKey,
-    baseURL: process.env.OPENAI_BASE_URL || undefined,
     maxRetries: 0,
     timeout: openAiTimeoutMs,
   });
-
-  if (process.env.OPENAI_BASE_URL) {
-    const response = await client.chat.completions.create({
-      model,
-      messages,
-      max_tokens: 500,
-      temperature: 0.2,
-    });
-    const content = response.choices[0]?.message?.content;
-    if (!content) throw new Error("OpenAI-compatible 응답이 비어 있습니다.");
-    return content;
-  }
 
   const response = await client.responses.create({
     model,
@@ -265,47 +212,6 @@ export async function runOpenAiChat(input: ChatContextInput) {
   }
 
   return response.output_text;
-}
-
-export async function runOllamaChat(input: ChatContextInput) {
-  const server = process.env.OLLAMA_SERVER?.replace(/\/+$/, "");
-  if (!server) {
-    throw new Error("OLLAMA_SERVER 환경변수가 설정되지 않았습니다.");
-  }
-
-  const model = process.env.OLLAMA_MODEL || "smollm2:135m";
-  const prompt = await buildPromptForOllama(input);
-
-  const response = await fetch(`${server}/api/generate`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model,
-      prompt,
-      stream: false,
-      options: {
-        num_predict: 450,
-        temperature: 0.2,
-      },
-    }),
-    signal: AbortSignal.timeout(ollamaTimeoutMs),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Ollama 응답 오류: ${response.status}`);
-  }
-
-  const payload = (await response.json()) as { response?: string; error?: string };
-  if (payload.error) {
-    throw new Error(payload.error);
-  }
-  if (!payload.response?.trim()) {
-    throw new Error("Ollama 응답이 비어 있습니다.");
-  }
-
-  return payload.response.trim();
 }
 
 export async function buildFallbackChat(input: ChatContextInput) {

@@ -2,7 +2,7 @@
 
 ## Project
 - NEXTPOST is a Next.js 16 app for Korean defense-career analysis.
-- Main stack: Next.js App Router, React 19, TypeScript, Tailwind CSS v4, Supabase, Puter.js chat UI.
+- Main stack: Next.js App Router, React 19, TypeScript, Tailwind CSS v4, Supabase, OpenAI API.
 - Production URL: `https://nextpost-wine.vercel.app`
 - Project path: `C:\Users\User\Downloads\nextpost (2)`
 
@@ -18,7 +18,7 @@
 - Supabase data is loaded through `lib/runtime-data.ts` and related helpers.
 - OpenDART enrichment scripts live in `scripts/` and generated SQL files live in `supabase/`.
 - Do not commit or print secrets from `.env.local`, Supabase auth tokens, Vercel tokens, or API keys.
-- Puter.js is loaded in `app/layout.tsx`; chat calls should use `puter.ai.chat()` from the browser without embedding an API key.
+- Chat and analysis requests run on the server through OpenAI API using `OPENAI_API_KEY`.
 
 ## Important App Areas
 - Landing page: `app/page.tsx`

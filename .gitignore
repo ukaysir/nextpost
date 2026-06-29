@@ -16,3 +16,4 @@ supabase/.temp
 skills-lock.json
 
 .vercel
+.env*

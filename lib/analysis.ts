@@ -660,41 +660,15 @@ export async function runOpenAiAnalysis(input: AnalyzeInput, context: PreparedCo
     throw new Error("OPENAI_API_KEY 환경변수가 설정되지 않았습니다.");
   }
 
-  const model = process.env.OPENAI_MODEL || "gpt-5.4-mini";
+  const model = process.env.OPENAI_MODEL || "gpt-4.1-mini";
   const systemPrompt =
     "당신은 전역 간부의 방산 취업을 돕는 커리어 분석 전문가입니다. 추천은 제공된 데이터 안에서만 수행하고, 한국어로 간결하고 실무적으로 작성하세요.";
   const userPrompt = buildPrompt(input, context, context.glossaryTerms);
   const client = new OpenAI({
     apiKey,
-    baseURL: process.env.OPENAI_BASE_URL || undefined,
     maxRetries: 0,
     timeout: openAiTimeoutMs,
   });
-
-  if (process.env.OPENAI_BASE_URL) {
-    const response = await client.chat.completions.create({
-      model,
-      messages: [
-        { role: "system", content: `${systemPrompt} 반드시 JSON만 출력하세요.` },
-        {
-          role: "user",
-          content: `${userPrompt}
-
-## 반드시 따라야 할 출력 JSON 스키마
-${JSON.stringify(responseSchema)}
-
-출력은 위 스키마를 만족하는 JSON 객체 하나만 허용됩니다. markdown 코드블록이나 설명 문장을 붙이지 마세요.`,
-        },
-      ],
-      response_format: { type: "json_object" },
-      max_tokens: 1200,
-      temperature: 0.2,
-    });
-    const content = response.choices[0]?.message?.content;
-    if (!content) throw new Error("OpenAI-compatible 응답이 비어 있습니다.");
-    const parsed = analysisResultSchema.parse(parseModelJson(content));
-    return enrichAnalysisResult(parsed, context);
-  }
 
   const response = await client.responses.create({
     model,

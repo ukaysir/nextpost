@@ -7,37 +7,16 @@ import remarkGfm from "remark-gfm";
 import { AnalysisResult } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-declare global {
-  interface Window {
-    puter?: {
-      ai?: {
-        chat: (
-          input:
-            | string
-            | Array<{
-                role: "system" | "user" | "assistant";
-                content: string;
-              }>,
-          options?: { model?: string },
-        ) => Promise<unknown>;
-      };
-    };
-  }
-}
 
 type ChatMessage = {
   role: "user" | "assistant";
   content: string;
 };
 
-type PuterMessage = {
-  role: "system" | "user" | "assistant";
-  content: string;
-};
 
 type ServerChatResponse = {
   answer?: string;
-  provider?: "ollama" | "openai" | "swish" | "fallback";
+provider?: "openai" | "fallback";
   message?: string;
 };
 
@@ -64,12 +43,11 @@ export function DataChat({
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [provider, setProvider] = useState<"swish" | "openai" | "ollama" | "puter" | null>(null);
+  const [provider, setProvider] = useState<"openai" | "fallback" | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const systemPrompt = useMemo(() => buildSystemPrompt(analysisResult), [analysisResult]);
   const canSend = useMemo(() => input.trim().length > 0 && !isLoading, [input, isLoading]);
 
   useEffect(() => {
@@ -88,26 +66,17 @@ export function DataChat({
 
     try {
       const serverReply = await askServerChat(nextMessages, analysisResult);
-      if (serverReply.provider === "fallback") {
-        throw new Error("Primary API returned fallback response.");
-      }
-      setProvider(serverReply.provider ?? "swish");
+      setProvider(serverReply.provider ?? "openai");
       setMessages((current) => [...current, { role: "assistant", content: serverReply.answer }]);
     } catch (error) {
-      try {
-        const answer = await askPuterChat(nextMessages, systemPrompt);
-        setProvider("puter");
-        setMessages((current) => [...current, { role: "assistant", content: answer }]);
-      } catch (puterError) {
-        console.error("Both Swish API and Puter fallback failed:", error, puterError);
-        setMessages((current) => [
-          ...current,
-          {
-            role: "assistant",
-            content: "AI 응답을 받지 못했습니다. 잠시 뒤 다시 시도해주세요.",
-          },
-        ]);
-      }
+      console.error("Chat request failed:", error);
+      setMessages((current) => [
+        ...current,
+        {
+          role: "assistant",
+          content: "AI 응답을 받지 못했습니다. 잠시 뒤 다시 시도해주세요.",
+        },
+      ]);
     } finally {
       setIsLoading(false);
       inputRef.current?.focus();
@@ -247,41 +216,10 @@ export function DataChat({
   );
 }
 
-function buildSystemPrompt(result: AnalysisResult) {
-  const compactReport = {
-    matched_field: result.matched_field,
-    matched_job_group: result.matched_job_group,
-    summary: result.skill_translation.summary,
-    keywords: result.skill_translation.keywords.slice(0, 8),
-    recommended_companies: result.recommended_companies.slice(0, 4).map((company) => ({
-      company_name: company.company_name,
-      fit_score: company.fit_score,
-      reason: company.reason,
-      recommended_positions: company.recommended_positions.slice(0, 3),
-      defense_field: company.defense_field,
-      recent_contract_year: company.recent_contract_year,
-      avg_salary: company.avg_salary,
-    })),
-    skill_gap: result.skill_gap,
-    education_roadmap: result.education_roadmap.slice(0, 4),
-    recommended_certs: result.recommended_certs,
-    discharge_timing: result.discharge_timing,
-  };
-
-  return [
-    "너는 NEXTPOST의 방산 커리어 상담 AI다.",
-    "반드시 제공된 리포트 내용에 근거해서 한국어로 답한다.",
-    "데이터에 없는 회사, 채용공고, 연봉, 교육을 사실처럼 만들지 않는다.",
-    "답변은 사용자가 바로 실행할 수 있도록 3~6문장 또는 짧은 bullet로 정리한다.",
-    "",
-    "## 현재 커리어 리포트",
-    JSON.stringify(compactReport),
-  ].join("\n");
-}
 
 async function askServerChat(messages: ChatMessage[], analysisResult: AnalysisResult): Promise<{
   answer: string;
-  provider?: "ollama" | "openai" | "swish" | "fallback";
+  provider?: "openai" | "fallback";
 }> {
   const response = await fetch("/api/chat", {
     method: "POST",
@@ -289,95 +227,17 @@ async function askServerChat(messages: ChatMessage[], analysisResult: AnalysisRe
     body: JSON.stringify({ messages, analysisResult }),
   });
   const payload = (await response.json()) as ServerChatResponse;
-  if (!response.ok) throw new Error(payload.message || "Swish API 응답을 받지 못했습니다.");
-  if (!payload.answer) throw new Error("Swish API 응답 본문이 비어 있습니다.");
+  if (!response.ok) throw new Error(payload.message || "OpenAI API 응답을 받지 못했습니다.");
+  if (!payload.answer) throw new Error("OpenAI API 응답 본문이 비어 있습니다.");
   return { answer: payload.answer, provider: payload.provider };
 }
 
-async function askPuterChat(messages: ChatMessage[], systemPrompt: string) {
-  const puter = await waitForPuter();
-  const modelMessages: PuterMessage[] = [
-    { role: "system", content: systemPrompt },
-    ...messages.slice(-8).map((message) => ({
-      role: message.role,
-      content: message.content,
-    })),
-  ];
-
-  const reply = await puter.ai!.chat(modelMessages, { model: "gpt-5-nano" });
-  return extractPuterText(reply);
-}
-
-function providerLabel(provider: "swish" | "openai" | "ollama" | "puter") {
+function providerLabel(provider: "openai" | "fallback") {
   const labels: Record<typeof provider, string> = {
-    swish: "Swish AI",
     openai: "OpenAI",
-    ollama: "Ollama",
-    puter: "Puter.js",
+    fallback: "데이터 요약",
   };
   return labels[provider] ?? provider;
-}
-
-async function waitForPuter() {
-  for (let attempt = 0; attempt < 60; attempt += 1) {
-    if (window.puter?.ai?.chat) return window.puter;
-    await new Promise((resolve) => window.setTimeout(resolve, 100));
-  }
-  throw new Error("Puter.js SDK가 아직 로드되지 않았습니다. 새로고침 후 다시 시도해주세요.");
-}
-
-function extractPuterText(value: unknown): string {
-  if (typeof value === "string") {
-    const parsed = parseMaybeJson(value);
-    return parsed === value ? value : extractPuterText(parsed);
-  }
-
-  if (Array.isArray(value)) {
-    const text = value.map(extractPuterText).filter(Boolean).join("\n").trim();
-    return text || "응답 본문을 찾지 못했습니다. 질문을 다시 입력해주세요.";
-  }
-
-  if (value && typeof value === "object") {
-    const record = value as Record<string, unknown>;
-
-    for (const key of ["output_text", "text", "content", "response"]) {
-      if (typeof record[key] === "string") return extractPuterText(record[key]);
-    }
-
-    const nestedMessage = record.message;
-    if (nestedMessage) return extractPuterText(nestedMessage);
-
-    const choices = record.choices;
-    if (Array.isArray(choices) && choices[0]) return extractPuterText(choices[0]);
-
-    const content = record.content;
-    if (Array.isArray(content)) {
-      const text = content
-        .map((item) => {
-          if (typeof item === "string") return item;
-          if (item && typeof item === "object") {
-            const itemRecord = item as Record<string, unknown>;
-            return itemRecord.text ?? itemRecord.content ?? "";
-          }
-          return "";
-        })
-        .join("\n")
-        .trim();
-      if (text) return text;
-    }
-  }
-
-  return "응답을 받았지만 표시할 본문을 찾지 못했습니다. 질문을 다시 입력해주세요.";
-}
-
-function parseMaybeJson(value: string) {
-  const trimmed = value.trim();
-  if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) return value;
-  try {
-    return JSON.parse(trimmed) as unknown;
-  } catch {
-    return value;
-  }
 }
 
 function MarkdownMessage({ content }: { content: string }) {

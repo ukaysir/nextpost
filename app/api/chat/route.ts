@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { buildFallbackChat, runOllamaChat, runOpenAiChat } from "@/lib/chat";
+import { buildFallbackChat, runOpenAiChat } from "@/lib/chat";
 import { analysisResultSchema } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -19,49 +19,21 @@ const chatRequestSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const body = chatRequestSchema.parse(await request.json());
-    let provider: "ollama" | "openai" | "swish" | "fallback" = process.env.OLLAMA_SERVER
-      ? "ollama"
-      : process.env.OPENAI_BASE_URL?.includes("swishai")
-        ? "swish"
-        : "openai";
+    let provider: "openai" | "fallback" = "openai";
     let answer: string;
 
     try {
-      if (process.env.OLLAMA_SERVER) {
-        answer = await runOllamaChat({
-          messages: body.messages,
-          analysisResult: body.analysisResult,
-        });
-      } else {
-        answer = await runOpenAiChat({
-          messages: body.messages,
-          analysisResult: body.analysisResult,
-        });
-      }
+      answer = await runOpenAiChat({
+        messages: body.messages,
+        analysisResult: body.analysisResult,
+      });
     } catch (error) {
-      console.error("Primary chat provider failed:", error);
-      if (process.env.OLLAMA_SERVER && process.env.OPENAI_API_KEY) {
-        try {
-          provider = process.env.OPENAI_BASE_URL?.includes("swishai") ? "swish" : "openai";
-          answer = await runOpenAiChat({
-            messages: body.messages,
-            analysisResult: body.analysisResult,
-          });
-        } catch (openAiError) {
-          console.error("OpenAI chat failed, using deterministic fallback:", openAiError);
-          provider = "fallback";
-          answer = await buildFallbackChat({
-            messages: body.messages,
-            analysisResult: body.analysisResult,
-          });
-        }
-      } else {
-        provider = "fallback";
-        answer = await buildFallbackChat({
-          messages: body.messages,
-          analysisResult: body.analysisResult,
-        });
-      }
+      console.error("OpenAI chat failed, using deterministic fallback:", error);
+      provider = "fallback";
+      answer = await buildFallbackChat({
+        messages: body.messages,
+        analysisResult: body.analysisResult,
+      });
     }
 
     return NextResponse.json({ answer, provider });

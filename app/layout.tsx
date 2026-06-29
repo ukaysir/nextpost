@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import { CanonicalAuthRedirect } from "@/components/canonical-auth-redirect";
 import "./globals.css";
 
@@ -26,7 +25,6 @@ export default function RootLayout({
       <body>
         <CanonicalAuthRedirect />
         {children}
-        <Script src="https://js.puter.com/v2/" strategy="afterInteractive" />
       </body>
     </html>
   );
