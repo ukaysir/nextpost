@@ -38,12 +38,6 @@ export default function Home() {
                 방산 커리어 분석하기
                 <ArrowRight size={20} />
               </Link>
-              <Link
-                className="focus-ring inline-flex min-h-12 items-center justify-center rounded-[10px] border border-white/35 bg-white/10 px-5 font-extrabold backdrop-blur md:min-h-14 md:px-6"
-                href="/about"
-              >
-                About NEXTPOST
-              </Link>
             </div>
           </div>
         </div>

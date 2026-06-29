@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { AuthMenu } from "@/components/auth-menu";
 import {
   getRuntimeAppData,
@@ -36,15 +36,6 @@ export default async function AboutPage() {
         </header>
 
         <div className="page-shell pb-10 pt-5 md:pb-20 md:pt-14">
-          <div className="flex flex-wrap items-center gap-2 md:gap-3">
-            <Link
-              className="focus-ring inline-flex h-10 items-center gap-2 rounded-[10px] border border-white/30 bg-white/12 px-3 text-xs font-black backdrop-blur transition hover:bg-white/20 md:h-11 md:px-4 md:text-sm"
-              href="/"
-            >
-              <ArrowLeft size={17} />
-              랜딩으로
-            </Link>
-          </div>
           <h1 className="mt-4 max-w-4xl text-[32px] font-black leading-tight tracking-normal drop-shadow-[0_2px_18px_rgba(0,0,0,.35)] md:mt-5 md:text-6xl">
             감이 아니라,
             <br />

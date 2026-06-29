@@ -90,7 +90,7 @@ export default function LoginPage() {
               계속 이어갑니다
             </h1>
             <p className="mt-3 max-w-[520px] text-[13.5px] font-bold leading-6 text-white/90 sm:mt-5 sm:text-base sm:leading-8">
-              Gmail 계정으로 로그인하면 리포트가 사용자별로 저장되고, 대시보드에서 이전 분석 결과를 다시 확인할 수 있습니다.
+              로그인하고 나만의 방산 커리어 진단하기
             </p>
           </div>
 
