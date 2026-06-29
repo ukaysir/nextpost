@@ -256,9 +256,10 @@ export function ResultsDashboard({
                     <h1 className="mt-2 text-[26px] font-black leading-tight tracking-normal md:mt-3 md:text-[35px] md:tracking-[-0.6px]">
                       MY 방산 커리어 리포트
                     </h1>
-                    <p className="mt-3 text-sm font-medium leading-6 text-[var(--muted-foreground)] md:mt-4 md:text-[15px] md:leading-7">
-                      {result.skill_translation.summary}
-                    </p>
+                    <ReadableText
+                      className="mt-3 text-sm font-medium leading-7 text-[var(--muted-foreground)] md:mt-4 md:text-[15px] md:leading-8"
+                      text={result.skill_translation.summary}
+                    />
                   </div>
                   <div className="rounded-[12px] bg-white p-4 text-center md:rounded-[14px] md:p-5">
                     <p className="text-xs font-extrabold text-[#5b6b82] md:text-sm">최상위 기업 적합도</p>
@@ -328,9 +329,10 @@ export function ResultsDashboard({
                           ))}
                         </div>
                         {job.preferred_military_exp ? (
-                          <p className="mt-3 text-sm leading-6 text-[var(--muted-foreground)]">
-                            {job.preferred_military_exp}
-                          </p>
+                          <ReadableText
+                            className="mt-3 text-sm leading-6 text-[var(--muted-foreground)]"
+                            text={job.preferred_military_exp}
+                          />
                         ) : null}
                       </article>
                     ))}
@@ -363,15 +365,35 @@ export function ResultsDashboard({
               <ReportSection icon={Target} id="report-skills" title="직무 준비도">
                 <div className="grid gap-5">
                   <div>
-                    <p className="mt-3 text-sm leading-7 text-[var(--muted-foreground)]">
-                      {result.skill_gap.analysis}
-                    </p>
-                    <div className="mt-5 h-4 overflow-hidden rounded-full bg-[#EDEFF2]">
-                      <div className="h-full w-[62%] bg-[var(--accent)]" />
-                    </div>
-                    <div className="mt-2 flex justify-between text-xs font-black text-[var(--caption)]">
-                      <span>현재 62%</span>
-                      <span>보완 후 88%</span>
+                    <ReadableText
+                      className="mt-3 text-sm leading-7 text-[var(--muted-foreground)]"
+                      text={result.skill_gap.analysis}
+                    />
+                    <div className="mt-5 rounded-[14px] border border-[var(--border)] bg-[#FAFBFC] p-4">
+                      <div className="flex flex-wrap items-end justify-between gap-3">
+                        <div>
+                          <p className="text-xs font-black text-[var(--caption)]">현재 준비도</p>
+                          <p className="mt-1 text-2xl font-black text-[var(--foreground)]">62%</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs font-black text-[var(--caption)]">보완 후 목표</p>
+                          <p className="mt-1 text-2xl font-black text-[var(--accent)]">88%</p>
+                        </div>
+                        <span className="rounded-full bg-[#E9F6EF] px-3 py-1 text-xs font-black text-[var(--success)]">
+                          +26%p 개선
+                        </span>
+                      </div>
+                      <div className="mt-4 h-4 overflow-hidden rounded-full bg-[#EDEFF2]">
+                        <div className="flex h-full w-[88%]">
+                          <div className="h-full w-[70.45%] bg-[var(--accent)]" />
+                          <div className="h-full flex-1 bg-[#A7D9B8]" />
+                        </div>
+                      </div>
+                      <div className="mt-2 grid grid-cols-[62fr_26fr_12fr] text-xs font-black text-[var(--caption)]">
+                        <span>현재 62%</span>
+                        <span className="text-center text-[var(--success)]">보완 구간</span>
+                        <span className="text-right">목표 88%</span>
+                      </div>
                     </div>
                   </div>
                   <div className="grid gap-3">
@@ -399,9 +421,10 @@ export function ResultsDashboard({
                       </div>
                       <div>
                         <p className="font-black">{item.education_name}</p>
-                        <p className="mt-2 text-sm leading-6 text-[var(--muted-foreground)]">
-                          {item.reason}
-                        </p>
+                        <ReadableText
+                          className="mt-2 text-sm leading-6 text-[var(--muted-foreground)]"
+                          text={item.reason}
+                        />
                       </div>
                     </a>
                   ))}
@@ -424,9 +447,10 @@ export function ResultsDashboard({
                   <TimingCard title="추가 복무" body={result.discharge_timing.later} />
                 </div>
                 <div className="mt-4 rounded-[12px] border border-[#E1E8E6] bg-[#FAFBFC] p-4">
-                  <p className="text-base font-extrabold leading-7">
-                    추천: {result.discharge_timing.recommendation}
-                  </p>
+                  <ReadableText
+                    className="text-base font-extrabold leading-7"
+                    text={`추천: ${result.discharge_timing.recommendation}`}
+                  />
                 </div>
               </ReportSection>
 
@@ -520,9 +544,10 @@ function CompanyCard({
 
           <div className="mt-3 rounded-[12px] bg-[#F8FAFB] p-4">
             <p className="text-sm font-black text-[var(--primary)]">AI 분석</p>
-            <p className="mt-2 text-sm font-medium leading-7 text-[var(--muted-foreground)]">
-              {company.reason}
-            </p>
+            <ReadableText
+              className="mt-2 text-sm font-medium leading-7 text-[var(--muted-foreground)]"
+              text={company.reason}
+            />
           </div>
 
           <div className="mt-4 flex flex-wrap gap-2">
@@ -822,7 +847,10 @@ function TimingCard({ body, title }: { body: string; title: string }) {
   return (
     <article className="rounded-[12px] border border-[var(--border)] bg-[#F8FAFB] p-3 md:p-4">
       <h3 className="font-black">{title}</h3>
-      <p className="mt-2 text-sm font-medium leading-7 text-[var(--muted-foreground)]">{body}</p>
+      <ReadableText
+        className="mt-2 text-sm font-medium leading-7 text-[var(--muted-foreground)]"
+        text={body}
+      />
     </article>
   );
 }
@@ -875,6 +903,49 @@ function EmptyText({ text }: { text: string }) {
       {text}
     </div>
   );
+}
+
+function ReadableText({ className, text }: { className?: string; text: string }) {
+  const paragraphs = splitReadableText(text);
+
+  return (
+    <div className={cn("break-words [overflow-wrap:anywhere]", className)}>
+      {paragraphs.map((paragraph) => (
+        <p className="my-2 first:mt-0 last:mb-0" key={paragraph}>
+          {paragraph}
+        </p>
+      ))}
+    </div>
+  );
+}
+
+function splitReadableText(value: string) {
+  const normalized = value
+    .replace(/\s+/g, " ")
+    .replace(/\s+([.,!?;:])/g, "$1")
+    .trim();
+
+  if (!normalized) return [];
+
+  const sentences = normalized.match(/[^.!?。！？]+[.!?。！？]?/g)?.map((sentence) => sentence.trim()).filter(Boolean) ?? [
+    normalized,
+  ];
+
+  const paragraphs: string[] = [];
+  let current = "";
+
+  for (const sentence of sentences) {
+    const next = current ? `${current} ${sentence}` : sentence;
+    if (current && next.length > 150) {
+      paragraphs.push(current);
+      current = sentence;
+    } else {
+      current = next;
+    }
+  }
+
+  if (current) paragraphs.push(current);
+  return paragraphs;
 }
 
 function formatDate(value?: string | null) {
