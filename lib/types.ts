@@ -182,7 +182,7 @@ export const analysisResultSchema = z.object({
       avg_salary: z.number().nullable().optional(),
       salary_source: z.string().nullable().optional(),
     }),
-  ),
+  ).max(3),
   skill_gap: z.object({
     possessed: z.array(z.string()),
     missing: z.array(z.string()),

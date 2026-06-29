@@ -578,10 +578,12 @@ function CompanyMeta({
 }) {
   return (
     <div className="rounded-[12px] bg-white p-4">
-      <p className="text-sm font-black text-[var(--primary)]">보직 기반 해석</p>
+      <p className="text-sm font-black text-[var(--primary)]">AI 추천 이유</p>
       <p className="mt-2 text-sm font-medium leading-7 text-[var(--muted-foreground)]">
-        이 기업은 {company.recommended_positions.slice(0, 3).join(", ") || "관련 직무"}와 연결됩니다.
-        사용자가 준비할 직무와 채용 신호 중심으로 압축했습니다.
+        {company.reason}
+      </p>
+      <p className="mt-3 text-xs font-black text-[var(--caption)]">
+        아래 포지션은 현재 군 경력과 연결해 우선 검토할 만한 직무입니다.
       </p>
       <div className="mt-3 flex flex-wrap gap-2">
         {company.recommended_positions.map((position) => (
@@ -597,7 +599,7 @@ function CompanyMeta({
 function EvidenceList({ evidence }: { evidence: string[] }) {
   return (
     <div className="rounded-[12px] bg-white p-4">
-      <p className="text-sm font-black text-[var(--primary)]">왜 이 기업인가</p>
+      <p className="text-sm font-black text-[var(--primary)]">공개 데이터 근거</p>
       <ul className="mt-3 grid gap-2 text-sm leading-6 text-[var(--muted-foreground)]">
         {evidence.map((item) => (
           <li className="flex gap-2" key={item}>

@@ -44,15 +44,8 @@ export default async function AboutPage() {
           <p className="mt-4 max-w-3xl text-sm font-bold leading-7 text-white/90 md:mt-6 md:text-lg md:leading-8">
             NEXTPOST는 군 경력을 방산 직무 언어로 변환하고, 방산업체 지정현황,
             국내조달 계약정보, 공식 채용 링크, OpenDART 재무/임직원 데이터, 출처 등급을
-            결합해 추천 기업과 준비 로드맵의 근거를 화면에 남깁니다.
+            결합해 추천 기업과 준비 로드맵의 근거를 제시합니다.
           </p>
-          <Link
-            className="focus-ring mt-6 inline-flex h-12 items-center justify-center gap-3 rounded-[10px] bg-[#3A404A] px-6 text-sm font-black text-white transition hover:bg-[#2E343D] md:mt-8 md:text-base"
-            href="/analyze"
-          >
-            지금 NEXTPOST 분석 시작
-            <ArrowRight size={18} />
-          </Link>
         </div>
       </section>
 
@@ -78,7 +71,7 @@ export default async function AboutPage() {
         <div className="mb-5 md:mb-8">
           <p className="text-sm font-black tracking-[1px] text-[var(--primary)]">DATA FOUNDATION</p>
           <h2 className="mt-2 text-2xl font-black tracking-normal md:text-4xl">
-            추천 근거를 공개 데이터로 남깁니다
+            납득할 수 있는 커리어 추천, NEXTPOST 의 투명한 데이터로 확인하세요
           </h2>
         </div>
 
@@ -184,15 +177,18 @@ export default async function AboutPage() {
       </section>
 
       <section className="page-shell pb-12 md:pb-20">
-        <div className="rounded-[16px] bg-[#252C36] p-5 text-white md:p-10">
-          <p className="text-sm font-black tracking-[1px] text-white/70">DATA FIRST</p>
-          <h2 className="mt-2 text-2xl font-black leading-tight tracking-normal md:mt-3 md:text-4xl">
-            NEXTPOST는 추천의 이유를 먼저 보여줍니다
-          </h2>
-          <p className="mt-4 max-w-3xl text-sm font-medium leading-7 text-white/78 md:mt-5 md:text-base md:leading-8">
-            사용자는 기업명보다 먼저 자신의 보직이 어떤 방산 직무로 변환됐는지, 어떤 채용 신호와
-            교육/자격 보완이 필요한지를 확인합니다.
-          </p>
+        <div className="relative overflow-hidden rounded-[16px] bg-[#252C36] p-5 text-white md:p-10">
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-cover bg-center grayscale"
+            style={{ backgroundImage: "url('/assets/about-tank.jpg')", opacity: 0.24 }}
+          />
+          <div aria-hidden="true" className="absolute inset-0 bg-[#252C36]/78" />
+          <div className="relative z-10">
+            <p className="text-sm font-black tracking-[1px] text-white/70">DATA FIRST</p>
+            <h2 className="mt-2 text-2xl font-black leading-tight tracking-normal md:mt-3 md:text-4xl">
+              지금 NEXTPODT 와 함께 당신의 커리어를 설계해보세요.
+            </h2>
             <Link
               className="focus-ring mt-6 inline-flex h-11 w-full items-center justify-center gap-3 rounded-[10px] bg-[#3A404A] px-5 font-black text-white transition hover:bg-[#464D58] sm:w-auto md:mt-8 md:h-12 md:px-6"
               href="/analyze"
@@ -200,6 +196,7 @@ export default async function AboutPage() {
               지금 분석 시작
               <ArrowRight size={18} />
             </Link>
+          </div>
         </div>
       </section>
     </main>

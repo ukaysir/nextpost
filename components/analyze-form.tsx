@@ -50,6 +50,31 @@ const defenseFieldLabels = [
   "기타",
 ];
 
+const commonYearsServed = [3, 5, 7, 10, 15, 20];
+const commonMajors = [
+  "전자공학",
+  "정보통신공학",
+  "컴퓨터공학",
+  "기계공학",
+  "전기공학",
+  "항공우주공학",
+  "산업공학",
+  "경영학",
+];
+const commonRegions = ["서울", "대전", "성남", "판교", "창원", "구미", "사천", "부산"];
+const commonCertifications = [
+  "정보처리기사",
+  "무선설비기사",
+  "정보통신기사",
+  "정보보안기사",
+  "SQLD",
+  "전자기사",
+  "품질경영기사",
+  "일반기계기사",
+  "자동차정비기사",
+  "산업안전기사",
+];
+
 const specialtyPresets: Record<
   string,
   {
@@ -97,6 +122,15 @@ const specialtyPresets: Record<
   },
 };
 
+const commonPositions = Array.from(
+  new Set(Object.values(specialtyPresets).flatMap((preset) => preset.positions)),
+);
+const desiredFieldOptions = DEFENSE_FIELDS.map((value, index) => ({
+  value,
+  label: defenseFieldLabels[index] ?? value,
+}));
+
+
 const loadingMessages = [
   "군 경력을 방산 직무 언어로 번역하는 중입니다.",
   "방산업체 지정현황과 계약 데이터를 대조하는 중입니다.",
@@ -135,6 +169,14 @@ export function AnalyzeForm() {
   const [isAnalysisComplete, setIsAnalysisComplete] = useState(false);
 
   const specialtyPreset = specialtyPresets[form.specialty];
+  const positionSuggestions = useMemo(
+    () => Array.from(new Set([...(specialtyPreset?.positions ?? []), ...commonPositions])).slice(0, 12),
+    [specialtyPreset],
+  );
+  const certificationSuggestions = useMemo(
+    () => Array.from(new Set([...(specialtyPreset?.certs ?? []), ...commonCertifications])).slice(0, 12),
+    [specialtyPreset],
+  );
   const isValid = useMemo(() => {
     const yearsServed = Number(form.years_served);
     return (
@@ -154,6 +196,16 @@ export function AnalyzeForm() {
     setForm((current) => ({ ...current, [name]: value }));
   }
 
+  function setSpecialtyValue(specialty: string) {
+    const preset = specialtyPresets[specialty];
+    setForm((current) => ({
+      ...current,
+      specialty,
+      desired_field: preset?.field ?? current.desired_field,
+      position: preset?.positions[0] ?? current.position,
+    }));
+  }
+
   function addCertification(nextValue = certInput) {
     const value = nextValue.trim();
     if (!value || certifications.includes(value)) return;
@@ -169,6 +221,7 @@ export function AnalyzeForm() {
       position: position ?? specialtyPreset.positions[0] ?? current.position,
     }));
   }
+
 
   async function submit() {
     if (!isValid || isLoading) return;
@@ -266,26 +319,30 @@ export function AnalyzeForm() {
                     <option key={item}>{item}</option>
                   ))}
                 </select>
+                <QuickPickButtons
+                  items={ranks.map((item) => ({ value: item }))}
+                  selected={form.rank}
+                  onPick={(value) => updateField("rank", value)}
+                />
               </Field>
               <Field label="병과" required>
-                <select
+                <input
                   className="input"
+                  list="specialty-options"
                   value={form.specialty}
-                  onChange={(event) => {
-                    const specialty = event.target.value;
-                    const preset = specialtyPresets[specialty];
-                    setForm((current) => ({
-                      ...current,
-                      specialty,
-                      desired_field: preset?.field ?? current.desired_field,
-                      position: preset?.positions[0] ?? current.position,
-                    }));
-                  }}
-                >
+                  onChange={(event) => setSpecialtyValue(event.target.value)}
+                  placeholder="예: 통신, 전산, 항공"
+                />
+                <datalist id="specialty-options">
                   {specialties.map((item) => (
-                    <option key={item}>{item}</option>
+                    <option key={item} value={item} />
                   ))}
-                </select>
+                </datalist>
+                <QuickPickButtons
+                  items={specialties.map((item) => ({ value: item }))}
+                  selected={form.specialty}
+                  onPick={setSpecialtyValue}
+                />
               </Field>
               <Field label="복무연수" required>
                 <input
@@ -299,6 +356,11 @@ export function AnalyzeForm() {
                     const value = event.target.value;
                     updateField("years_served", value === "" ? "" : Number(value));
                   }}
+                />
+                <QuickPickButtons
+                  items={commonYearsServed.map((item) => ({ value: String(item), label: `${item}년` }))}
+                  selected={String(form.years_served)}
+                  onPick={(value) => updateField("years_served", Number(value))}
                 />
               </Field>
               {specialtyPreset ? (
@@ -330,25 +392,58 @@ export function AnalyzeForm() {
               <Field label="보직 / 주특기" required>
                 <input
                   className="input"
+                  list="position-options"
                   value={form.position}
                   onChange={(event) => updateField("position", event.target.value)}
                   placeholder="예: 통신전자장비 정비/운용"
+                />
+                <datalist id="position-options">
+                  {positionSuggestions.map((item) => (
+                    <option key={item} value={item} />
+                  ))}
+                </datalist>
+                <QuickPickButtons
+                  items={positionSuggestions.map((item) => ({ value: item }))}
+                  selected={form.position}
+                  onPick={(value) => updateField("position", value)}
                 />
               </Field>
               <Field label="전공" required>
                 <input
                   className="input"
+                  list="major-options"
                   value={form.major}
                   onChange={(event) => updateField("major", event.target.value)}
                   placeholder="예: 전자공학"
+                />
+                <datalist id="major-options">
+                  {commonMajors.map((item) => (
+                    <option key={item} value={item} />
+                  ))}
+                </datalist>
+                <QuickPickButtons
+                  items={commonMajors.map((item) => ({ value: item }))}
+                  selected={form.major}
+                  onPick={(value) => updateField("major", value)}
                 />
               </Field>
               <Field label="희망 근무지역">
                 <input
                   className="input"
+                  list="region-options"
                   value={form.preferred_region}
                   onChange={(event) => updateField("preferred_region", event.target.value)}
                   placeholder="예: 서울, 대전, 창원"
+                />
+                <datalist id="region-options">
+                  {commonRegions.map((item) => (
+                    <option key={item} value={item} />
+                  ))}
+                </datalist>
+                <QuickPickButtons
+                  items={commonRegions.map((item) => ({ value: item }))}
+                  selected={form.preferred_region}
+                  onPick={(value) => updateField("preferred_region", value)}
                 />
               </Field>
               <Field label="희망 방산분야">
@@ -357,12 +452,17 @@ export function AnalyzeForm() {
                   value={form.desired_field}
                   onChange={(event) => updateField("desired_field", event.target.value)}
                 >
-                  {DEFENSE_FIELDS.map((item, index) => (
-                    <option key={item} value={item}>
-                      {defenseFieldLabels[index] ?? item}
+                  {desiredFieldOptions.map((item) => (
+                    <option key={item.value} value={item.value}>
+                      {item.label}
                     </option>
                   ))}
                 </select>
+                <QuickPickButtons
+                  items={desiredFieldOptions}
+                  selected={form.desired_field}
+                  onPick={(value) => updateField("desired_field", value)}
+                />
               </Field>
             </div>
           </FormSection>
@@ -373,6 +473,7 @@ export function AnalyzeForm() {
             <div className="flex gap-2">
               <input
                 className="input"
+                list="certification-options"
                 value={certInput}
                 onChange={(event) => setCertInput(event.target.value)}
                 onKeyDown={(event) => {
@@ -383,6 +484,11 @@ export function AnalyzeForm() {
                 }}
                 placeholder="예: 정보처리기사"
               />
+              <datalist id="certification-options">
+                {certificationSuggestions.map((cert) => (
+                  <option key={cert} value={cert} />
+                ))}
+              </datalist>
               <button
                 className="focus-ring grid h-[44px] w-[50px] shrink-0 place-items-center rounded-[9px] border-[1.5px] border-[#E5E8EB] bg-[#F2F4F6] text-[var(--muted-foreground)]"
                 type="button"
@@ -392,23 +498,14 @@ export function AnalyzeForm() {
                 <Plus size={20} />
               </button>
             </div>
-            {specialtyPreset ? (
-              <div className="mt-3">
-                <p className="text-xs font-black text-[var(--caption)]">추천 자격증 빠른 추가</p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {specialtyPreset.certs.map((cert) => (
-                    <button
-                      className="rounded-full border border-[var(--border)] bg-white px-3 py-1 text-xs font-black text-[var(--caption)] transition hover:border-[var(--primary)] hover:text-[var(--foreground)]"
-                      key={cert}
-                      type="button"
-                      onClick={() => addCertification(cert)}
-                    >
-                      + {cert}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ) : null}
+            <div className="mt-3">
+              <p className="text-xs font-black text-[var(--caption)]">자주 선택하는 자격증</p>
+              <QuickPickButtons
+                items={certificationSuggestions.map((cert) => ({ value: cert, label: `+ ${cert}` }))}
+                selectedValues={certifications}
+                onPick={addCertification}
+              />
+            </div>
             {certifications.length > 0 ? (
               <div className="mt-4 flex flex-wrap gap-2">
                 {certifications.map((cert) => (
@@ -522,6 +619,47 @@ function Field({
         {label} {required ? <span className="text-[var(--required)]">*</span> : null}
       </span>
       {children}
+    </div>
+  );
+}
+
+type QuickPickItem = {
+  value: string;
+  label?: string;
+};
+
+function QuickPickButtons({
+  items,
+  onPick,
+  selected,
+  selectedValues,
+}: {
+  items: QuickPickItem[];
+  onPick: (value: string) => void;
+  selected?: string;
+  selectedValues?: string[];
+}) {
+  const selectedSet = new Set(selectedValues ?? []);
+
+  return (
+    <div className="mt-2 flex flex-wrap gap-2">
+      {items.map((item) => {
+        const isActive = item.value === selected || selectedSet.has(item.value);
+        return (
+          <button
+            className={`rounded-full border px-3 py-1 text-xs font-black transition ${
+              isActive
+                ? "border-[var(--primary)] bg-[var(--primary-soft)] text-[var(--primary)]"
+                : "border-[var(--border)] bg-white text-[var(--caption)] hover:border-[var(--primary)] hover:text-[var(--foreground)]"
+            }`}
+            key={item.value}
+            type="button"
+            onClick={() => onPick(item.value)}
+          >
+            {item.label ?? item.value}
+          </button>
+        );
+      })}
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { getRuntimeAppData } from "@/lib/runtime-data";
 import { AnalysisResult } from "@/lib/types";
 import { formatWon, normalizeDefenseField } from "@/lib/utils";
 
-const openAiTimeoutMs = Number(process.env.OPENAI_TIMEOUT_MS ?? 15000);
+const openAiTimeoutMs = Number(process.env.OPENAI_TIMEOUT_MS ?? 30000);
 
 export type ChatMessage = {
   role: "user" | "assistant";

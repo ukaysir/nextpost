@@ -41,6 +41,7 @@ const responseSchema = {
     },
     recommended_companies: {
       type: "array",
+      maxItems: 3,
       items: {
         type: "object",
         additionalProperties: false,
@@ -92,7 +93,7 @@ const responseSchema = {
   },
 };
 
-const openAiTimeoutMs = Number(process.env.OPENAI_TIMEOUT_MS ?? 15000);
+const openAiTimeoutMs = Number(process.env.OPENAI_TIMEOUT_MS ?? 30000);
 
 export type PreparedContext = {
   matchedField: string;
@@ -194,15 +195,43 @@ export async function prepareAnalysisContext(input: AnalyzeInput): Promise<Prepa
   };
 }
 
-function compactCompanies(companies: Company[]) {
-  return companies.map((company) => ({
-    company_name: company.company_name,
-    defense_field: company.defense_field,
-    contract_rank_hint: company.total_contract_amount > 0 ? "계약정보 있음" : "계약정보 없음",
-    recent_contract_year: company.recent_contract_year,
-    is_cost_certified: company.is_cost_certified,
-  }));
+function compactCompanies(companies: Company[], context: PreparedContext) {
+  const companyDetails = buildCompanyDetails(companies, context);
+
+  return companies.map((company) => {
+    const detail = companyDetails.find((item) => item.company_name === company.company_name);
+    const latestFinancial = detail?.financials?.[0];
+
+    return {
+      company_name: company.company_name,
+      defense_field: company.defense_field,
+      total_contract_amount: company.total_contract_amount,
+      recent_contract_year: company.recent_contract_year,
+      is_cost_certified: company.is_cost_certified,
+      avg_salary: company.avg_salary ?? latestFinancial?.avg_salary ?? null,
+      summary: detail?.summary ?? null,
+      main_products: detail?.main_products.slice(0, 4) ?? [],
+      careers_page_url: detail?.careers_page_url ?? company.careers_page_url ?? null,
+      key_contracts:
+        detail?.contracts.slice(0, 2).map((contract) => ({
+          contract_name: contract.contract_name,
+          contract_year: contract.contract_year,
+          contract_amount: contract.contract_amount,
+          buyer: contract.buyer,
+        })) ?? [],
+      key_postings:
+        detail?.job_postings.slice(0, 2).map((posting) => ({
+          title: posting.title,
+          job_function: posting.job_function,
+          preferred_military_experience: posting.preferred_military_experience,
+          required_skills: posting.required_skills?.slice(0, 5) ?? [],
+          location: posting.location,
+        })) ?? [],
+      source_grades: detail?.sources.slice(0, 3).map((source) => source.source_grade) ?? [],
+    };
+  });
 }
+
 
 function compactJobs(jobs: JobRequirement[]) {
   return jobs.map((job) => ({
@@ -323,7 +352,7 @@ function buildDataCoverageSummary(
 }
 
 function buildCompanyDetails(
-  companies: AnalysisResult["recommended_companies"],
+  companies: Array<{ company_name: string; careers_page_url?: string | null }>,
   context: PreparedContext,
 ): NonNullable<AnalysisResult["company_details"]> {
   const companyByName = new Map(context.companies.map((company) => [company.company_name, company]));
@@ -595,6 +624,7 @@ function buildRecommendationEvidence(
 ) {
   const detail = companyDetails.find((item) => item.company_name === company.company_name);
   const evidence = [
+    `AI 해석: ${company.reason}`,
     `${company.defense_field ?? "매칭 분야"} 분야 추천 점수 ${company.fit_score}점`,
     company.total_contract_amount
       ? `누적 계약 규모 ${formatWon(company.total_contract_amount)}`
@@ -611,13 +641,11 @@ function buildRecommendationEvidence(
     detail?.job_postings[0]?.title
       ? `채용 직무: ${detail.job_postings[0].title}`
       : "기업별 채용 직무 미확보",
-    detail?.sources[0]
-      ? `최상위 출처: ${detail.sources[0].source_grade}`
-      : "출처 링크 미확보",
   ];
 
-  return evidence.slice(0, 9);
+  return evidence.slice(0, 8);
 }
+
 
 function buildPrompt(input: AnalyzeInput, context: PreparedContext, glossaryTerms: string) {
   const compactGlossary = glossaryTerms.split("\n").slice(0, 20).join("\n");
@@ -630,11 +658,12 @@ function buildPrompt(input: AnalyzeInput, context: PreparedContext, glossaryTerm
 - 전공: ${input.major}
 - 보유 자격증: ${input.certifications.length ? input.certifications.join(", ") : "없음"}
 - 희망 분야: ${input.desired_field}
+- 희망 지역: ${input.preferred_region || "미지정"}
 - 서버 규칙 매핑 분야: ${context.matchedField}
 - 서버 규칙 매핑 직무군: ${context.matchedJobGroup}
 
 ## 추천 후보 기업 데이터
-${JSON.stringify(compactCompanies(context.companies))}
+${JSON.stringify(compactCompanies(context.companies.slice(0, 5), context))}
 
 ## 해당 분야 직무 요구역량
 ${JSON.stringify(compactJobs(context.jobRequirements))}
@@ -645,8 +674,18 @@ ${JSON.stringify(compactEducation(context.educationCerts))}
 ## 방산 용어 참고
 ${compactGlossary}
 
-위 데이터 안에서만 회사, 직무, 교육, 자격증을 선택하세요. 제공되지 않은 회사, 교육명, 자격증명은 절대 생성하지 마세요.`;
+## 출력 품질 규칙
+1. 모든 설명은 반드시 사용자 입력(병과, 보직, 전공, 자격증, 희망분야, 복무경력)과 제공된 기업/직무 데이터에 근거해야 합니다.
+2. skill_translation.summary는 사용자의 보직, 전공, 자격증 중 2개 이상을 직접 언급하며 왜 ${context.matchedField}/${context.matchedJobGroup}으로 연결되는지 3~4문장으로 설명하세요.
+3. recommended_companies는 최대 3개만 추천하세요.
+4. 각 recommended_companies.reason은 2~3문장으로 작성하고, 반드시 사용자 배경 1개 이상 + 회사 데이터 근거 2개 이상(계약, 최근연도, 인증, 채용신호, 제품/프로필, 연봉, 출처 중)을 직접 언급하세요.
+5. skill_gap.analysis는 현재 강점, 부족역량, 왜 우선 보완해야 하는지까지 사용자가 납득할 수 있게 4~5문장으로 작성하세요.
+6. education_roadmap.reason은 해당 교육이 어떤 부족역량 또는 목표직무를 메우는지 구체적으로 적으세요.
+7. discharge_timing.now/later/recommendation은 현재 부족역량과 데이터상 준비상태를 근거로 비교해 작성하세요.
+8. 데이터가 없는 경우에는 없다고 명시하고 추측하지 마세요.
+9. 제공된 데이터 안에서만 회사, 직무, 교육, 자격증을 선택하세요. 제공되지 않은 회사, 교육명, 자격증명은 절대 생성하지 마세요.`;
 }
+
 
 function parseModelJson(content: string) {
   const trimmed = content.trim();
@@ -662,7 +701,7 @@ export async function runOpenAiAnalysis(input: AnalyzeInput, context: PreparedCo
 
   const model = process.env.OPENAI_MODEL || "gpt-4.1-mini";
   const systemPrompt =
-    "당신은 전역 간부의 방산 취업을 돕는 커리어 분석 전문가입니다. 추천은 제공된 데이터 안에서만 수행하고, 한국어로 간결하고 실무적으로 작성하세요.";
+    "당신은 전역 간부의 방산 취업을 돕는 시니어 커리어 전략가입니다. 사용자의 군 경력과 제공된 공개 데이터를 함께 읽고, 각 결론마다 왜 그런 판단을 했는지 한국어로 분명하게 설명하세요. 데이터가 없는 항목은 없다고 적고 추측하지 마세요.";
   const userPrompt = buildPrompt(input, context, context.glossaryTerms);
   const client = new OpenAI({
     apiKey,
@@ -690,7 +729,8 @@ export async function runOpenAiAnalysis(input: AnalyzeInput, context: PreparedCo
         schema: responseSchema,
       },
     },
-    max_output_tokens: 1200,
+    max_output_tokens: 2200,
+
   });
 
   const content = response.output_text;
@@ -720,7 +760,7 @@ export function buildFallbackAnalysis(input: AnalyzeInput, context: PreparedCont
   return enrichAnalysisResult(
     {
       skill_translation: {
-        summary: `${input.position} 경험은 ${context.matchedField} 분야의 ${context.matchedJobGroup} 역량으로 전환해 설명할 수 있습니다. 복무 중 장비 운용, 조직 조율, 절차 기반 문제 해결 경험을 방산 직무 언어로 정리하는 것이 핵심입니다.`,
+        summary: `${input.specialty} 병과에서 ${input.position} 보직으로 쌓은 경험은 ${context.matchedField} 분야의 ${context.matchedJobGroup} 역량으로 바로 연결됩니다. 특히 ${input.major} 전공과 ${possessed.slice(0, 3).join(", ")} 경험은 방산 직무에서 요구하는 장비 이해, 절차 준수, 문제 해결 역량을 설명하는 근거가 됩니다. 민간 이력서에서는 이 경험을 직무 언어로 재구성해 보여주는 것이 핵심입니다.`,
         keywords: Array.from(
           new Set([
             context.matchedField,
@@ -732,28 +772,28 @@ export function buildFallbackAnalysis(input: AnalyzeInput, context: PreparedCont
           ]),
         ),
       },
-      recommended_companies: context.companies.map((company, index) => ({
+      recommended_companies: context.companies.slice(0, 3).map((company, index) => ({
         company_name: company.company_name,
         fit_score: Math.max(72, 94 - index * 4),
-        reason: `${company.defense_field} 분야 지정업체이며, 공개 계약 데이터 기준 후보군 내 사업 규모가 높아 관련 직무 탐색 우선순위가 높습니다.`,
+        reason: `${input.specialty} 병과와 ${input.position} 경험을 ${company.defense_field} 분야 직무로 연결해 설명하기 좋고, 공개 데이터 기준 사업 연속성이 확인되는 후보입니다. ${company.recent_contract_year ? `${company.recent_contract_year}년 최근 계약` : "최근 계약연도는 미확보지만"} ${company.total_contract_amount ? `${formatWon(company.total_contract_amount)} 규모의 계약 데이터가 있어` : "계약 원천을 통해"} 우선 검토할 가치가 있습니다.`,
         recommended_positions: topJobs.slice(0, 2).map((job) => job.job_title),
       })),
       skill_gap: {
         possessed,
         missing,
         analysis:
-          "현재 군 경력은 도메인 이해와 운용 경험 측면에서 강점이 있습니다. 민간 방산 직무 전환을 위해서는 요구역량 데이터에 있는 개발도구, 시험평가, 품질/체계공학 역량을 우선 보완해야 합니다.",
+          `현재 프로필의 강점은 ${possessed.slice(0, 4).join(", ")}처럼 이미 설명 가능한 군 경력 자산이 있다는 점입니다. 다만 방산 민간 직무에서는 ${missing.slice(0, 5).join(", ")} 같은 키워드를 함께 제시해야 서류 설득력이 높아집니다. 즉, 지금 필요한 것은 경험 자체를 새로 만드는 것보다 기존 경험을 직무 언어와 증빙으로 번역하는 작업입니다. 먼저 목표 직무 1~2개를 정하고 부족역량을 교육·자격증·프로젝트 기록으로 보완하는 순서가 적절합니다.`,
       },
       education_roadmap: roadmap,
       recommended_certs: Array.from(
         new Set(context.educationCerts.map((education) => education.cert_name).filter(Boolean)),
       ).slice(0, 5),
       discharge_timing: {
-        now: "지금 전역하면 현장 운용 경험을 강점으로 지원할 수 있으나, 민간 직무 키워드와 교육 이수 증빙은 보완이 필요합니다.",
+        now: "지금 전역하면 현재 보직 경험을 빠르게 민간 지원서로 전환할 수 있다는 장점이 있습니다. 다만 부족역량을 보여줄 교육 이수, 자격증, 프로젝트 정리가 아직 약하면 서류 설득력이 떨어질 수 있습니다.",
         later:
-          "1~2년 더 복무하며 목표 분야와 연결되는 장비, 사업관리, 정비, 시험평가 경험을 명확히 쌓으면 직무 적합도 설명이 쉬워집니다.",
+          "1~2년 더 복무하면 목표 직무와 직접 연결되는 장비 운용, 정비, 사업관리, 시험평가 경험을 더 선명하게 쌓을 수 있습니다. 특히 부족역량을 보완할 시간을 확보하면 지원 스토리가 더 또렷해집니다.",
         recommendation:
-          "목표 기업을 먼저 좁히고 3개월 단위로 교육·자격증·프로젝트 기록을 정리한 뒤 전역 시점을 결정하는 전략이 적합합니다.",
+          "우선 목표 기업과 목표 직무를 2~3개로 좁힌 뒤, 부족역량 보완 계획과 이력서 근거를 3개월 단위로 정리해보세요. 그 준비가 이미 가능하다면 조기 전역도 검토할 수 있고, 아직 근거가 약하면 추가 복무로 스토리를 더 쌓는 편이 유리합니다.",
       },
     },
     context,
