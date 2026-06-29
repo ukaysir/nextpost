@@ -207,7 +207,7 @@ function compactCompanies(companies: Company[], context: PreparedContext) {
       defense_field: company.defense_field,
       total_contract_amount: company.total_contract_amount,
       recent_contract_year: company.recent_contract_year,
-      is_cost_certified: company.is_cost_certified,
+      cost_certification: company.is_cost_certified ? "원가관리 인증 확인" : "원가관리 인증 미확인",
       avg_salary: company.avg_salary ?? latestFinancial?.avg_salary ?? null,
       summary: detail?.summary ?? null,
       main_products: detail?.main_products.slice(0, 4) ?? [],
@@ -682,7 +682,9 @@ ${compactGlossary}
 6. education_roadmap.reason은 해당 교육이 어떤 부족역량 또는 목표직무를 메우는지 구체적으로 적으세요.
 7. discharge_timing.now/later/recommendation은 현재 부족역량과 데이터상 준비상태를 근거로 비교해 작성하세요.
 8. 데이터가 없는 경우에는 없다고 명시하고 추측하지 마세요.
-9. 제공된 데이터 안에서만 회사, 직무, 교육, 자격증을 선택하세요. 제공되지 않은 회사, 교육명, 자격증명은 절대 생성하지 마세요.`;
+9. 제공된 데이터 안에서만 회사, 직무, 교육, 자격증을 선택하세요. 제공되지 않은 회사, 교육명, 자격증명은 절대 생성하지 마세요.
+10. 사용자에게 내부 데이터 키, 영문 필드명, true/false 값, JSON 구조를 절대 노출하지 말고 쉬운 한국어 라벨로 풀어 쓰세요.
+11. 굵게 표시, 표, 코드블록 같은 마크다운 문법을 쓰지 말고 일반 문장으로 작성하세요.`;
 }
 
 
@@ -700,7 +702,7 @@ export async function runOpenAiAnalysis(input: AnalyzeInput, context: PreparedCo
 
   const model = process.env.OPENAI_MODEL || "gpt-5.4-nano";
   const systemPrompt =
-    "당신은 전역 간부의 방산 취업을 돕는 시니어 커리어 전략가입니다. 사용자의 군 경력과 제공된 공개 데이터를 함께 읽고, 각 결론마다 왜 그런 판단을 했는지 한국어로 분명하게 설명하세요. 데이터가 없는 항목은 없다고 적고 추측하지 마세요.";
+    "당신은 전역 간부의 방산 취업을 돕는 시니어 커리어 전략가입니다. 사용자의 군 경력과 제공된 공개 데이터를 함께 읽고, 각 결론마다 왜 그런 판단을 했는지 한국어로 분명하게 설명하세요. 데이터가 없는 항목은 없다고 적고 추측하지 마세요. 내부 데이터 키, 영문 필드명, true/false 값, JSON 구조, 마크다운 문법은 사용자 답변에 노출하지 마세요.";
   const userPrompt = buildPrompt(input, context, context.glossaryTerms);
   const client = new OpenAI({
     apiKey,

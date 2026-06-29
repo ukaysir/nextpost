@@ -15,6 +15,28 @@ type ChatContextInput = {
   analysisResult?: AnalysisResult;
 };
 
+function costCertificationLabel(value?: boolean | null) {
+  if (value === true) return "원가관리 인증 확인";
+  if (value === false) return "원가관리 인증 미확인";
+  return "원가관리 인증 정보 없음";
+}
+
+function cleanAssistantAnswer(answer: string) {
+  return answer
+    .replace(/\*\*(.*?)\*\*/g, "$1")
+    .replace(/__(.*?)__/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/is_cost_certified\s*=\s*true/gi, "원가관리 인증이 확인됩니다")
+    .replace(/is_cost_certified\s*=\s*false/gi, "원가관리 인증은 확인되지 않았습니다")
+    .replace(/is_cost_certified/gi, "원가관리 인증")
+    .replace(/careers_page_url/gi, "채용 페이지")
+    .replace(/total_contract_amount/gi, "총 계약금액")
+    .replace(/recent_contract_year/gi, "최근 계약연도")
+    .replace(/source_grade/gi, "출처 등급")
+    .replace(/true/g, "확인")
+    .replace(/false/g, "미확인");
+}
+
 function getLastUserMessage(messages: ChatMessage[]) {
   return [...messages].reverse().find((message) => message.role === "user")?.content ?? "";
 }
@@ -123,14 +145,32 @@ async function selectRelevantContext({ messages, analysisResult }: ChatContextIn
           matched_job_group: analysisResult.matched_job_group,
           skill_translation: analysisResult.skill_translation,
           skill_gap: analysisResult.skill_gap,
-          recommended_companies: analysisResult.recommended_companies.slice(0, 5),
+          recommended_companies: analysisResult.recommended_companies.slice(0, 5).map((company) => ({
+            company_name: company.company_name,
+            defense_field: company.defense_field,
+            fit_score: company.fit_score,
+            reason: company.reason,
+            recommended_positions: company.recommended_positions,
+            total_contract_amount_label: formatWon(company.total_contract_amount ?? 0),
+            recent_contract_year: company.recent_contract_year,
+            cost_certification: costCertificationLabel(company.is_cost_certified),
+            careers_page: company.careers_page_url ? "채용 페이지 확인" : "채용 페이지 미확보",
+            avg_salary_label: company.avg_salary ? `${company.avg_salary.toLocaleString("ko-KR")}만원` : "연봉 정보 없음",
+          })),
           matching_evidence: analysisResult.matching_evidence,
           field_market_summary: analysisResult.field_market_summary,
           industry_growth: analysisResult.industry_growth,
           data_reliability: analysisResult.data_reliability,
           recommendation_evidence: analysisResult.recommendation_evidence,
           data_coverage_summary: analysisResult.data_coverage_summary,
-          company_details: analysisResult.company_details,
+          company_details: analysisResult.company_details?.slice(0, 5).map((detail) => ({
+            company_name: detail.company_name,
+            summary: detail.summary,
+            main_products: detail.main_products,
+            contracts: detail.contracts.slice(0, 3),
+            job_postings: detail.job_postings.slice(0, 3),
+            source_count: detail.sources.length,
+          })),
           recommended_certs: analysisResult.recommended_certs,
           discharge_timing: analysisResult.discharge_timing,
         }
@@ -141,8 +181,8 @@ async function selectRelevantContext({ messages, analysisResult }: ChatContextIn
       total_contract_amount: company.total_contract_amount,
       total_contract_amount_label: formatWon(company.total_contract_amount),
       recent_contract_year: company.recent_contract_year,
-      is_cost_certified: company.is_cost_certified,
-      careers_page_url: company.careers_page_url,
+      cost_certification: costCertificationLabel(company.is_cost_certified),
+      careers_page: company.careers_page_url ? "채용 페이지 확인" : "채용 페이지 미확보",
     })),
     jobs: jobs.map((job) => ({
       job_title: job.job_title,
@@ -173,7 +213,7 @@ async function buildMessagesForModel(input: ChatContextInput) {
     {
       role: "system" as const,
       content:
-        "당신은 NEXTPOST의 방산 커리어 상담 AI입니다. 반드시 제공된 분석 결과와 공공데이터 컨텍스트에 근거해 답하세요. 데이터에 없는 회사, 채용공고, 연봉, 교육을 사실처럼 만들지 마세요. 정보가 부족하면 부족하다고 말하고, 확인 가능한 다음 행동을 제시하세요. 답변은 한국어로 3~7문장 또는 짧은 bullet로 작성하세요.",
+        "당신은 NEXTPOST의 방산 커리어 상담 AI입니다. 반드시 제공된 분석 결과와 공공데이터 컨텍스트에 근거해 답하세요. 데이터에 없는 회사, 채용공고, 연봉, 교육을 사실처럼 만들지 마세요. 정보가 부족하면 부족하다고 말하고, 확인 가능한 다음 행동을 제시하세요. 답변은 한국어로 3~7문장 또는 짧은 bullet로 작성하세요. 사용자에게 내부 데이터 키, 영문 필드명, true/false 값, JSON 구조를 절대 노출하지 말고 쉬운 한국어 라벨로 풀어 쓰세요. 굵게 표시, 표, 코드블록 같은 마크다운 문법은 쓰지 마세요.",
     },
     {
       role: "user" as const,
@@ -211,7 +251,7 @@ export async function runOpenAiChat(input: ChatContextInput) {
     throw new Error("OpenAI 응답이 비어 있습니다.");
   }
 
-  return response.output_text;
+  return cleanAssistantAnswer(response.output_text);
 }
 
 export async function buildFallbackChat(input: ChatContextInput) {
