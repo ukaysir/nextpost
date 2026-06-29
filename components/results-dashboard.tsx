@@ -176,7 +176,7 @@ export function ResultsDashboard({
         </div>
       ) : null}
 
-      <div className="mx-auto max-w-[1480px] px-3 py-5 md:px-6 md:py-10">
+      <div className="mx-auto max-w-[1380px] px-3 py-5 md:px-5 md:py-8">
         <div className="mb-4 grid gap-2 no-print sm:flex sm:flex-wrap sm:items-center">
           <Link
             className="focus-ring inline-flex h-10 items-center justify-center gap-2 rounded-[9px] border border-[var(--border)] bg-white px-3 text-sm font-extrabold text-[var(--caption)] sm:justify-start"
@@ -244,10 +244,10 @@ export function ResultsDashboard({
           ))}
         </nav>
 
-        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(380px,480px)] xl:items-start">
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(340px,420px)] xl:items-start">
           <div className="min-w-0">
             <article className="np-card overflow-hidden">
-              <section className="scroll-mt-28 p-4 md:p-8" id="report-summary">
+              <section className="scroll-mt-28 p-4 md:p-7" id="report-summary">
                 <div className="grid gap-4 md:grid-cols-[1fr_220px] md:items-start md:gap-6">
                   <div>
                     <p className="text-xs font-black tracking-[1px] text-[var(--primary)] md:text-sm">
@@ -257,7 +257,7 @@ export function ResultsDashboard({
                       MY 방산 커리어 리포트
                     </h1>
                     <ReadableText
-                      className="mt-3 text-sm font-medium leading-7 text-[var(--muted-foreground)] md:mt-4 md:text-[15px] md:leading-8"
+                      className="mt-3 text-sm font-medium leading-7 text-[var(--muted-foreground)] md:mt-4 md:text-[15px] md:leading-7"
                       text={result.skill_translation.summary}
                     />
                   </div>
@@ -304,7 +304,7 @@ export function ResultsDashboard({
                     </div>
                   </div>
 
-                  <div className="grid gap-3 md:grid-cols-2">
+                  <div className="grid gap-3 md:grid-cols-2 md:[&>article]:min-h-[164px]">
                     {(result.job_cards ?? []).map((job) => (
                       <article
                         className="rounded-[12px] border border-[var(--border)] bg-white p-4"
@@ -369,7 +369,7 @@ export function ResultsDashboard({
                       className="mt-3 text-sm leading-7 text-[var(--muted-foreground)]"
                       text={result.skill_gap.analysis}
                     />
-                    <div className="mt-5 rounded-[14px] border border-[var(--border)] bg-[#FAFBFC] p-4">
+                    <div className="mt-5 rounded-[14px] border border-[var(--border)] bg-[#FAFBFC] p-4 md:p-5">
                       <div className="flex flex-wrap items-end justify-between gap-3">
                         <div>
                           <p className="text-xs font-black text-[var(--caption)]">현재 준비도</p>
@@ -528,8 +528,8 @@ function CompanyCard({
   const careerUrl = detail?.careers_page_url ?? company.careers_page_url;
 
   return (
-    <article className="rounded-[14px] border border-[var(--border)] bg-white p-4 md:rounded-[16px] md:p-6">
-      <div className="grid gap-5 lg:grid-cols-[1fr_104px]">
+    <article className="rounded-[14px] border border-[var(--border)] bg-white p-4 md:rounded-[16px] md:p-5">
+      <div className="grid gap-4 lg:grid-cols-[1fr_96px]">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-lg font-black md:text-xl">{company.company_name}</h3>
@@ -542,7 +542,7 @@ function CompanyCard({
             ) : null}
           </div>
 
-          <div className="mt-3 rounded-[12px] bg-[#F8FAFB] p-4">
+          <div className="mt-3 rounded-[12px] bg-[#F8FAFB] p-3.5">
             <p className="text-sm font-black text-[var(--primary)]">AI 분석</p>
             <ReadableText
               className="mt-2 text-sm font-medium leading-7 text-[var(--muted-foreground)]"
@@ -585,7 +585,7 @@ function CompanyCard({
             {careerUrl ? <ExternalButton href={careerUrl} label="채용 페이지" /> : null}
           </div>
 
-          <details className="group mt-5 rounded-[14px] border border-[var(--border)] bg-[#FAFBFC]">
+          <details className="group mt-4 rounded-[14px] border border-[var(--border)] bg-[#FAFBFC]">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 font-black">
               <span>공개 데이터 근거</span>
               <ChevronDown
@@ -593,7 +593,7 @@ function CompanyCard({
                 size={18}
               />
             </summary>
-            <div className="grid gap-4 border-t border-[var(--border)] p-3 md:gap-5 md:p-4">
+            <div className="grid gap-3 border-t border-[var(--border)] p-3 md:p-4">
               {evidence.length ? <EvidenceList evidence={evidence} /> : null}
               <JobSignalList postings={detail?.job_postings ?? []} />
             </div>
@@ -690,7 +690,7 @@ function ReportSection({
   title: string;
 }) {
   return (
-    <section className="scroll-mt-28 p-4 md:p-8" id={id}>
+    <section className="scroll-mt-28 p-4 md:p-7" id={id}>
       <div className="mb-4 flex items-center gap-2 md:mb-5 md:gap-3">
         <Icon className="text-[var(--primary)]" size={21} />
         <h2 className="text-xl font-black tracking-normal md:text-2xl md:tracking-[-0.4px]">{title}</h2>
@@ -909,9 +909,9 @@ function ReadableText({ className, text }: { className?: string; text: string })
   const paragraphs = splitReadableText(text);
 
   return (
-    <div className={cn("break-words [overflow-wrap:anywhere]", className)}>
+    <div className={cn("space-y-1 break-words [overflow-wrap:anywhere]", className)}>
       {paragraphs.map((paragraph) => (
-        <p className="my-2 first:mt-0 last:mb-0" key={paragraph}>
+        <p key={paragraph}>
           {paragraph}
         </p>
       ))}
@@ -936,7 +936,7 @@ function splitReadableText(value: string) {
 
   for (const sentence of sentences) {
     const next = current ? `${current} ${sentence}` : sentence;
-    if (current && next.length > 150) {
+    if (current && next.length > 240) {
       paragraphs.push(current);
       current = sentence;
     } else {
