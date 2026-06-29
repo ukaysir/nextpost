@@ -96,6 +96,7 @@ const responseSchema = {
 const openAiTimeoutMs = Number(process.env.OPENAI_TIMEOUT_MS ?? 30000);
 
 export type PreparedContext = {
+  input: AnalyzeInput;
   matchedField: string;
   matchedJobGroup: string;
   matchingEvidence?: CareerMapping & { matchedBy: string[] };
@@ -162,6 +163,7 @@ export async function prepareAnalysisContext(input: AnalyzeInput): Promise<Prepa
           .slice(0, 7);
 
   return {
+    input,
     matchedField,
     matchedJobGroup,
     matchingEvidence,
@@ -282,12 +284,7 @@ export function enrichAnalysisResult(
     matched_job_group: context.matchedJobGroup,
     matching_evidence: buildMatchingEvidence(context),
     recommended_companies: enrichedCompanies,
-    job_cards: context.jobRequirements.map((job) => ({
-      job_title: job.job_title,
-      required_skills: job.required_skills,
-      preferred_military_exp: job.preferred_military_exp,
-      related_weapon_system: job.related_weapon_system,
-    })),
+    job_cards: buildJobCards(context),
     field_market_summary: buildMarketSummary(context),
     industry_growth: buildIndustryGrowth(context.industryStats),
     education_groups: buildEducationGroups(context.educationCerts),
@@ -303,7 +300,150 @@ export function enrichAnalysisResult(
     })),
     data_coverage_summary: buildDataCoverageSummary(enrichedCompanies, companyDetails),
     company_details: companyDetails,
+    skill_gap: {
+      ...result.skill_gap,
+      possessed_details: buildSkillDetails(result.skill_gap.possessed, "possessed"),
+      missing_details: buildSkillDetails(result.skill_gap.missing, "missing"),
+    },
+    discharge_timing: {
+      ...result.discharge_timing,
+      ...buildDischargeTimingDetails(result, context),
+    },
   };
+}
+
+function buildJobCards(context: PreparedContext): NonNullable<AnalysisResult["job_cards"]> {
+  const scoredJobs = context.jobRequirements
+    .map((job, index) => {
+      const fitScore = calculateJobFitScore(job, context, index);
+      const fitLabel = fitScore >= 88 ? "최적합" : fitScore >= 76 ? "적합" : "검토";
+
+      return {
+        job_title: job.job_title,
+        required_skills: job.required_skills,
+        preferred_military_exp: job.preferred_military_exp,
+        related_weapon_system: job.related_weapon_system,
+        fit_label: fitLabel as "최적합" | "적합" | "검토",
+        fit_score: fitScore,
+        match_reason: buildJobMatchReason(job, context),
+      };
+    })
+    .sort((a, b) => (b.fit_score ?? 0) - (a.fit_score ?? 0));
+
+  return scoredJobs.map((job, index) => ({
+    ...job,
+    fit_label: index === 0 ? "최적합" : job.fit_label,
+  }));
+}
+
+function calculateJobFitScore(job: JobRequirement, context: PreparedContext, index: number) {
+  const haystack = [
+    job.job_title,
+    job.preferred_military_exp,
+    job.related_weapon_system,
+    ...job.required_skills,
+  ]
+    .join(" ")
+    .toLowerCase();
+  const input = context.input;
+  const signals = [
+    input.specialty,
+    input.position,
+    input.major,
+    input.desired_field,
+    context.matchedField,
+    context.matchedJobGroup,
+    ...input.certifications,
+  ]
+    .filter(Boolean)
+    .flatMap((value) => value.split(/[,/·\s()]+/))
+    .map((value) => value.trim().toLowerCase())
+    .filter((value) => value.length >= 2);
+  const uniqueSignals = Array.from(new Set(signals));
+  const hits = uniqueSignals.filter((signal) => haystack.includes(signal)).length;
+  const base = 72 - index * 4;
+  const evidenceBonus = Math.min(hits * 5, 18);
+  const matchingBonus = context.matchingEvidence ? 4 : 0;
+  const score = base + evidenceBonus + matchingBonus;
+  return Math.max(62, Math.min(96, score));
+}
+
+function buildJobMatchReason(job: JobRequirement, context: PreparedContext) {
+  const input = context.input;
+  const anchors = [input.specialty, input.position, input.major]
+    .filter(Boolean)
+    .slice(0, 3)
+    .join(" · ");
+  const skills = job.required_skills.slice(0, 3).join(", ");
+  const system = job.related_weapon_system ? `${job.related_weapon_system}와 연결되고, ` : "";
+
+  return `${anchors} 경험을 ${context.matchedField} 분야의 ${job.job_title} 직무 언어로 전환할 수 있습니다. ${system}핵심 요구역량은 ${skills || "채용 요구역량"}입니다.`;
+}
+
+function buildSkillDetails(items: string[], type: "possessed" | "missing") {
+  return items
+    .map(formatShortSkill)
+    .filter(Boolean)
+    .slice(0, 5)
+    .map((name, index) => {
+      const score = type === "possessed" ? Math.max(62, 92 - index * 7) : Math.min(58, 24 + index * 8);
+      const level =
+        type === "possessed"
+          ? index < 2 ? "상" : index < 4 ? "중상" : "중"
+          : index < 2 ? "하" : index < 4 ? "중하" : "중";
+
+      return {
+        name,
+        level,
+        score,
+        priority: type === "missing" ? (index < 2 ? "우선" : index < 4 ? "중요" : "보완") : undefined,
+        reason:
+          type === "possessed"
+            ? "현재 경력에서 바로 설명 가능한 강점입니다."
+            : "목표 직무 전환 시 증빙을 보강해야 하는 항목입니다.",
+      };
+    });
+}
+
+function buildDischargeTimingDetails(result: AnalysisResult, context: PreparedContext) {
+  const missing = result.skill_gap.missing.map(formatShortSkill).filter(Boolean).slice(0, 2);
+  const possessed = result.skill_gap.possessed.map(formatShortSkill).filter(Boolean).slice(0, 2);
+  const years = context.input.years_served;
+
+  return {
+    now_details: {
+      label: "유리도 높음",
+      pros: [
+        `${context.input.rank}·${years}년 경력을 바로 민간 직무 언어로 전환 가능`,
+        `${possessed.join(", ") || context.matchedField} 강점을 지원서에서 즉시 활용 가능`,
+        "추천 기업과 채용 페이지를 기준으로 바로 지원 전략 수립 가능",
+      ],
+      cautions: [
+        `${missing.join(", ") || "부족 역량"}은 교육·프로젝트 증빙으로 보완 필요`,
+      ],
+    },
+    later_details: {
+      label: "유리도 보통",
+      pros: [
+        "전역 전 교육·자격증 준비 시간을 확보할 수 있음",
+        "부족 역량을 실무 사례나 교육 이수로 보완 가능",
+      ],
+      cautions: [
+        "채용 수요와 공고 조건은 시간이 지나며 변동될 수 있음",
+        "추가 복무가 민간 직무 경험을 대체하지는 않으므로 목표 직무 증빙을 따로 준비해야 함",
+      ],
+    },
+  };
+}
+
+function formatShortSkill(value: string) {
+  return value
+    .replace(/\s*\((?:데이터\s*제공|데이터제공|제공\s*데이터|데이터가\s*제공됨|데이터\s*없음|확인\s*불가)[^)]+\)\s*/g, " ")
+    .replace(/(?:보유\s*여부\s*)?(?:데이터\s*없음|확인\s*불가|데이터\s*미제공|데이터가\s*제공되지\s*않음)/g, "")
+    .replace(/[·•]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 28);
 }
 
 function buildDataCoverageSummary(
@@ -678,10 +818,10 @@ ${compactGlossary}
 2. skill_translation.summary는 사용자의 보직, 전공, 자격증 중 2개 이상을 직접 언급하며 왜 ${context.matchedField}/${context.matchedJobGroup}으로 연결되는지 3~4문장으로 설명하세요.
 3. recommended_companies는 최대 3개만 추천하세요.
 4. 각 recommended_companies.reason은 2~3문장으로 작성하고, 반드시 사용자 배경 1개 이상 + 회사 데이터 근거 2개 이상(계약, 최근연도, 인증, 채용신호, 제품/프로필, 연봉, 출처 중)을 직접 언급하세요.
-5. skill_gap.analysis는 현재 강점, 부족역량, 왜 우선 보완해야 하는지까지 사용자가 납득할 수 있게 4~5문장으로 작성하세요.
-6. skill_gap.possessed와 skill_gap.missing은 설명문이 아니라 24자 이하의 짧은 역량 키워드만 넣으세요. 괄호 안에 "데이터 제공", "데이터 없음", "확인 불가" 같은 출처/상태 설명을 붙이지 마세요.
-7. education_roadmap.reason은 해당 교육이 어떤 부족역량 또는 목표직무를 메우는지 구체적으로 적으세요.
-8. discharge_timing.now/later/recommendation은 현재 부족역량과 데이터상 준비상태를 근거로 비교해 작성하세요.
+5. skill_gap.analysis는 현재 강점, 부족역량, 우선 보완 이유를 사용자가 납득할 수 있게 3~4문장으로 작성하세요.
+6. skill_gap.possessed와 skill_gap.missing은 설명문이 아니라 24자 이하의 짧은 역량 키워드만 넣으세요. UI 막대 항목으로 쓰이므로 한 항목에 여러 문장을 넣지 마세요.
+7. education_roadmap은 가능하면 입문, 중급, 심화 3단계로 구성하고, reason은 해당 교육이 어떤 부족역량 또는 목표직무를 메우는지 1~2문장으로 적으세요.
+8. discharge_timing.now/later/recommendation은 현재 강점과 부족역량을 근거로 비교하되, 각 항목은 2~3문장 이내로 짧게 작성하세요.
 9. 데이터가 없는 경우에는 없다고 명시하고 추측하지 마세요.
 10. 제공된 데이터 안에서만 회사, 직무, 교육, 자격증을 선택하세요. 제공되지 않은 회사, 교육명, 자격증명은 절대 생성하지 마세요.
 11. 사용자에게 내부 데이터 키, 영문 필드명, true/false 값, JSON 구조를 절대 노출하지 말고 쉬운 한국어 라벨로 풀어 쓰세요.
@@ -752,13 +892,24 @@ export function buildFallbackAnalysis(input: AnalyzeInput, context: PreparedCont
     ...input.certifications,
   ].filter(Boolean);
   const missing = Array.from(new Set(topJobs.flatMap((job) => job.required_skills))).slice(0, 6);
-  const roadmap = context.educationCerts.slice(0, 5).map((education, index) => ({
-    step: index + 1,
-    level: education.level,
-    education_name: education.education_name,
-    education_link: education.education_link,
-    reason: `${education.job_title} 직무 요구역량 보완에 직접 연결됩니다.`,
-  }));
+  const roadmapLevels = ["입문", "중급", "심화"];
+  const roadmap = roadmapLevels
+    .map((level, index) => {
+      const education =
+        context.educationCerts.find((item) => item.level === level) ??
+        context.educationCerts[index] ??
+        context.educationCerts[0];
+      if (!education) return null;
+
+      return {
+        step: index + 1,
+        level,
+        education_name: education.education_name,
+        education_link: education.education_link,
+        reason: `${education.job_title || context.matchedJobGroup} 직무 요구역량 중 ${missing.slice(0, 2).join(", ")} 보완에 연결됩니다.`,
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => Boolean(item));
 
   return enrichAnalysisResult(
     {

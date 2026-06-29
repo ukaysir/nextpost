@@ -44,6 +44,7 @@ type ResultPayload = AnalysisResult & {
 };
 
 type CompanyDetail = NonNullable<AnalysisResult["company_details"]>[number];
+type JobMatch = NonNullable<AnalysisResult["job_cards"]>[number];
 type RecommendedCompany = AnalysisResult["recommended_companies"][number];
 
 export function ResultsDashboard({
@@ -154,7 +155,7 @@ export function ResultsDashboard({
   ];
 
   return (
-    <main className="min-h-screen bg-[var(--background)]">
+    <main className="min-h-screen bg-[#e9edf3]">
       <header className="np-image-nav sticky top-0 z-30 border-b border-white/10 text-white no-print">
         <div className="page-shell flex items-center py-4 md:py-5">
           <Link className="text-lg font-black tracking-[1px] md:text-xl" href="/">
@@ -176,8 +177,8 @@ export function ResultsDashboard({
         </div>
       ) : null}
 
-      <div className="mx-auto max-w-[1380px] px-3 py-5 md:px-5 md:py-8">
-        <div className="mb-4 grid gap-2 no-print sm:flex sm:flex-wrap sm:items-center">
+      <div className="mx-auto max-w-[1100px] px-4 py-6 md:px-5 md:py-10">
+        <div className="mx-auto mb-5 grid max-w-[920px] gap-2 no-print sm:flex sm:flex-wrap sm:items-center">
           <Link
             className="focus-ring inline-flex h-10 items-center justify-center gap-2 rounded-[9px] border border-[var(--border)] bg-white px-3 text-sm font-extrabold text-[var(--caption)] sm:justify-start"
             href="/analyze"
@@ -232,7 +233,7 @@ export function ResultsDashboard({
           </div>
         </div>
 
-        <nav className="no-print sticky top-[57px] z-20 -mx-3 mb-4 flex gap-2 overflow-x-auto border-y border-[var(--border)] bg-[var(--background)] px-3 py-2 sm:hidden">
+        <nav className="no-print sticky top-[57px] z-20 -mx-4 mb-5 flex gap-2 overflow-x-auto border-y border-[#dce3ee] bg-[#e9edf3] px-4 py-2 sm:hidden">
           {mobileTabs.map((tab) => (
             <a
               className="shrink-0 rounded-full border border-[var(--border)] bg-white px-3 py-2 text-xs font-black text-[var(--muted-foreground)]"
@@ -244,30 +245,52 @@ export function ResultsDashboard({
           ))}
         </nav>
 
-        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(340px,420px)] xl:items-start">
+        <div className="mx-auto max-w-[920px]">
           <div className="min-w-0">
-            <article className="np-card overflow-hidden">
-              <section className="scroll-mt-28 p-4 md:p-7" id="report-summary">
-                <div className="grid gap-4 md:grid-cols-[1fr_220px] md:items-start md:gap-6">
+            <article className="space-y-6">
+              <section className="scroll-mt-28" id="report-summary">
+                <h1 className="mb-6 text-[34px] font-extrabold leading-tight tracking-normal text-[#1d2533] md:text-[46px]">
+                  <span className="text-[#15316f]">MY</span>
+                  <span className="text-[#46506a]"> 방산 커리어 분석</span>
+                </h1>
+                <div className="rounded-[20px] bg-white shadow-[0_8px_30px_-16px_rgba(40,55,80,.25)]">
+                  <div className="border-b border-[#eaeef4] bg-[#f4f6fa] px-5 py-5 md:px-7">
+                    <h2 className="text-[30px] font-extrabold leading-tight text-[#1d2533] md:text-[40px]">
+                      군경력 번역
+                    </h2>
+                    <p className="mt-1 text-[13px] font-medium leading-6 text-[#6b7890]">
+                      군 보직·경력을 방산업계가 이해하는 직무역량 언어로 변환합니다.
+                    </p>
+                  </div>
+                  <div className="grid gap-5 px-5 py-6 md:grid-cols-[1fr_180px] md:items-start md:px-7">
                   <div>
-                    <p className="text-xs font-black tracking-[1px] text-[var(--primary)] md:text-sm">
+                    <p className="text-[22px] font-extrabold text-[#15316f]">
+                      군 경력 요약
+                    </p>
+                    <p className="mt-2 text-sm font-bold text-[#6b7890]">
                       {result.matched_field} · {result.matched_job_group}
                     </p>
-                    <h1 className="mt-2 text-[26px] font-black leading-tight tracking-normal md:mt-3 md:text-[35px] md:tracking-[-0.6px]">
-                      MY 방산 커리어 리포트
-                    </h1>
                     <ReadableText
-                      className="mt-3 text-sm font-medium leading-7 text-[var(--muted-foreground)] md:mt-4 md:text-[15px] md:leading-7"
+                      className="mt-3 text-[15px] font-medium leading-8 text-[#34405a]"
                       text={result.skill_translation.summary}
                     />
+                    <div className="mt-6">
+                      <p className="text-[22px] font-extrabold text-[#15316f]">이력서 활용가능 키워드</p>
+                      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                        {result.skill_translation.keywords.slice(0, 8).map((keyword) => (
+                          <KeywordCard keyword={keyword} key={keyword} />
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                  <div className="rounded-[12px] bg-white p-4 text-center md:rounded-[14px] md:p-5">
-                    <p className="text-xs font-extrabold text-[#5b6b82] md:text-sm">최상위 기업 적합도</p>
-                    <p className="mt-2 text-[48px] font-black leading-none tracking-normal md:text-[64px] md:tracking-[-1px]">
+                  <div className="rounded-[16px] border border-[#e9edf4] bg-[#fbfcfe] p-4 text-center">
+                    <p className="text-xs font-extrabold text-[#6b7890]">최상위 기업 적합도</p>
+                    <p className="mt-2 text-[54px] font-extrabold leading-none text-[#1d2533]">
                       {topScore}
                     </p>
-                    <p className="mt-2 text-xs font-black text-[var(--caption)]">점</p>
+                    <p className="mt-2 text-xs font-extrabold text-[#8a96ab]">점</p>
                   </div>
+                </div>
                 </div>
 
               </section>
@@ -304,37 +327,9 @@ export function ResultsDashboard({
                     </div>
                   </div>
 
-                  <div className="grid gap-3 md:grid-cols-2 md:[&>article]:min-h-[164px]">
+                  <div className="grid gap-3 md:grid-cols-2">
                     {(result.job_cards ?? []).map((job) => (
-                      <article
-                        className="rounded-[12px] border border-[var(--border)] bg-white p-4"
-                        key={job.job_title}
-                      >
-                        <div className="flex flex-wrap items-center justify-between gap-2">
-                          <h3 className="font-black">{job.job_title}</h3>
-                          {job.related_weapon_system ? (
-                            <span className="rounded-full bg-[#EEF4FA] px-3 py-1 text-xs font-black text-[#506580]">
-                              {job.related_weapon_system}
-                            </span>
-                          ) : null}
-                        </div>
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          {job.required_skills.map((skill) => (
-                            <span
-                              className="rounded-full bg-[#F4F6F8] px-3 py-1 text-xs font-extrabold text-[#5b6b82]"
-                              key={skill}
-                            >
-                              {skill}
-                            </span>
-                          ))}
-                        </div>
-                        {job.preferred_military_exp ? (
-                          <ReadableText
-                            className="mt-3 text-sm leading-6 text-[var(--muted-foreground)]"
-                            text={job.preferred_military_exp}
-                          />
-                        ) : null}
-                      </article>
+                      <JobMatchCard job={job} key={job.job_title} />
                     ))}
                   </div>
                 </div>
@@ -362,69 +357,63 @@ export function ResultsDashboard({
 
               <Divider />
 
-              <ReportSection icon={Target} id="report-skills" title="직무 준비도">
-                <div className="grid gap-5">
-                  <div>
-                    <ReadableText
-                      className="mt-3 text-sm leading-7 text-[var(--muted-foreground)]"
-                      text={result.skill_gap.analysis}
-                    />
-                    <div className="mt-5 rounded-[14px] border border-[var(--border)] bg-[#FAFBFC] p-4 md:p-5">
-                      <div className="flex flex-wrap items-end justify-between gap-3">
-                        <div>
-                          <p className="text-xs font-black text-[var(--caption)]">현재 준비도</p>
-                          <p className="mt-1 text-2xl font-black text-[var(--foreground)]">62%</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-xs font-black text-[var(--caption)]">보완 후 목표</p>
-                          <p className="mt-1 text-2xl font-black text-[var(--accent)]">88%</p>
-                        </div>
-                        <span className="rounded-full bg-[#E9F6EF] px-3 py-1 text-xs font-black text-[var(--success)]">
-                          +26%p 개선
-                        </span>
-                      </div>
-                      <div className="mt-4 h-4 overflow-hidden rounded-full bg-[#EDEFF2]">
-                        <div className="flex h-full w-[88%]">
-                          <div className="h-full w-[70.45%] bg-[var(--accent)]" />
-                          <div className="h-full flex-1 bg-[#A7D9B8]" />
-                        </div>
-                      </div>
-                      <div className="mt-2 grid grid-cols-[62fr_26fr_12fr] text-xs font-black text-[var(--caption)]">
-                        <span>현재 62%</span>
-                        <span className="text-center text-[var(--success)]">보완 구간</span>
-                        <span className="text-right">목표 88%</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="grid gap-3">
-                    <SkillPills title="보유 역량" items={result.skill_gap.possessed} />
-                    <SkillPills title="보완 필요" items={result.skill_gap.missing} />
-                  </div>
+              <ReportSection icon={Target} id="report-skills" title="Skill Gap 분석">
+                <div className="grid gap-5 md:grid-cols-2">
+                  <SkillBarList
+                    accent="#3d5a9a"
+                    details={result.skill_gap.possessed_details}
+                    fallbackItems={result.skill_gap.possessed}
+                    title="보유 역량"
+                  />
+                  <SkillBarList
+                    accent="#c47f3d"
+                    details={result.skill_gap.missing_details}
+                    fallbackItems={result.skill_gap.missing}
+                    title="부족 역량"
+                  />
+                </div>
+                <div className="mt-5 rounded-[14px] bg-[#fbfcfe] p-5">
+                  <p className="text-[20px] font-extrabold text-[#3d5a9a]">* 종합 진단</p>
+                  <ReadableText
+                    className="mt-2 text-[14.5px] font-bold leading-7 text-[#333]"
+                    text={result.skill_gap.analysis}
+                  />
                 </div>
               </ReportSection>
 
               <Divider />
 
               <ReportSection icon={GraduationCap} title="교육 · 자격증 로드맵">
-                <div className="grid gap-3">
+                <div className="grid gap-3 md:grid-cols-3">
                   {result.education_roadmap.map((item) => (
                     <a
-                      className="grid gap-3 rounded-[12px] border border-[var(--border)] p-4 hover:border-[var(--primary)] md:grid-cols-[86px_1fr]"
+                      className="flex min-h-[210px] flex-col rounded-[14px] border border-[#eef1f6] p-5 transition hover:border-[#3d5a9a]"
                       href={item.education_link}
                       key={`${item.step}-${item.education_name}`}
                       rel="noreferrer"
                       target="_blank"
                     >
-                      <div className="text-sm font-black text-[var(--blue-score)]">
-                        STEP {item.step}
-                        <div className="mt-1 text-xs text-[var(--caption)]">{item.level}</div>
+                      <div className="mb-4 flex items-center gap-2">
+                        <span className={cn(
+                          "grid h-[26px] w-[26px] place-items-center rounded-full text-[13px] font-extrabold",
+                          item.step >= 3 ? "bg-[#2a3342] text-white" : "bg-[#eef2fb] text-[#3d5a9a]",
+                        )}>
+                          {item.step}
+                        </span>
+                        <span className="text-[15px] font-extrabold text-[#1d2533]">{item.level}</span>
                       </div>
-                      <div>
-                        <p className="font-black">{item.education_name}</p>
+                      <div className="flex flex-1 flex-col">
+                        <p className="text-[15px] font-extrabold leading-6 text-[#1d2533]">{item.education_name}</p>
                         <ReadableText
-                          className="mt-2 text-sm leading-6 text-[var(--muted-foreground)]"
+                          className="mt-2 text-[13.5px] leading-6 text-[#3a4762]"
                           text={item.reason}
                         />
+                        <span className={cn(
+                          "mt-auto inline-flex h-10 items-center justify-center rounded-[10px] px-3 text-[13px] font-bold",
+                          item.step >= 3 ? "bg-[#2a3342] text-white" : "bg-[#eef2fb] text-[#3d5a9a]",
+                        )}>
+                          강좌 알아보기
+                        </span>
                       </div>
                     </a>
                   ))}
@@ -443,13 +432,23 @@ export function ResultsDashboard({
 
               <ReportSection icon={RotateCcw} title="전역 타이밍">
                 <div className="grid gap-3 md:grid-cols-2">
-                  <TimingCard title="지금 전역" body={result.discharge_timing.now} />
-                  <TimingCard title="추가 복무" body={result.discharge_timing.later} />
+                  <TimingCard
+                    recommended
+                    title="지금 전역"
+                    body={result.discharge_timing.now}
+                    details={result.discharge_timing.now_details}
+                  />
+                  <TimingCard
+                    title="추가 복무"
+                    body={result.discharge_timing.later}
+                    details={result.discharge_timing.later_details}
+                  />
                 </div>
-                <div className="mt-4 rounded-[12px] border border-[#E1E8E6] bg-[#FAFBFC] p-4">
+                <div className="mt-5 rounded-[14px] bg-[#fbfcfe] p-5">
+                  <p className="mb-2 text-[20px] font-extrabold text-[#2e8b6f]">* 추천</p>
                   <ReadableText
-                    className="text-base font-extrabold leading-7"
-                    text={`추천: ${result.discharge_timing.recommendation}`}
+                    className="text-[14.5px] font-bold leading-7 text-[#34405a]"
+                    text={result.discharge_timing.recommendation}
                   />
                 </div>
               </ReportSection>
@@ -457,14 +456,14 @@ export function ResultsDashboard({
             </article>
           </div>
 
-          <aside className="no-print min-h-0 scroll-mt-28 xl:sticky xl:top-[92px]" id="report-chat">
+          <aside className="no-print min-h-0 scroll-mt-28" id="report-chat">
             {isChatOpen ? (
               <DataChat
                 analysisResult={result}
-                className="mt-5 h-[620px] min-h-[500px] xl:mt-0 xl:h-[calc(100dvh-188px)]"
+                className="mt-6 h-[620px] min-h-[500px]"
               />
             ) : (
-              <section className="np-card mt-5 p-5 xl:mt-0">
+              <section className="mt-6 rounded-[20px] bg-white p-5 shadow-[0_8px_30px_-16px_rgba(40,55,80,.25)]">
                 <p className="text-sm font-black text-[var(--primary)]">NEXTPOST AI 상담</p>
                 <h2 className="mt-2 text-xl font-black">리포트 기준으로 질문하기</h2>
                 <p className="mt-3 text-sm font-medium leading-6 text-[var(--muted-foreground)]">
@@ -528,41 +527,32 @@ function CompanyCard({
   const careerUrl = detail?.careers_page_url ?? company.careers_page_url;
 
   return (
-    <article className="rounded-[14px] border border-[var(--border)] bg-white p-4 md:rounded-[16px] md:p-5">
-      <div className="grid gap-4 lg:grid-cols-[1fr_96px]">
+    <article className="rounded-[16px] border border-[#e9edf4] bg-white p-5">
+      <div className="grid gap-5 md:grid-cols-[96px_1fr]">
+        <FitGauge score={company.fit_score} />
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-lg font-black md:text-xl">{company.company_name}</h3>
-            {company.defense_field ? <span className="np-pill px-2.5 py-1">{company.defense_field}</span> : null}
-            {company.is_cost_certified ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-[#E9F6EF] px-2.5 py-1 text-xs font-black text-[var(--success)]">
-                <CheckCircle2 size={13} />
-                원가관리 인증
+            <h3 className="text-[18px] font-extrabold text-[#1d2533]">{company.company_name}</h3>
+            {company.defense_field ? (
+              <span className="rounded-full bg-[#eef2fb] px-2.5 py-1 text-xs font-extrabold text-[#3d5a9a]">
+                {company.defense_field}
               </span>
             ) : null}
           </div>
 
-          <div className="mt-3 rounded-[12px] bg-[#F8FAFB] p-3.5">
-            <p className="text-sm font-black text-[var(--primary)]">AI 분석</p>
-            <ReadableText
-              className="mt-2 text-sm font-medium leading-7 text-[var(--muted-foreground)]"
-              text={company.reason}
-            />
+          <p className="mt-2 text-sm leading-6 text-[#4b5870]">
+            <b className="text-[#2a3342]">추천직무</b> · {company.recommended_positions.slice(0, 2).join(", ") || "채용 페이지 확인"}
+          </p>
+          <div className="mt-1 text-sm leading-7 text-[#4b5870]">
+            <b className="text-[#2a3342]">추천사유</b> ·{" "}
+            <ReadableText className="inline text-sm leading-7 text-[#4b5870]" text={company.reason} />
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-2">
-            {company.recommended_positions.map((position) => (
-              <span
-                className="rounded-full bg-[#F4F6F8] px-3 py-1 text-xs font-extrabold text-[#5b6b82]"
-                key={position}
-              >
-                {position}
-              </span>
-            ))}
-          </div>
-
-          <div className="mt-4 text-xs font-bold text-[var(--caption)]">
-            채용 신호 {detail?.job_postings?.length ?? 0}건
+          <div className="mt-4 grid gap-2 sm:grid-cols-4">
+            <MetricBox label="계약 규모" value={formatMoney(company.total_contract_amount)} />
+            <MetricBox label="최근 계약" value={company.recent_contract_year ? `${company.recent_contract_year}년` : "확인 중"} />
+            <MetricBox label="평균연봉" value={formatSalary(company.avg_salary)} />
+            <MetricBox label="채용 신호" value={`${detail?.job_postings?.length ?? 0}건`} />
           </div>
 
           <div className="mt-4">
@@ -599,8 +589,6 @@ function CompanyCard({
             </div>
           </details>
         </div>
-
-        <FitGauge score={company.fit_score} />
       </div>
     </article>
   );
@@ -675,7 +663,7 @@ function JobSignalList({ postings }: { postings: CompanyDetail["job_postings"] }
 }
 
 function Divider() {
-  return <div className="mx-4 h-px bg-[#EEF1F3] md:mx-8" />;
+  return null;
 }
 
 function ReportSection({
@@ -690,13 +678,31 @@ function ReportSection({
   title: string;
 }) {
   return (
-    <section className="scroll-mt-28 p-4 md:p-7" id={id}>
-      <div className="mb-4 flex items-center gap-2 md:mb-5 md:gap-3">
-        <Icon className="text-[var(--primary)]" size={21} />
-        <h2 className="text-xl font-black tracking-normal md:text-2xl md:tracking-[-0.4px]">{title}</h2>
+    <section
+      className="scroll-mt-28 overflow-hidden rounded-[20px] bg-white shadow-[0_8px_30px_-16px_rgba(40,55,80,.25)]"
+      id={id}
+    >
+      <div className="flex items-center gap-3 border-b border-[#eaeef4] bg-[#f4f6fa] px-5 py-5 md:px-7">
+        <Icon className="hidden text-[#15316f] sm:block" size={24} />
+        <div>
+          <h2 className="text-[30px] font-extrabold leading-tight text-[#1d2533] md:text-[40px]">
+            {title}
+          </h2>
+        </div>
       </div>
-      {children}
+      <div className="px-5 py-6 md:px-7">{children}</div>
     </section>
+  );
+}
+
+function KeywordCard({ keyword }: { keyword: string }) {
+  return (
+    <div className="flex min-h-[46px] items-center gap-3 rounded-[10px] border border-[#e9edf4] bg-[#fbfcfe] px-4 py-3">
+      <span className="shrink-0 text-[13px] font-extrabold text-[#2b3a5c]">{formatSkillPillText(keyword)}</span>
+      <span className="min-w-0 text-xs font-medium leading-5 text-[#7c8aa3]">
+        방산 직무 역량으로 활용 가능한 키워드
+      </span>
+    </div>
   );
 }
 
@@ -765,58 +771,163 @@ function ActionButton({
   );
 }
 
-function FitGauge({ score }: { score: number }) {
-  const color =
-    score >= 85
-      ? "var(--success)"
-      : score >= 78
-        ? "var(--blue-score)"
-        : score >= 70
-          ? "var(--warning)"
-          : "var(--danger)";
-  const tier = score >= 85 ? "매우 높음" : score >= 78 ? "높음" : score >= 70 ? "보통" : "검토";
+function JobMatchCard({ job }: { job: JobMatch }) {
+  const skills = job.required_skills.map(formatSkillPillText).filter(Boolean);
+  const visibleSkills = skills.slice(0, 4);
+  const hiddenSkillCount = Math.max(skills.length - visibleSkills.length, 0);
+  const relatedWeaponSystem = job.related_weapon_system?.trim();
+  const fitLabel = job.fit_label ?? "적합";
+  const labelClass =
+    fitLabel === "최적합"
+      ? "bg-[#3d5a9a]"
+      : fitLabel === "검토"
+        ? "bg-[#8a96ab]"
+        : "bg-[#5b6b87]";
 
   return (
-    <div className="flex flex-row items-center justify-center gap-3 border-t border-[#F0F2F4] pt-4 lg:flex-col lg:border-l lg:border-t-0 lg:gap-0 lg:pl-4 lg:pt-0">
+    <article className="flex min-h-[168px] flex-col rounded-[14px] border border-[#e9edf4] bg-[#fbfcfe] p-4">
+      <div className="min-w-0">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <span className={cn("rounded-[6px] px-2.5 py-1 text-[11px] font-extrabold text-white", labelClass)}>
+              {fitLabel}
+            </span>
+            <h3 className="break-keep text-[15px] font-extrabold leading-6 text-[#1d2533]">
+              {job.job_title}
+            </h3>
+          </div>
+          {job.fit_score ? (
+            <span className="shrink-0 text-xs font-extrabold text-[#3d5a9a]">
+              {job.fit_score}점
+            </span>
+          ) : null}
+        </div>
+        <div className="mt-2 min-h-6">
+          {relatedWeaponSystem ? (
+            <span className="inline-flex max-w-full rounded-full bg-[#eef2fb] px-3 py-1 text-xs font-extrabold leading-4 text-[#3d5a9a]">
+              <span className="truncate">{relatedWeaponSystem}</span>
+            </span>
+          ) : null}
+        </div>
+      </div>
+
+      {job.match_reason ? (
+        <p className="mt-2 text-[13px] font-medium leading-6 text-[#6b7890]">
+          {job.match_reason}
+        </p>
+      ) : job.preferred_military_exp ? (
+        <ReadableText
+          className="mt-2 text-[13px] leading-6 text-[#6b7890]"
+          text={job.preferred_military_exp}
+        />
+      ) : null}
+
+      <div className="mt-auto flex content-start flex-wrap gap-2 pt-3">
+        {visibleSkills.map((skill, index) => (
+          <span
+            className="max-w-full rounded-full bg-white px-3 py-1 text-xs font-extrabold leading-4 text-[#5b6b82]"
+            key={`${skill}-${index}`}
+            title={skill}
+          >
+            {skill}
+          </span>
+        ))}
+        {hiddenSkillCount > 0 ? (
+          <span className="rounded-full bg-[#e9edf4] px-3 py-1 text-xs font-black leading-4 text-[#506580]">
+            +{hiddenSkillCount}
+          </span>
+        ) : null}
+      </div>
+    </article>
+  );
+}
+
+function FitGauge({ score }: { score: number }) {
+  const color = score >= 85 ? "#c47f3d" : score >= 78 ? "#3d5a9a" : score >= 70 ? "#8a96ab" : "#b07535";
+
+  return (
+    <div className="flex justify-center md:block">
       <div
-        className="grid h-[78px] w-[78px] place-items-center rounded-full"
+        className="grid h-[84px] w-[84px] place-items-center rounded-full"
         style={{
           background: `conic-gradient(${color} ${score * 3.6}deg, #EDEFF2 0)`,
         }}
       >
-        <div className="grid h-[58px] w-[58px] place-items-center rounded-full bg-white text-base font-black">
-          {score}
+        <div className="grid h-[64px] w-[64px] place-items-center rounded-full bg-white text-center">
+          <span className="text-[22px] font-extrabold leading-none text-[#1d2533]">{score}</span>
+          <span className="-mt-3 text-[10px] font-bold text-[#8a96ab]">적합도</span>
         </div>
       </div>
-      <p className="mt-2 text-xs font-black" style={{ color }}>
-        {tier}
-      </p>
     </div>
   );
 }
 
-function SkillPills({
-  items,
+function MetricBox({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-[10px] bg-[#f7f9fc] px-3 py-2.5">
+      <div className="text-[11px] font-bold text-[#94a0b5]">{label}</div>
+      <div className="mt-1 truncate text-[15px] font-extrabold text-[#1d2533]" title={value}>
+        {value}
+      </div>
+    </div>
+  );
+}
+
+type SkillDetail =
+  | NonNullable<AnalysisResult["skill_gap"]["possessed_details"]>[number]
+  | NonNullable<AnalysisResult["skill_gap"]["missing_details"]>[number];
+
+function SkillBarList({
+  accent,
+  details,
+  fallbackItems,
   title,
 }: {
-  items: string[];
+  accent: string;
+  details?: SkillDetail[];
+  fallbackItems: string[];
   title: string;
 }) {
-  const displayItems = items.map(formatSkillPillText).filter(Boolean).slice(0, 8);
+  const displayItems =
+    details?.length
+      ? details.slice(0, 5)
+      : fallbackItems
+          .map(formatSkillPillText)
+          .filter(Boolean)
+          .slice(0, 5)
+          .map((name, index) => ({
+            name,
+            level: title.includes("보유")
+              ? index < 2 ? "상" : index < 4 ? "중상" : "중"
+              : index < 2 ? "하" : index < 4 ? "중하" : "중",
+            score: title.includes("보유") ? 92 - index * 7 : 24 + index * 8,
+          }));
 
   return (
-    <div className="grid gap-2 md:grid-cols-[90px_1fr] md:items-center">
-      <h3 className="font-black text-[var(--foreground)]">{title}</h3>
-      <div className="flex flex-wrap items-center gap-2">
-        {displayItems.map((item) => (
-          <span
-            className="max-w-full rounded-full bg-[#F4F6F8] px-3 py-1 text-xs font-extrabold leading-5 text-[var(--foreground)]"
-            key={item}
-            title={item}
-          >
-            {item}
-          </span>
-        ))}
+    <div className="rounded-[14px] border border-[#eef1f6] p-5">
+      <div className="mb-4 flex items-center gap-2">
+        <span className="h-2 w-2 rounded-[2px]" style={{ backgroundColor: accent }} />
+        <h3 className="text-[15px] font-extrabold" style={{ color: accent }}>
+          {title}
+        </h3>
+      </div>
+      <div className="grid gap-3">
+        {displayItems.map((item, index) => {
+          return (
+            <div key={`${item.name}-${index}`}>
+              <div className="mb-1.5 flex justify-between gap-3 text-[13.5px] font-bold text-[#2a3342]">
+                <span className="min-w-0 truncate" title={item.name}>{item.name}</span>
+                <span className="shrink-0" style={{ color: accent }}>{item.level}</span>
+              </div>
+              <div className="h-[7px] rounded-full bg-[#f1f3f6]">
+                <div
+                  className="h-[7px] rounded-full"
+                  style={{ width: `${item.score}%`, backgroundColor: accent, opacity: 0.78 }}
+                />
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -843,15 +954,72 @@ function formatSkillPillText(value: string) {
   return shortened.length > 28 ? `${shortened.slice(0, 27)}…` : shortened;
 }
 
-function TimingCard({ body, title }: { body: string; title: string }) {
+function TimingCard({
+  body,
+  details,
+  recommended = false,
+  title,
+}: {
+  body: string;
+  details?: {
+    label: string;
+    pros: string[];
+    cautions: string[];
+  };
+  recommended?: boolean;
+  title: string;
+}) {
   return (
-    <article className="rounded-[12px] border border-[var(--border)] bg-[#F8FAFB] p-3 md:p-4">
-      <h3 className="font-black">{title}</h3>
-      <ReadableText
-        className="mt-2 text-sm font-medium leading-7 text-[var(--muted-foreground)]"
-        text={body}
-      />
+    <article
+      className={cn(
+        "relative rounded-[16px] p-5",
+        recommended ? "border-2 border-[#2e8b6f]" : "border border-[#e9edf4]",
+      )}
+    >
+      {recommended ? (
+        <span className="absolute -top-3 left-5 rounded-full bg-[#2e8b6f] px-3 py-1 text-[11px] font-extrabold text-white">
+          추천
+        </span>
+      ) : null}
+      <div className="flex flex-wrap items-baseline gap-2">
+        <h3 className="text-[17px] font-extrabold text-[#1d2533]">{title}</h3>
+        {details?.label ? (
+          <span className={cn("text-[13px] font-bold", recommended ? "text-[#2e8b6f]" : "text-[#8a96ab]")}>
+            {details.label}
+          </span>
+        ) : null}
+      </div>
+      {details ? (
+        <div className="mt-4 grid gap-4">
+          <BulletGroup color="#2e8b6f" items={details.pros} title="장점" />
+          <BulletGroup color="#b07535" items={details.cautions} title="유의점" />
+        </div>
+      ) : (
+        <ReadableText
+          className="mt-3 text-[13.5px] font-medium leading-7 text-[#3a4762]"
+          text={body}
+        />
+      )}
     </article>
+  );
+}
+
+function BulletGroup({ color, items, title }: { color: string; items: string[]; title: string }) {
+  if (!items.length) return null;
+
+  return (
+    <div>
+      <p className="mb-1.5 text-xs font-extrabold" style={{ color }}>
+        {title}
+      </p>
+      <ul className="grid gap-1.5 pl-4 text-[13.5px] leading-6 text-[#3a4762]">
+        {items.slice(0, 4).map((item) => (
+          <li className="list-disc" key={item}>
+            {item}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
@@ -957,4 +1125,16 @@ function formatDate(value?: string | null) {
     month: "2-digit",
     day: "2-digit",
   });
+}
+
+function formatMoney(value?: number | null) {
+  if (!value) return "확인 중";
+  if (value >= 1_0000_0000_0000) return `${(value / 1_0000_0000_0000).toFixed(1)}조`;
+  if (value >= 1_0000_0000) return `${Math.round(value / 1_0000_0000).toLocaleString("ko-KR")}억`;
+  return `${Math.round(value).toLocaleString("ko-KR")}원`;
+}
+
+function formatSalary(value?: number | null) {
+  if (!value) return "확인 중";
+  return `${Math.round(value / 10000).toLocaleString("ko-KR")}만`;
 }

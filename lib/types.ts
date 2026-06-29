@@ -187,6 +187,23 @@ export const analysisResultSchema = z.object({
     possessed: z.array(z.string()),
     missing: z.array(z.string()),
     analysis: z.string(),
+    possessed_details: z.array(
+      z.object({
+        name: z.string(),
+        level: z.string(),
+        score: z.number().int().min(0).max(100),
+        reason: z.string().optional(),
+      }),
+    ).optional(),
+    missing_details: z.array(
+      z.object({
+        name: z.string(),
+        level: z.string(),
+        score: z.number().int().min(0).max(100),
+        priority: z.string().optional(),
+        reason: z.string().optional(),
+      }),
+    ).optional(),
   }),
   education_roadmap: z.array(
     z.object({
@@ -202,6 +219,16 @@ export const analysisResultSchema = z.object({
     now: z.string(),
     later: z.string(),
     recommendation: z.string(),
+    now_details: z.object({
+      label: z.string(),
+      pros: z.array(z.string()),
+      cautions: z.array(z.string()),
+    }).optional(),
+    later_details: z.object({
+      label: z.string(),
+      pros: z.array(z.string()),
+      cautions: z.array(z.string()),
+    }).optional(),
   }),
   matched_field: z.string().optional(),
   matched_job_group: z.string().optional(),
@@ -218,6 +245,9 @@ export const analysisResultSchema = z.object({
       required_skills: z.array(z.string()),
       preferred_military_exp: z.string().nullable().optional(),
       related_weapon_system: z.string().nullable().optional(),
+      fit_label: z.enum(["최적합", "적합", "검토"]).optional(),
+      fit_score: z.number().int().min(0).max(100).optional(),
+      match_reason: z.string().optional(),
     }),
   ).optional(),
   field_market_summary: z.object({
