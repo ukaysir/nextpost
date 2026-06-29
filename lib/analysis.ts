@@ -409,10 +409,14 @@ function buildDischargeTimingDetails(result: AnalysisResult, context: PreparedCo
   const missing = result.skill_gap.missing.map(formatShortSkill).filter(Boolean).slice(0, 2);
   const possessed = result.skill_gap.possessed.map(formatShortSkill).filter(Boolean).slice(0, 2);
   const years = context.input.years_served;
+  const recommendation = result.discharge_timing.recommendation;
+  const recommendsLater = /추가\s*복무|더\s*복무|6\s*~?\s*12\s*개월|1\s*~?\s*2\s*년|이후|준비\s*후|보완\s*후/.test(
+    recommendation,
+  );
 
   return {
     now_details: {
-      label: "유리도 높음",
+      label: recommendsLater ? "유리도 보통" : "유리도 높음",
       pros: [
         `${context.input.rank}·${years}년 경력을 바로 민간 직무 언어로 전환 가능`,
         `${possessed.join(", ") || context.matchedField} 강점을 지원서에서 즉시 활용 가능`,
@@ -423,7 +427,7 @@ function buildDischargeTimingDetails(result: AnalysisResult, context: PreparedCo
       ],
     },
     later_details: {
-      label: "유리도 보통",
+      label: recommendsLater ? "유리도 높음" : "유리도 보통",
       pros: [
         "전역 전 교육·자격증 준비 시간을 확보할 수 있음",
         "부족 역량을 실무 사례나 교육 이수로 보완 가능",

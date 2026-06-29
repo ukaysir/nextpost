@@ -76,6 +76,10 @@ export function ResultsDashboard({
   }
 
   const topScore = useMemo(() => result?.recommended_companies?.[0]?.fit_score ?? 0, [result]);
+  const dischargeRecommendsLater = useMemo(
+    () => Boolean(result && recommendsLaterDischarge(result.discharge_timing.recommendation)),
+    [result],
+  );
   const detailByCompany = useMemo(() => {
     return new Map((result?.company_details ?? []).map((detail) => [detail.company_name, detail]));
   }, [result?.company_details]);
@@ -177,15 +181,15 @@ export function ResultsDashboard({
       ) : null}
 
       <div className="mx-auto max-w-[1380px] px-4 py-6 md:px-5 md:py-10">
-        <div className="mx-auto mb-5 grid gap-2 no-print sm:flex sm:flex-wrap sm:items-center">
+        <div className="mx-auto mb-5 grid gap-2 no-print xl:grid-cols-[minmax(0,920px)_minmax(340px,420px)] xl:items-center xl:justify-center">
           <Link
-            className="focus-ring inline-flex h-10 items-center justify-center gap-2 rounded-[9px] border border-[var(--border)] bg-white px-3 text-sm font-extrabold text-[var(--caption)] sm:justify-start"
+            className="focus-ring inline-flex h-10 w-fit items-center justify-center gap-2 rounded-[9px] border border-[var(--border)] bg-white px-3 text-sm font-extrabold text-[var(--caption)]"
             href="/analyze"
           >
             <ArrowLeft size={16} />
             다시 입력하기
           </Link>
-          <div className="grid grid-cols-2 gap-2 sm:ml-auto sm:flex sm:flex-wrap">
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap xl:justify-start">
             {!readOnly ? (
               <ActionButton
                 icon={Save}
@@ -382,38 +386,47 @@ export function ResultsDashboard({
                 description="부족 역량을 채우기 위한 공공·전문 교육과정을 입문→중급→심화 단계로 제안합니다."
               >
                 <div className="grid gap-3.5 md:grid-cols-3">
-                  {result.education_roadmap.map((item) => (
-                    <a
+                  {buildRoadmapGroups(result).map((group, index) => {
+                    const href = group.items[0]?.education_link ?? "#";
+                    return (
+                    <article
                       className="flex min-h-[210px] flex-col rounded-[14px] border border-[#eef1f6] p-[18px] transition hover:border-[#3d5a9a]"
-                      href={item.education_link}
-                      key={`${item.step}-${item.education_name}`}
-                      rel="noreferrer"
-                      target="_blank"
+                      key={group.level}
                     >
                       <div className="mb-4 flex items-center gap-2">
                         <span className={cn(
                           "grid h-[26px] w-[26px] place-items-center rounded-full text-[13px] font-extrabold",
-                          item.step >= 3 ? "bg-[#2a3342] text-white" : "bg-[#eef2fb] text-[#3d5a9a]",
+                          index >= 2 ? "bg-[#2a3342] text-white" : "bg-[#eef2fb] text-[#3d5a9a]",
                         )}>
-                          {item.step}
+                          {index + 1}
                         </span>
-                        <span className="text-[15px] font-extrabold text-[#1d2533]">{item.level}</span>
+                        <span className="text-[15px] font-extrabold text-[#1d2533]">{group.level}</span>
                       </div>
-                      <div className="flex flex-1 flex-col">
-                        <p className="text-[15px] font-extrabold leading-6 text-[#1d2533]">{item.education_name}</p>
-                        <ReadableText
-                          className="mt-2 text-[13.5px] leading-6 text-[#3a4762]"
-                          text={item.reason}
-                        />
-                        <span className={cn(
+                      <ul className="mb-4 grid gap-[9px]">
+                        {group.items.slice(0, 3).map((item) => (
+                          <li className="text-[13.5px] leading-[1.5] text-[#3a4762]" key={item.education_name}>
+                            <b className="text-[#1d2533]">{item.education_name}</b>
+                            <br />
+                            <span className="text-xs text-[#8a96ab]">
+                              {[item.education_provider, item.cert_name].filter(Boolean).join(" · ") || item.job_title || "추천 과정"}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                      <a
+                        className={cn(
                           "mt-auto inline-flex h-10 items-center justify-center rounded-[10px] px-3 text-[13px] font-bold",
-                          item.step >= 3 ? "bg-[#2a3342] text-white" : "bg-[#eef2fb] text-[#3d5a9a]",
-                        )}>
+                          index >= 2 ? "bg-[#2a3342] text-white" : "bg-[#eef2fb] text-[#3d5a9a]",
+                        )}
+                        href={href}
+                        rel="noreferrer"
+                        target="_blank"
+                      >
                           강좌 알아보기
-                        </span>
-                      </div>
-                    </a>
-                  ))}
+                      </a>
+                    </article>
+                    );
+                  })}
                 </div>
                 <div className="mt-5 flex flex-wrap items-center gap-2">
                   <Award size={18} className="text-[var(--warning)]" />
@@ -434,12 +447,13 @@ export function ResultsDashboard({
               >
                 <div className="grid gap-4 md:grid-cols-2">
                   <TimingCard
-                    recommended
+                    recommended={!dischargeRecommendsLater}
                     title="지금 전역"
                     body={result.discharge_timing.now}
                     details={result.discharge_timing.now_details}
                   />
                   <TimingCard
+                    recommended={dischargeRecommendsLater}
                     title="추가 복무"
                     body={result.discharge_timing.later}
                     details={result.discharge_timing.later_details}
@@ -457,11 +471,11 @@ export function ResultsDashboard({
             </article>
           </div>
 
-          <aside className="no-print min-h-0 scroll-mt-28 xl:sticky xl:top-[92px]" id="report-chat">
+          <aside className="no-print min-h-0 scroll-mt-28 xl:sticky xl:top-[92px] xl:pt-[84px]" id="report-chat">
             {isChatOpen ? (
               <DataChat
                 analysisResult={result}
-                className="mt-6 h-[620px] min-h-[500px] xl:mt-0 xl:h-[calc(100dvh-188px)]"
+                className="mt-6 h-[620px] min-h-[500px] xl:mt-0 xl:h-[calc(100dvh-272px)]"
               />
             ) : (
               <section className="mt-6 rounded-[20px] bg-white p-5 shadow-[0_8px_30px_-16px_rgba(40,55,80,.25)] xl:mt-0">
@@ -514,6 +528,52 @@ function saveReportLocally(result: ResultPayload, input: Record<string, unknown>
   }
 }
 
+function buildRoadmapGroups(result: ResultPayload) {
+  const preferredLevels = ["입문", "중급", "심화"];
+  const groups = result.education_groups?.length
+    ? result.education_groups
+    : preferredLevels.map((level) => ({
+        level,
+        items: result.education_roadmap
+          .filter((item) => item.level === level)
+          .map((item) => ({
+            education_name: item.education_name,
+            education_provider: null,
+            education_link: item.education_link,
+            cert_name: null,
+            job_title: item.reason,
+            defense_field: result.matched_field ?? null,
+          })),
+      }));
+
+  return preferredLevels
+    .map((level) => {
+      const group = groups.find((item) => item.level === level);
+      if (group?.items.length) return group;
+      const fallback = result.education_roadmap.find((item) => item.level === level) ?? result.education_roadmap[0];
+      return {
+        level,
+        items: fallback
+          ? [
+              {
+                education_name: fallback.education_name,
+                education_provider: null,
+                education_link: fallback.education_link,
+                cert_name: null,
+                job_title: fallback.reason,
+                defense_field: result.matched_field ?? null,
+              },
+            ]
+          : [],
+      };
+    })
+    .filter((group) => group.items.length > 0);
+}
+
+function recommendsLaterDischarge(value: string) {
+  return /추가\s*복무|더\s*복무|6\s*~?\s*12\s*개월|1\s*~?\s*2\s*년|이후|준비\s*후|보완\s*후/.test(value);
+}
+
 function CompanyCard({
   company,
   detail,
@@ -523,9 +583,9 @@ function CompanyCard({
   detail?: CompanyDetail;
   evidence: string[];
 }) {
-  const topJob = detail?.job_postings?.[0];
   const homepageUrl = detail?.homepage_url;
   const careerUrl = detail?.careers_page_url ?? company.careers_page_url;
+  const latestRevenue = detail?.financials?.[0]?.revenue;
 
   return (
     <article className="rounded-[16px] border border-[#e9edf4] bg-white p-5">
@@ -550,26 +610,13 @@ function CompanyCard({
           </div>
 
           <div className="mb-3.5 grid gap-2.5 sm:grid-cols-4">
-            <MetricBox label="계약 규모" value={formatMoney(company.total_contract_amount)} />
-            <MetricBox label="최근 계약" value={company.recent_contract_year ? `${company.recent_contract_year}년` : "확인 중"} />
+            <MetricBox label="방산 수주잔고" value={formatMoney(company.total_contract_amount)} />
+            <MetricBox label="매출" value={formatMoney(latestRevenue)} />
             <MetricBox label="평균연봉" value={formatSalary(company.avg_salary)} />
             <MetricBox label="채용 신호" value={`${detail?.job_postings?.length ?? 0}건`} />
           </div>
 
-          <div className="mt-0">
-            <SignalBox
-              icon={BriefcaseBusiness}
-              label="채용 신호"
-              value={topJob?.title ?? "채용 링크 확인"}
-              meta={[
-                topJob?.job_function,
-                topJob?.experience_level,
-                topJob?.is_active === false ? "과거/참고 공고" : null,
-              ]}
-            />
-          </div>
-
-          <div className="mt-4 flex flex-wrap gap-2.5">
+          <div className="flex flex-wrap gap-2.5">
             {homepageUrl ? (
               <ExternalButton href={homepageUrl} label="공식 홈페이지" />
             ) : null}
@@ -1028,31 +1075,6 @@ function BulletGroup({ color, items, title }: { color: string; items: string[]; 
           </li>
         ))}
       </ul>
-    </div>
-  );
-}
-
-function SignalBox({
-  icon: Icon,
-  label,
-  meta,
-  value,
-}: {
-  icon: LucideIcon;
-  label: string;
-  value: string;
-  meta: Array<string | null | undefined>;
-}) {
-  return (
-    <div className="rounded-[12px] bg-[#F8FAFB] p-3">
-      <p className="flex items-center gap-2 text-xs font-black text-[var(--primary)]">
-        <Icon size={15} />
-        {label}
-      </p>
-      <p className="mt-2 line-clamp-2 text-sm font-black leading-6">{value}</p>
-      <p className="mt-2 text-xs font-bold leading-5 text-[var(--caption)]">
-        {meta.filter(Boolean).join(" · ") || "세부 정보 없음"}
-      </p>
     </div>
   );
 }
