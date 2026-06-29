@@ -5,10 +5,8 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import {
   ArrowLeft,
-  Award,
   BriefcaseBusiness,
   CheckCircle2,
-  ChevronDown,
   Copy,
   Download,
   ExternalLink,
@@ -75,7 +73,6 @@ export function ResultsDashboard({
     window.setTimeout(() => setToast(""), 2400);
   }
 
-  const topScore = useMemo(() => result?.recommended_companies?.[0]?.fit_score ?? 0, [result]);
   const dischargeRecommendsLater = useMemo(
     () => Boolean(result && recommendsLaterDischarge(result.discharge_timing.recommendation)),
     [result],
@@ -83,9 +80,6 @@ export function ResultsDashboard({
   const detailByCompany = useMemo(() => {
     return new Map((result?.company_details ?? []).map((detail) => [detail.company_name, detail]));
   }, [result?.company_details]);
-  const evidenceByCompany = useMemo(() => {
-    return new Map((result?.recommendation_evidence ?? []).map((item) => [item.company_name, item]));
-  }, [result?.recommendation_evidence]);
   const reportUrl =
     typeof window !== "undefined"
       ? savedSharePath
@@ -265,16 +259,13 @@ export function ResultsDashboard({
                       군 보직·경력을 방산업계가 이해하는 직무역량 언어로 변환합니다. 이력서·자기소개서에 바로 사용하세요.
                     </p>
                   </div>
-                  <div className="grid gap-5 px-5 py-6 md:grid-cols-[1fr_180px] md:items-start md:px-[26px]">
+                  <div className="px-5 py-6 md:px-[26px]">
                   <div>
                     <p className="mb-1.5 text-[22px] font-extrabold text-[#15316f]">
                       군 경력 요약
                     </p>
-                    <p className="mt-2 text-sm font-bold text-[#6b7890]">
-                      {result.matched_field} · {result.matched_job_group}
-                    </p>
                     <ReadableText
-                      className="mt-3 text-[15px] font-medium leading-8 text-[#34405a]"
+                      className="text-[15px] font-normal leading-[1.75] text-[#34405a]"
                       text={result.skill_translation.summary}
                     />
                     <div className="mt-[22px]">
@@ -293,14 +284,7 @@ export function ResultsDashboard({
                       </div>
                     </div>
                   </div>
-                  <div className="rounded-[16px] border border-[#e9edf4] bg-[#fbfcfe] p-4 text-center">
-                    <p className="text-xs font-extrabold text-[#6b7890]">최상위 기업 적합도</p>
-                    <p className="mt-2 text-[54px] font-extrabold leading-none text-[#1d2533]">
-                      {topScore}
-                    </p>
-                    <p className="mt-2 text-xs font-extrabold text-[#8a96ab]">점</p>
                   </div>
-                </div>
                 </div>
 
               </section>
@@ -330,13 +314,10 @@ export function ResultsDashboard({
 
                   {result.recommended_companies.map((company) => {
                     const detail = detailByCompany.get(company.company_name);
-                    const evidence = evidenceByCompany.get(company.company_name);
-
                     return (
                       <CompanyCard
                         company={company}
                         detail={detail}
-                        evidence={evidence?.evidence_points ?? []}
                         key={company.company_name}
                       />
                     );
@@ -427,14 +408,6 @@ export function ResultsDashboard({
                     </article>
                     );
                   })}
-                </div>
-                <div className="mt-5 flex flex-wrap items-center gap-2">
-                  <Award size={18} className="text-[var(--warning)]" />
-                  {result.recommended_certs.map((cert) => (
-                    <span className="np-pill px-3 py-1" key={cert}>
-                      {cert}
-                    </span>
-                  ))}
                 </div>
               </ReportSection>
 
@@ -577,11 +550,9 @@ function recommendsLaterDischarge(value: string) {
 function CompanyCard({
   company,
   detail,
-  evidence,
 }: {
   company: RecommendedCompany;
   detail?: CompanyDetail;
-  evidence: string[];
 }) {
   const homepageUrl = detail?.homepage_url;
   const careerUrl = detail?.careers_page_url ?? company.careers_page_url;
@@ -594,11 +565,6 @@ function CompanyCard({
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-[18px] font-extrabold leading-tight text-[#1d2533]">{company.company_name}</h3>
-            {company.defense_field ? (
-              <span className="rounded-full bg-[#eef2fb] px-2.5 py-1 text-xs font-extrabold text-[#3d5a9a]">
-                {company.defense_field}
-              </span>
-            ) : null}
           </div>
 
           <p className="mt-2 text-[14px] leading-[1.6] text-[#4b5870]">
@@ -621,91 +587,9 @@ function CompanyCard({
             ) : null}
             {careerUrl ? <ExternalButton href={careerUrl} label="채용 페이지" /> : null}
           </div>
-
-          <details className="group mt-4 rounded-[14px] border border-[var(--border)] bg-[#FAFBFC]">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 font-black">
-              <span>공개 데이터 근거</span>
-              <ChevronDown
-                className="text-[var(--caption)] transition-transform group-open:rotate-180"
-                size={18}
-              />
-            </summary>
-            <div className="grid gap-3 border-t border-[var(--border)] p-3 md:p-4">
-              {evidence.length ? <EvidenceList evidence={evidence} /> : null}
-              <JobSignalList postings={detail?.job_postings ?? []} />
-            </div>
-          </details>
         </div>
       </div>
     </article>
-  );
-}
-
-function EvidenceList({ evidence }: { evidence: string[] }) {
-  return (
-    <div className="rounded-[12px] bg-white p-4">
-      <p className="text-sm font-black text-[var(--primary)]">공개 데이터 근거</p>
-      <ul className="mt-3 grid gap-2 text-sm leading-6 text-[var(--muted-foreground)]">
-        {evidence.map((item) => (
-          <li className="flex gap-2" key={item}>
-            <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--primary)]" />
-            <span>{item}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-function JobSignalList({ postings }: { postings: CompanyDetail["job_postings"] }) {
-  return (
-    <section>
-      <h4 className="mb-3 flex items-center gap-2 text-sm font-black">
-        <BriefcaseBusiness size={16} className="text-[var(--primary)]" />
-        채용 신호
-      </h4>
-      <div className="grid gap-2">
-        {postings.length ? (
-          postings.map((posting, index) => (
-            <article className="rounded-[12px] bg-white p-3" key={`${posting.title}-${index}`}>
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="font-black leading-6">{posting.title}</p>
-                {posting.posting_url ? <ExternalButton href={posting.posting_url} label="공고" compact /> : null}
-              </div>
-              <p className="mt-1 text-sm leading-6 text-[var(--muted-foreground)]">
-                {posting.job_function ?? "직무 상세 미확보"}
-              </p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {[
-                  posting.employment_type,
-                  posting.experience_level,
-                  posting.location,
-                  posting.deadline_at ? `마감 ${formatDate(posting.deadline_at)}` : null,
-                  posting.is_active === false ? "과거/참고" : null,
-                ]
-                  .filter(Boolean)
-                  .map((item) => (
-                    <span className="rounded-full bg-[#F4F6F8] px-2.5 py-1 text-xs font-bold text-[var(--caption)]" key={item}>
-                      {item}
-                    </span>
-                  ))}
-              </div>
-              {posting.required_skills?.length || posting.preferred_skills?.length ? (
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {[...(posting.required_skills ?? []), ...(posting.preferred_skills ?? [])].slice(0, 8).map((skill) => (
-                    <span className="rounded-full bg-[#EEF4FA] px-2.5 py-1 text-xs font-bold text-[#506580]" key={skill}>
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              ) : null}
-            </article>
-          ))
-        ) : (
-          <EmptyText text="기업별 채용 신호가 없습니다." />
-        )}
-      </div>
-    </section>
   );
 }
 
@@ -1095,14 +979,6 @@ function ExternalButton({ compact, href, label }: { compact?: boolean; href: str
   );
 }
 
-function EmptyText({ text }: { text: string }) {
-  return (
-    <div className="rounded-[12px] border border-dashed border-[var(--border)] bg-white p-4 text-sm font-bold text-[var(--caption)]">
-      {text}
-    </div>
-  );
-}
-
 function ReadableText({ className, text }: { className?: string; text: string }) {
   const paragraphs = splitReadableText(text);
 
@@ -1144,17 +1020,6 @@ function splitReadableText(value: string) {
 
   if (current) paragraphs.push(current);
   return paragraphs;
-}
-
-function formatDate(value?: string | null) {
-  if (!value) return "정보 없음";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString("ko-KR", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
 }
 
 function formatMoney(value?: number | null) {
