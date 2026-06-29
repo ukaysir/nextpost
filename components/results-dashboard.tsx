@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -24,8 +25,20 @@ import {
 import { AnalysisResult } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { AuthMenu } from "@/components/auth-menu";
-import { DataChat } from "@/components/data-chat";
 import { getAuthHeaders } from "@/lib/auth-client";
+
+const DataChat = dynamic(
+  () => import("@/components/data-chat").then((mod) => mod.DataChat),
+  {
+    loading: () => (
+      <div className="np-card grid h-[420px] place-items-center p-6 text-center">
+        <Loader2 className="mx-auto animate-spin text-[var(--primary)]" size={30} />
+        <p className="mt-3 text-sm font-bold text-[var(--caption)]">AI 상담을 준비하고 있습니다.</p>
+      </div>
+    ),
+    ssr: false,
+  },
+);
 
 type ResultPayload = AnalysisResult & {
   ai_provider?: "openai" | "fallback";
@@ -46,6 +59,7 @@ export function ResultsDashboard({
   const [result, setResult] = useState<ResultPayload | null>(initialResult ?? null);
   const [toast, setToast] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const [savedSharePath, setSavedSharePath] = useState(
     savedReportShareId ? `/reports/${savedReportShareId}` : "",
   );
@@ -62,6 +76,12 @@ export function ResultsDashboard({
   }
 
   const topScore = useMemo(() => result?.recommended_companies?.[0]?.fit_score ?? 0, [result]);
+  const detailByCompany = useMemo(() => {
+    return new Map((result?.company_details ?? []).map((detail) => [detail.company_name, detail]));
+  }, [result?.company_details]);
+  const evidenceByCompany = useMemo(() => {
+    return new Map((result?.recommendation_evidence ?? []).map((item) => [item.company_name, item]));
+  }, [result?.recommendation_evidence]);
   const reportUrl =
     typeof window !== "undefined"
       ? savedSharePath
@@ -126,7 +146,6 @@ export function ResultsDashboard({
     );
   }
 
-  const companyDetails = result.company_details ?? [];
   const mobileTabs = [
     { href: "#report-summary", label: "요약" },
     { href: "#report-matching", label: "직무근거" },
@@ -325,12 +344,8 @@ export function ResultsDashboard({
               <ReportSection icon={BriefcaseBusiness} id="report-companies" title="추천 기업">
                 <div className="grid gap-4">
                   {result.recommended_companies.map((company) => {
-                    const detail = companyDetails.find(
-                      (item) => item.company_name === company.company_name,
-                    );
-                    const evidence = result.recommendation_evidence?.find(
-                      (item) => item.company_name === company.company_name,
-                    );
+                    const detail = detailByCompany.get(company.company_name);
+                    const evidence = evidenceByCompany.get(company.company_name);
 
                     return (
                       <CompanyCard
@@ -444,10 +459,28 @@ export function ResultsDashboard({
           </div>
 
           <aside className="no-print min-h-0 scroll-mt-28 xl:sticky xl:top-[92px]" id="report-chat">
-            <DataChat
-              analysisResult={result}
-              className="mt-5 h-[620px] min-h-[500px] xl:mt-0 xl:h-[calc(100dvh-188px)]"
-            />
+            {isChatOpen ? (
+              <DataChat
+                analysisResult={result}
+                className="mt-5 h-[620px] min-h-[500px] xl:mt-0 xl:h-[calc(100dvh-188px)]"
+              />
+            ) : (
+              <section className="np-card mt-5 p-5 xl:mt-0">
+                <p className="text-sm font-black text-[var(--primary)]">NEXTPOST AI 상담</p>
+                <h2 className="mt-2 text-xl font-black">리포트 기준으로 질문하기</h2>
+                <p className="mt-3 text-sm font-medium leading-6 text-[var(--muted-foreground)]">
+                  추천 기업, 직무 역량, 교육 로드맵을 이어서 확인할 수 있습니다.
+                </p>
+                <button
+                  className="focus-ring mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-[9px] bg-[#252C36] px-4 text-sm font-black text-white"
+                  type="button"
+                  onClick={() => setIsChatOpen(true)}
+                >
+                  <Send size={17} />
+                  AI 상담 열기
+                </button>
+              </section>
+            )}
           </aside>
         </div>
       </div>

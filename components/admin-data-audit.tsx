@@ -78,7 +78,7 @@ export function AdminDataAudit() {
   }, []);
 
   const audit = state?.audit ?? null;
-  const totals = audit?.totals ?? {};
+  const totals = useMemo(() => audit?.totals ?? {}, [audit]);
   const headlineMetrics = useMemo(
     () => ["companies", "company_sources", "contract_records", "job_postings"].map((key) => pickMetric(totals, key)),
     [totals],

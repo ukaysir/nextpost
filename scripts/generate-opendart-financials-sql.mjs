@@ -1,6 +1,5 @@
 import fs from "node:fs";
 import path from "node:path";
-import zlib from "node:zlib";
 import iconv from "iconv-lite";
 import Papa from "papaparse";
 
@@ -51,14 +50,6 @@ function parseCsv(fileName) {
   return result.data;
 }
 
-function normalizeName(value) {
-  return String(value ?? "")
-    .toLowerCase()
-    .replace(/\(주\)|주식회사|㈜|유한회사|재단법인|사단법인/g, "")
-    .replace(/[^0-9a-z가-힣]/g, "")
-    .trim();
-}
-
 function parseNumber(value) {
   const parsed = Number(String(value ?? "").replace(/[^0-9.-]/g, ""));
   return Number.isFinite(parsed) ? parsed : null;
@@ -83,36 +74,6 @@ function amountToManwon(value) {
   return Math.round(amount * 100);
 }
 
-function unzipSingleXml(buffer) {
-  let offset = 0;
-  while (offset < buffer.length - 30) {
-    if (buffer.readUInt32LE(offset) !== 0x04034b50) {
-      offset += 1;
-      continue;
-    }
-    const flags = buffer.readUInt16LE(offset + 6);
-    const method = buffer.readUInt16LE(offset + 8);
-    const compressedSize = buffer.readUInt32LE(offset + 18);
-    const uncompressedSize = buffer.readUInt32LE(offset + 22);
-    const nameLength = buffer.readUInt16LE(offset + 26);
-    const extraLength = buffer.readUInt16LE(offset + 28);
-    const name = buffer.subarray(offset + 30, offset + 30 + nameLength).toString("utf8");
-    const dataStart = offset + 30 + nameLength + extraLength;
-    const dataEnd = dataStart + compressedSize;
-    if (name.toLowerCase().endsWith(".xml")) {
-      const compressed = buffer.subarray(dataStart, dataEnd);
-      if (method === 0) return compressed.toString("utf8");
-      if (method === 8) return zlib.inflateRawSync(compressed, { finishFlush: zlib.constants.Z_SYNC_FLUSH }).toString("utf8");
-      throw new Error(`Unsupported ZIP compression method: ${method}`);
-    }
-    if (flags & 0x08 || compressedSize === 0 || uncompressedSize === 0) {
-      throw new Error("Unsupported ZIP layout: data descriptor entries are not handled.");
-    }
-    offset = dataEnd;
-  }
-  throw new Error("No XML file found in OpenDART corpCode.zip.");
-}
-
 function parseCorpCodes(xml) {
   return Array.from(xml.matchAll(/<list>([\s\S]*?)<\/list>/g)).map((match) => {
     const item = match[1];
@@ -124,19 +85,6 @@ function parseCorpCodes(xml) {
       modify_date: pick("modify_date"),
     };
   });
-}
-
-async function getJson(endpoint, params) {
-  const url = new URL(`https://opendart.fss.or.kr/api/${endpoint}`);
-  url.searchParams.set("crtfc_key", apiKey);
-  for (const [key, value] of Object.entries(params)) url.searchParams.set(key, value);
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`${endpoint} HTTP ${response.status}`);
-  const payload = await response.json();
-  if (payload.status && payload.status !== "000") {
-    throw new Error(`${endpoint} ${payload.status}: ${payload.message}`);
-  }
-  return payload;
 }
 
 async function getJsonOptional(endpoint, params) {

@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
+import { Noto_Sans_KR } from "next/font/google";
 import { CanonicalAuthRedirect } from "@/components/canonical-auth-redirect";
 import "./globals.css";
+
+const notoSansKr = Noto_Sans_KR({
+  subsets: ["latin"],
+  weight: ["400", "500", "700", "800", "900"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "NEXTPOST",
@@ -14,15 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body>
+      <body className={notoSansKr.className}>
         <CanonicalAuthRedirect />
         {children}
       </body>

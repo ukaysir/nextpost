@@ -1,5 +1,6 @@
 "use client";
 
+import { memo, useMemo } from "react";
 import {
   Area,
   AreaChart,
@@ -11,12 +12,16 @@ import {
 } from "recharts";
 import { IndustryStat } from "@/lib/types";
 
-export function IndustryChart({ data }: { data: IndustryStat[] }) {
-  const chartData = data.map((item) => ({
-    year: item.year,
-    sales: item.sales ?? 0,
-    rate: item.operating_profit_rate ?? null,
-  }));
+function IndustryChartComponent({ data }: { data: IndustryStat[] }) {
+  const chartData = useMemo(
+    () =>
+      data.map((item) => ({
+        year: item.year,
+        sales: item.sales ?? 0,
+        rate: item.operating_profit_rate ?? null,
+      })),
+    [data],
+  );
 
   return (
     <div className="h-72 w-full">
@@ -69,3 +74,5 @@ export function IndustryChart({ data }: { data: IndustryStat[] }) {
     </div>
   );
 }
+
+export const IndustryChart = memo(IndustryChartComponent);

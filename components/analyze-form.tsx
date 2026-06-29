@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowRight,
@@ -743,7 +743,7 @@ function FormSection({
           isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
         }`}
       >
-        <div className="min-h-0 overflow-hidden">
+        <div className={`min-h-0 ${isOpen ? "overflow-visible" : "overflow-hidden"}`}>
           <div className="pt-4 md:pt-5">{children}</div>
         </div>
       </div>
@@ -784,23 +784,61 @@ function OptionPicker({
   selected: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isCustomInputOpen, setIsCustomInputOpen] = useState(false);
+  const [customValue, setCustomValue] = useState("");
   const selectedOption = options.find((option) => option.value === selected);
+  const selectedLabel = (selectedOption?.label ?? selected) || placeholder;
+
+  function closePicker() {
+    setIsOpen(false);
+    setIsCustomInputOpen(false);
+    setCustomValue("");
+  }
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setIsOpen(false);
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isOpen]);
 
   function handleSelect(value: string) {
     onSelect(value);
-    setIsOpen(false);
+    closePicker();
+  }
+
+  function openCustomInput() {
+    setCustomValue(selected && !selectedOption ? selected : "");
+    setIsCustomInputOpen(true);
+  }
+
+  function submitCustomInput() {
+    const value = customValue.trim();
+    if (!value) return;
+    handleSelect(value);
   }
 
   return (
-    <div className="relative">
+    <div>
       <button
         aria-expanded={isOpen}
+        aria-haspopup="dialog"
         className="focus-ring flex min-h-[44px] w-full items-center justify-between gap-3 rounded-[9px] border-[1.5px] border-[#E5E8EB] bg-[#F9FAFB] px-3 text-left text-[14px] font-extrabold text-[var(--foreground)] transition hover:border-[#D5DCE5]"
         type="button"
         onClick={() => setIsOpen((current) => !current)}
       >
         <span className="min-w-0">
-          <span className="block truncate">{(selectedOption?.label ?? selected) || placeholder}</span>
+          <span className="block truncate">{selectedLabel}</span>
           {selectedOption?.detail ? (
             <span className="mt-0.5 block truncate text-[11px] font-bold text-[var(--caption)]">
               {selectedOption.detail}
@@ -812,43 +850,113 @@ function OptionPicker({
           size={18}
         />
       </button>
-      <div
-        className={`grid transition-[grid-template-rows,opacity] duration-200 ${
-          isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
-        }`}
-      >
-        <div className="min-h-0 overflow-hidden">
+
+      {isOpen ? (
+        <div
+          className="fixed inset-0 z-[80] flex items-end justify-center bg-[rgba(25,31,40,0.24)] px-3 py-4 backdrop-blur-[2px] sm:items-start sm:py-[11vh]"
+          role="presentation"
+          onClick={closePicker}
+        >
           <div
-            className={`mt-2 overflow-y-auto rounded-[9px] border border-[var(--border-strong)] bg-white p-1.5 shadow-[0_12px_26px_rgba(25,31,40,0.08)] ${maxListHeight}`}
+            aria-modal="true"
+            className="w-full max-w-[520px] overflow-hidden rounded-[12px] border border-[var(--border-strong)] bg-white shadow-[0_24px_70px_rgba(25,31,40,0.28)]"
+            role="dialog"
+            onClick={(event) => event.stopPropagation()}
           >
-            {options.map((option) => {
-              const isSelected = option.value === selected;
-              return (
-                <button
-                  className={`focus-ring flex min-h-[38px] w-full items-center justify-between gap-3 rounded-[7px] px-3 py-2 text-left text-sm font-extrabold transition ${
-                    isSelected
-                      ? "bg-[var(--primary-soft)] text-[var(--foreground)]"
-                      : "text-[var(--muted-foreground)] hover:bg-[#F8FAFB] hover:text-[var(--foreground)]"
-                  }`}
-                  key={option.value}
-                  type="button"
-                  onClick={() => handleSelect(option.value)}
-                >
-                  <span className="min-w-0">
-                    <span className="block truncate">{option.label ?? option.value}</span>
-                    {option.detail ? (
-                      <span className="mt-0.5 block truncate text-[11px] font-bold text-[var(--caption)]">
-                        {option.detail}
-                      </span>
-                    ) : null}
-                  </span>
-                  {isSelected ? <span className="h-2 w-2 shrink-0 rounded-[3px] bg-[var(--primary)]" /> : null}
-                </button>
-              );
-            })}
+            <div className="flex min-h-[54px] items-center gap-3 border-b border-[var(--border)] px-4">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-black text-[var(--foreground)]">{placeholder}</p>
+                <p className="truncate text-xs font-bold text-[var(--caption)]">{selectedLabel}</p>
+              </div>
+              <button
+                aria-label="선택 닫기"
+                className="focus-ring grid h-9 w-9 shrink-0 place-items-center rounded-[8px] text-[var(--caption)] hover:bg-[#F8FAFB]"
+                type="button"
+                onClick={closePicker}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className={`max-h-[62vh] overflow-y-auto p-2 ${maxListHeight}`} role="listbox">
+              {isCustomInputOpen ? (
+                <div className="grid gap-3 p-2">
+                  <label className="grid gap-2 text-sm font-black text-[var(--muted-foreground)]">
+                    직접 입력
+                    <input
+                      autoFocus
+                      className="input"
+                      placeholder={`${placeholder} 입력`}
+                      value={customValue}
+                      onChange={(event) => setCustomValue(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") submitCustomInput();
+                      }}
+                    />
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      className="focus-ring h-11 rounded-[9px] border border-[var(--border-strong)] bg-white text-sm font-black text-[var(--muted-foreground)]"
+                      type="button"
+                      onClick={() => setIsCustomInputOpen(false)}
+                    >
+                      목록으로
+                    </button>
+                    <button
+                      className="focus-ring h-11 rounded-[9px] bg-[#001025d9] text-sm font-black text-white disabled:opacity-50"
+                      disabled={!customValue.trim()}
+                      type="button"
+                      onClick={submitCustomInput}
+                    >
+                      적용
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {options.map((option) => {
+                    const isSelected = option.value === selected;
+                    return (
+                      <button
+                        aria-selected={isSelected}
+                        className={`focus-ring flex min-h-[42px] w-full items-center justify-between gap-3 rounded-[8px] px-3 py-2.5 text-left text-sm font-extrabold transition ${
+                          isSelected
+                            ? "bg-[var(--primary-soft)] text-[var(--foreground)]"
+                            : "text-[var(--muted-foreground)] hover:bg-[#F8FAFB] hover:text-[var(--foreground)]"
+                        }`}
+                        key={option.value}
+                        role="option"
+                        type="button"
+                        onClick={() => handleSelect(option.value)}
+                      >
+                        <span className="min-w-0">
+                          <span className="block truncate">{option.label ?? option.value}</span>
+                          {option.detail ? (
+                            <span className="mt-0.5 block truncate text-[11px] font-bold text-[var(--caption)]">
+                              {option.detail}
+                            </span>
+                          ) : null}
+                        </span>
+                        {isSelected ? <span className="h-2.5 w-2.5 shrink-0 rounded-[4px] bg-[var(--primary)]" /> : null}
+                      </button>
+                    );
+                  })}
+                  <button
+                    aria-selected={false}
+                    className="focus-ring mt-1 flex min-h-[42px] w-full items-center gap-3 rounded-[8px] border border-dashed border-[var(--border-strong)] px-3 py-2.5 text-left text-sm font-black text-[var(--muted-foreground)] transition hover:bg-[#F8FAFB] hover:text-[var(--foreground)]"
+                    role="option"
+                    type="button"
+                    onClick={openCustomInput}
+                  >
+                    <Plus size={17} />
+                    직접 입력
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      ) : null}
     </div>
   );
 }
