@@ -270,7 +270,7 @@ export function ResultsDashboard({
                     />
                     <div className="mt-[22px]">
                       <p className="mb-1.5 text-[22px] font-extrabold text-[#15316f]">이력서 활용가능 키워드</p>
-                      <p className="mt-2 text-[13.5px] leading-7 text-[#6b7890]">
+                      <p className="mb-3.5 text-[13.5px] leading-[1.7] text-[#6b7890]">
                         <b className="text-[14.5px] text-[#1d2533]">
                           군 보직 용어를 방산 채용담당자가 곧바로 이해하는 직무역량 언어로 바꾼 키워드입니다.
                         </b>
@@ -296,11 +296,12 @@ export function ResultsDashboard({
                 id="report-companies"
                 title="추천 기업 List"
                 description="경력·전공·희망분야 기준 적합도가 높은 순으로 방산기업을 추천합니다. 추천사유·직무·기업정보·채용링크를 함께 확인하세요."
+                bodyClassName="px-5 py-[22px] md:px-[26px]"
               >
-                <div className="grid gap-4">
+                <div className="flex flex-col gap-4">
                   <div>
                     <p className="text-[22px] font-extrabold text-[#15316f]">추천 직무</p>
-                    <p className="mt-1 text-[13px] leading-6 text-[#6b7890]">
+                    <p className="mt-1 text-[13px] leading-[1.6] text-[#6b7890]">
                       경력·전공·역량을 종합한 적합 직무입니다. 아래 직무 기준으로 기업을 추천했습니다.
                     </p>
                     <div className="mt-3 grid gap-3 md:grid-cols-2">
@@ -598,12 +599,14 @@ function Divider() {
 }
 
 function ReportSection({
+  bodyClassName,
   children,
   description,
   icon: Icon,
   id,
   title,
 }: {
+  bodyClassName?: string;
   children: React.ReactNode;
   description?: string;
   icon: LucideIcon;
@@ -629,7 +632,7 @@ function ReportSection({
           ) : null}
         </div>
       </div>
-      <div className="px-5 py-6 md:px-[26px]">{children}</div>
+      <div className={cn("px-5 py-6 md:px-[26px]", bodyClassName)}>{children}</div>
     </section>
   );
 }
@@ -935,7 +938,7 @@ function TimingCard({
         </div>
       ) : (
         <ReadableText
-          className="mt-3 text-[13.5px] font-medium leading-7 text-[#3a4762]"
+          className="mt-3 text-[13.5px] font-medium leading-[1.7] text-[#3a4762]"
           text={body}
         />
       )}
@@ -951,7 +954,7 @@ function BulletGroup({ color, items, title }: { color: string; items: string[]; 
       <p className="mb-1.5 text-xs font-extrabold" style={{ color }}>
         {title}
       </p>
-      <ul className="grid gap-1.5 pl-4 text-[13.5px] leading-6 text-[#3a4762]">
+      <ul className="grid gap-1.5 pl-[18px] text-[13.5px] leading-[1.7] text-[#3a4762]">
         {items.slice(0, 4).map((item) => (
           <li className="list-disc" key={item}>
             {item}
