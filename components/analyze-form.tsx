@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   ArrowRight,
   CheckCircle2,
+  ChevronDown,
   Loader2,
   Plus,
   X,
@@ -13,66 +14,155 @@ import Link from "next/link";
 import { AuthMenu } from "@/components/auth-menu";
 import { DEFENSE_FIELDS } from "@/lib/types";
 
-const branchOptions = [
-  { label: "육군", value: "육군" },
-  { label: "해군", value: "해군" },
-  { label: "공군", value: "공군" },
-  { label: "해병대", value: "해병대" },
-];
+const branchOptions = ["육군", "해군", "공군", "해병대"];
 
-const ranks = ["소위", "중위", "대위", "소령", "중령", "대령", "하사", "중사", "상사", "원사"];
+const ranks = [
+  "병장",
+  "하사",
+  "중사",
+  "상사",
+  "원사",
+  "준위",
+  "소위",
+  "중위",
+  "대위",
+  "소령",
+  "중령",
+  "대령",
+  "준장",
+];
 
 const specialties = [
   "보병",
-  "포병",
   "기갑",
+  "포병",
   "방공",
-  "통신",
   "공병",
-  "병기",
-  "화학",
-  "항공",
   "정보",
+  "정보통신",
+  "통신",
   "전산",
-  "수송",
-  "행정",
-  "기타",
-];
-
-const defenseFieldLabels = [
-  "항공유도",
-  "통신전자",
-  "기동",
+  "사이버",
+  "항공",
+  "항공정비",
+  "항공통제",
+  "UAV/드론",
+  "전탐",
+  "전자전",
   "함정",
+  "기관",
+  "병기",
   "탄약",
-  "화력",
+  "군수",
+  "병참",
+  "수송",
+  "정비",
   "화생방",
+  "의무",
+  "행정",
+  "품질/검사",
   "기타",
 ];
 
-const commonYearsServed = [3, 5, 7, 10, 15, 20];
+const desiredFieldOptions = [
+  { value: "항공유도", label: "항공유도", detail: "유도무기, 항공전자, UAV, MRO, 위성/우주" },
+  { value: "통신전자", label: "통신전자", detail: "C4I, 레이더, 전자전, 국방SW, 사이버/네트워크" },
+  { value: "기동", label: "기동", detail: "전차, 장갑차, 차량, 유압/동력, 기동장비 정비" },
+  { value: "함정", label: "함정", detail: "함정 전투체계, 기관/전기, 소나, 해양무기체계" },
+  { value: "화력", label: "화력", detail: "화포, 사격통제, 탄도, 표적탐지, 발사체계" },
+  { value: "탄약", label: "탄약", detail: "탄약, 추진제, 무장, 저장/안전, 품질검사" },
+  { value: "화생방", label: "화생방", detail: "탐지, 제독, 방호, 보호장비, 환경시험" },
+  { value: "기타", label: "기타", detail: "방산 영업, 사업관리, 구매, 원가, 품질보증" },
+].filter((item) => DEFENSE_FIELDS.includes(item.value as (typeof DEFENSE_FIELDS)[number]));
+
 const commonMajors = [
   "전자공학",
+  "전기공학",
   "정보통신공학",
   "컴퓨터공학",
+  "소프트웨어공학",
+  "사이버보안학",
+  "데이터사이언스",
   "기계공학",
-  "전기공학",
+  "자동차공학",
+  "메카트로닉스공학",
+  "제어계측공학",
   "항공우주공학",
+  "무인항공시스템학",
+  "조선해양공학",
+  "재료공학",
+  "금속공학",
+  "화학공학",
+  "환경공학",
   "산업공학",
+  "품질경영학",
+  "물류학",
   "경영학",
+  "국방시스템공학",
+  "방위사업학",
 ];
-const commonRegions = ["서울", "대전", "성남", "판교", "창원", "구미", "사천", "부산"];
+
+const commonRegions = [
+  "서울",
+  "경기 성남/판교",
+  "경기 용인",
+  "경기 수원",
+  "경기 안양",
+  "경기 평택",
+  "인천",
+  "대전",
+  "세종",
+  "충남 논산/계룡",
+  "충남 천안/아산",
+  "충북 청주",
+  "경남 창원",
+  "경남 사천",
+  "경남 진주",
+  "부산",
+  "울산",
+  "대구",
+  "경북 구미",
+  "경북 경주",
+  "전북 전주/익산",
+  "전남 여수/광양",
+  "광주",
+  "강원 원주/춘천",
+];
+
 const commonCertifications = [
   "정보처리기사",
-  "무선설비기사",
-  "정보통신기사",
   "정보보안기사",
-  "SQLD",
+  "정보통신기사",
+  "무선설비기사",
+  "전파전자통신기사",
   "전자기사",
+  "전기기사",
+  "임베디드기사",
+  "빅데이터분석기사",
+  "SQLD",
+  "네트워크관리사",
+  "리눅스마스터",
+  "CISSP",
+  "산업안전기사",
   "품질경영기사",
   "일반기계기사",
+  "기계설계기사",
+  "건설기계설비기사",
   "자동차정비기사",
-  "산업안전기사",
+  "항공기사",
+  "항공산업기사",
+  "항공정비사",
+  "초경량비행장치 조종자",
+  "비파괴검사기사",
+  "화공기사",
+  "화약류관리기사",
+  "위험물산업기사",
+  "대기환경기사",
+  "수질환경기사",
+  "소방설비기사",
+  "물류관리사",
+  "CPIM",
+  "PMP",
 ];
 
 const specialtyPresets: Record<
@@ -86,50 +176,159 @@ const specialtyPresets: Record<
 > = {
   통신: {
     field: "통신전자",
-    positions: ["통신전자장비 정비/운용", "C4I 운용", "무전/위성통신 운용"],
-    skills: ["RF", "C4ISR", "네트워크", "전자회로"],
-    certs: ["정보처리기사", "무선설비기사", "정보통신기사"],
+    positions: ["전술통신망 운용", "무전/위성통신 운용", "C4I 운용", "암호장비 운용", "통신전자장비 정비"],
+    skills: ["무선통신", "네트워크", "안테나", "암호장비", "장비정비"],
+    certs: ["정보통신기사", "무선설비기사", "전파전자통신기사", "정보처리기사"],
+  },
+  정보통신: {
+    field: "통신전자",
+    positions: ["정보통신체계 운용", "전술데이터링크 운용", "네트워크/서버 관리", "암호체계 운용"],
+    skills: ["C4ISR", "네트워크", "보안", "DB", "서버"],
+    certs: ["정보처리기사", "정보보안기사", "정보통신기사", "네트워크관리사"],
   },
   전산: {
     field: "통신전자",
-    positions: ["전산체계 운용", "정보체계 관리", "보안관제"],
-    skills: ["소프트웨어", "DB", "보안", "클라우드"],
-    certs: ["정보처리기사", "SQLD", "정보보안기사"],
+    positions: ["전산체계 운용", "정보체계 관리", "DB/서버 관리", "보안관제", "국방망 운영"],
+    skills: ["소프트웨어", "DB", "보안", "클라우드", "Linux"],
+    certs: ["정보처리기사", "SQLD", "정보보안기사", "리눅스마스터"],
+  },
+  사이버: {
+    field: "통신전자",
+    positions: ["사이버작전 지원", "침해대응/보안관제", "네트워크 보안", "취약점 진단", "암호/인증체계 운용"],
+    skills: ["보안관제", "네트워크", "로그분석", "취약점 진단", "암호"],
+    certs: ["정보보안기사", "CISSP", "리눅스마스터", "네트워크관리사"],
+  },
+  정보: {
+    field: "통신전자",
+    positions: ["정보분석", "신호정보(SIGINT)", "영상정보(IMINT)", "감시정찰(ISR)", "표적정보 분석"],
+    skills: ["데이터 분석", "GIS", "신호처리", "영상판독", "ISR"],
+    certs: ["빅데이터분석기사", "정보처리기사", "SQLD", "전파전자통신기사"],
+  },
+  전탐: {
+    field: "통신전자",
+    positions: ["레이더 운용", "전탐장비 정비", "소나/수중감시 운용", "전자전(EW) 운용"],
+    skills: ["레이더", "RF", "신호처리", "소나", "전자전"],
+    certs: ["전자기사", "무선설비기사", "전파전자통신기사", "품질경영기사"],
+  },
+  전자전: {
+    field: "통신전자",
+    positions: ["전자전 장비 운용", "ES/EA 장비 정비", "RF 신호분석", "전파감시"],
+    skills: ["RF", "안테나", "신호처리", "전자기학", "FPGA"],
+    certs: ["전자기사", "전파전자통신기사", "무선설비기사", "정보처리기사"],
   },
   항공: {
     field: "항공유도",
-    positions: ["항공정비", "항공전자 운용", "무인체계 운용"],
-    skills: ["항공전자", "센서", "정비", "품질"],
-    certs: ["항공산업기사", "전자기사", "품질경영기사"],
+    positions: ["항공정비", "항공전자 운용", "항공관제", "무인체계 운용", "비행시험 지원"],
+    skills: ["항공전자", "센서", "정비", "감항", "품질"],
+    certs: ["항공기사", "항공산업기사", "전자기사", "품질경영기사"],
   },
-  기갑: {
-    field: "기동",
-    positions: ["전차/장갑차 정비", "기동장비 운용", "차량 정비"],
-    skills: ["기계", "정비", "유압", "품질"],
-    certs: ["일반기계기사", "자동차정비기사", "품질경영기사"],
+  항공정비: {
+    field: "항공유도",
+    positions: ["기체정비", "엔진정비", "항전정비", "군수정비", "비파괴검사(NDT)"],
+    skills: ["정비교범", "기계", "항전", "NDT", "형상관리"],
+    certs: ["항공정비사", "항공산업기사", "비파괴검사기사", "품질경영기사"],
+  },
+  항공통제: {
+    field: "통신전자",
+    positions: ["방공통제", "항공관제", "레이더 감시", "전술항공통제", "표적식별"],
+    skills: ["레이더", "항공교통", "전술데이터", "상황판단", "통신"],
+    certs: ["전파전자통신기사", "무선설비기사", "정보처리기사", "전자기사"],
+  },
+  "UAV/드론": {
+    field: "항공유도",
+    positions: ["무인기 운용", "드론 정비", "임무장비 운용", "지상통제장비 운용", "영상정보 분석"],
+    skills: ["UAV", "데이터링크", "센서융합", "ROS", "임베디드"],
+    certs: ["초경량비행장치 조종자", "무선설비기사", "정보처리기사", "전자기사"],
+  },
+  방공: {
+    field: "항공유도",
+    positions: ["방공포병 운용", "유도탄 정비", "방공레이더 운용", "표적탐지/식별", "사격통제"],
+    skills: ["유도무기", "레이더", "사격통제", "표적식별", "정비"],
+    certs: ["전자기사", "전파전자통신기사", "품질경영기사", "정보처리기사"],
   },
   포병: {
     field: "화력",
-    positions: ["화력장비 운용", "사격통제", "탄도/표적 분석"],
-    skills: ["사격통제", "센서", "기계", "데이터 분석"],
-    certs: ["기계설계기사", "전자기사", "정보처리기사"],
+    positions: ["화력장비 운용", "사격지휘", "사격통제", "탄도/표적 분석", "대포병레이더 연동"],
+    skills: ["사격통제", "탄도", "센서", "기계", "데이터 분석"],
+    certs: ["기계설계기사", "전자기사", "정보처리기사", "품질경영기사"],
+  },
+  기갑: {
+    field: "기동",
+    positions: ["전차 운용", "장갑차 정비", "기동장비 운용", "차량 정비", "포탑/사격통제 정비"],
+    skills: ["기계", "정비", "유압", "동력전달", "품질"],
+    certs: ["일반기계기사", "자동차정비기사", "건설기계설비기사", "품질경영기사"],
+  },
+  정비: {
+    field: "기동",
+    positions: ["차량정비", "궤도장비 정비", "발전기/동력장치 정비", "창정비", "검사/품질"],
+    skills: ["정비", "검사", "고장진단", "유압", "안전"],
+    certs: ["자동차정비기사", "일반기계기사", "산업안전기사", "품질경영기사"],
+  },
+  공병: {
+    field: "기동",
+    positions: ["전투공병장비 운용", "장애물 개척장비 운용", "건설장비 정비", "폭파/장애물 처리"],
+    skills: ["건설기계", "유압", "구조", "안전", "장비운용"],
+    certs: ["건설기계설비기사", "산업안전기사", "일반기계기사", "품질경영기사"],
+  },
+  함정: {
+    field: "함정",
+    positions: ["함정 전투체계 운용", "함정기관 운용", "함정전기 정비", "소나/전탐 운용", "함포/유도탄 운용"],
+    skills: ["전투체계", "기관", "전기", "소나", "정비"],
+    certs: ["전기기사", "전자기사", "일반기계기사", "품질경영기사"],
+  },
+  기관: {
+    field: "함정",
+    positions: ["함정기관 운용", "가스터빈/디젤기관 정비", "추진체계 정비", "보조기계 운용"],
+    skills: ["기관", "유체", "동력", "정비", "안전"],
+    certs: ["일반기계기사", "건설기계설비기사", "산업안전기사", "품질경영기사"],
   },
   병기: {
     field: "탄약",
-    positions: ["탄약/무장 정비", "창정비", "품질검사"],
-    skills: ["정비", "품질", "안전", "검사"],
-    certs: ["화공기사", "품질경영기사", "산업안전기사"],
+    positions: ["무장 정비", "창정비", "탄약/무기 검사", "총포/화기 정비", "품질검사"],
+    skills: ["정비", "품질", "안전", "검사", "무장"],
+    certs: ["화약류관리기사", "품질경영기사", "산업안전기사", "일반기계기사"],
+  },
+  탄약: {
+    field: "탄약",
+    positions: ["탄약관리", "탄약검사", "저장/안전관리", "폭발물 처리 지원", "추진제/화공 관리"],
+    skills: ["탄약", "화공", "안전관리", "품질검사", "위험물"],
+    certs: ["화약류관리기사", "위험물산업기사", "화공기사", "산업안전기사"],
+  },
+  화생방: {
+    field: "화생방",
+    positions: ["화생방 탐지", "제독장비 운용", "방호장비 관리", "환경/시료 분석", "연막/소독 장비 운용"],
+    skills: ["분석화학", "센서", "제독", "방호", "환경시험"],
+    certs: ["화공기사", "대기환경기사", "수질환경기사", "산업안전기사"],
+  },
+  군수: {
+    field: "기타",
+    positions: ["군수관리", "정비보급", "수리부속 관리", "계약/구매 지원", "창정비 계획"],
+    skills: ["물류", "원가", "구매", "재고관리", "사업관리"],
+    certs: ["물류관리사", "CPIM", "PMP", "품질경영기사"],
+  },
+  병참: {
+    field: "기타",
+    positions: ["보급관리", "물자관리", "급식/피복 보급", "재고/창고 관리", "조달 지원"],
+    skills: ["물류", "재고", "구매", "프로세스", "원가"],
+    certs: ["물류관리사", "CPIM", "산업안전기사", "품질경영기사"],
+  },
+  수송: {
+    field: "기동",
+    positions: ["차량운용", "수송계획", "특수차량 정비", "물류운송 관리", "장비 배차/정비"],
+    skills: ["차량", "정비", "물류", "안전", "운송계획"],
+    certs: ["자동차정비기사", "물류관리사", "산업안전기사", "일반기계기사"],
+  },
+  "품질/검사": {
+    field: "기타",
+    positions: ["품질보증", "수입검사", "시험평가 지원", "형상관리", "협력사 품질관리"],
+    skills: ["품질", "검사", "시험", "형상관리", "문서화"],
+    certs: ["품질경영기사", "산업안전기사", "비파괴검사기사", "PMP"],
   },
 };
 
-const commonPositions = Array.from(
+const allPositions = Array.from(
   new Set(Object.values(specialtyPresets).flatMap((preset) => preset.positions)),
-);
-const desiredFieldOptions = DEFENSE_FIELDS.map((value, index) => ({
-  value,
-  label: defenseFieldLabels[index] ?? value,
-}));
-
+).sort((a, b) => a.localeCompare(b, "ko-KR"));
 
 const loadingMessages = [
   "군 경력을 방산 직무 언어로 번역하는 중입니다.",
@@ -149,20 +348,27 @@ type AnalyzeFormState = {
   preferred_region: string;
 };
 
+type SectionKey = "military" | "career" | "certifications";
+
 export function AnalyzeForm() {
   const router = useRouter();
   const [form, setForm] = useState<AnalyzeFormState>({
-    military_branch: branchOptions[0].value,
+    military_branch: "육군",
     rank: "대위",
-    specialty: "통신",
-    position: "통신전자장비 정비/운용",
+    specialty: "정보",
+    position: "신호정보(SIGINT)",
     years_served: 7,
     major: "전자공학",
-    desired_field: DEFENSE_FIELDS[1] ?? DEFENSE_FIELDS[0],
-    preferred_region: "서울",
+    desired_field: "통신전자",
+    preferred_region: "대전",
   });
   const [certInput, setCertInput] = useState("정보처리기사");
   const [certifications, setCertifications] = useState<string[]>([]);
+  const [openSections, setOpenSections] = useState<Record<SectionKey, boolean>>({
+    military: true,
+    career: false,
+    certifications: false,
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [progress, setProgress] = useState(0);
@@ -170,11 +376,14 @@ export function AnalyzeForm() {
 
   const specialtyPreset = specialtyPresets[form.specialty];
   const positionSuggestions = useMemo(
-    () => Array.from(new Set([...(specialtyPreset?.positions ?? []), ...commonPositions])).slice(0, 12),
+    () => Array.from(new Set([...(specialtyPreset?.positions ?? []), ...allPositions])),
     [specialtyPreset],
   );
   const certificationSuggestions = useMemo(
-    () => Array.from(new Set([...(specialtyPreset?.certs ?? []), ...commonCertifications])).slice(0, 12),
+    () =>
+      Array.from(new Set([...(specialtyPreset?.certs ?? []), ...commonCertifications])).sort((a, b) =>
+        a.localeCompare(b, "ko-KR"),
+      ),
     [specialtyPreset],
   );
   const isValid = useMemo(() => {
@@ -191,6 +400,10 @@ export function AnalyzeForm() {
       form.desired_field
     );
   }, [form]);
+
+  function toggleSection(key: SectionKey) {
+    setOpenSections((current) => ({ ...current, [key]: !current[key] }));
+  }
 
   function updateField(name: keyof AnalyzeFormState, value: string | number) {
     setForm((current) => ({ ...current, [name]: value }));
@@ -209,19 +422,9 @@ export function AnalyzeForm() {
   function addCertification(nextValue = certInput) {
     const value = nextValue.trim();
     if (!value || certifications.includes(value)) return;
-    setCertifications((current) => [...current, value]);
+    setCertifications((current) => [...current, value].slice(0, 12));
     if (nextValue === certInput) setCertInput("");
   }
-
-  function applySpecialtyPreset(position?: string) {
-    if (!specialtyPreset) return;
-    setForm((current) => ({
-      ...current,
-      desired_field: specialtyPreset.field,
-      position: position ?? specialtyPreset.positions[0] ?? current.position,
-    }));
-  }
-
 
   async function submit() {
     if (!isValid || isLoading) return;
@@ -281,7 +484,7 @@ export function AnalyzeForm() {
         </nav>
       </header>
 
-      <div className="mx-auto max-w-[420px] px-3 pb-12 pt-2 sm:max-w-[920px] sm:px-4 md:pb-14 md:pt-3">
+      <div className="mx-auto max-w-[440px] px-3 pb-12 pt-2 sm:max-w-[1080px] sm:px-5 md:pb-14 md:pt-3">
         <div className="text-center text-white">
           <h1 className="max-w-full text-[30px] font-black leading-tight tracking-normal drop-shadow sm:text-4xl md:text-5xl">
             <span className="sm:hidden">군 경력 입력</span>
@@ -290,28 +493,24 @@ export function AnalyzeForm() {
         </div>
 
         <section className="np-card mt-6 p-4 md:mt-7 md:p-7">
-          <FormSection number="1" title="기본 군 정보">
-            <div className="grid gap-4 md:grid-cols-2">
+          <FormSection
+            isOpen={openSections.military}
+            number="1"
+            summary={`${form.military_branch} · ${form.rank} · ${form.specialty} · ${form.years_served || "-"}년`}
+            title="기본 군 정보"
+            onToggle={() => toggleSection("military")}
+          >
+            <div className="grid gap-4 md:grid-cols-[0.85fr_0.85fr_1.25fr_0.65fr]">
               <Field label="군별" required>
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  {branchOptions.map((branch) => {
-                    const selected = form.military_branch === branch.value;
-                    return (
-                      <button
-                        className={`focus-ring h-[40px] rounded-[9px] border-[1.5px] text-sm font-extrabold md:h-[42px] ${
-                          selected
-                            ? "border-[var(--primary)] bg-[var(--primary)] text-white"
-                            : "border-[#E5E8EB] bg-[#F9FAFB] text-[var(--muted-foreground)]"
-                        }`}
-                        key={branch.value}
-                        type="button"
-                        onClick={() => updateField("military_branch", branch.value)}
-                      >
-                        {branch.label}
-                      </button>
-                    );
-                  })}
-                </div>
+                <select
+                  className="input"
+                  value={form.military_branch}
+                  onChange={(event) => updateField("military_branch", event.target.value)}
+                >
+                  {branchOptions.map((item) => (
+                    <option key={item}>{item}</option>
+                  ))}
+                </select>
               </Field>
               <Field label="계급" required>
                 <select className="input" value={form.rank} onChange={(e) => updateField("rank", e.target.value)}>
@@ -319,11 +518,6 @@ export function AnalyzeForm() {
                     <option key={item}>{item}</option>
                   ))}
                 </select>
-                <QuickPickButtons
-                  items={ranks.map((item) => ({ value: item }))}
-                  selected={form.rank}
-                  onPick={(value) => updateField("rank", value)}
-                />
               </Field>
               <Field label="병과" required>
                 <input
@@ -331,18 +525,13 @@ export function AnalyzeForm() {
                   list="specialty-options"
                   value={form.specialty}
                   onChange={(event) => setSpecialtyValue(event.target.value)}
-                  placeholder="예: 통신, 전산, 항공"
+                  placeholder="예: 정보, 통신, 항공정비"
                 />
                 <datalist id="specialty-options">
                   {specialties.map((item) => (
                     <option key={item} value={item} />
                   ))}
                 </datalist>
-                <QuickPickButtons
-                  items={specialties.map((item) => ({ value: item }))}
-                  selected={form.specialty}
-                  onPick={setSpecialtyValue}
-                />
               </Field>
               <Field label="복무연수" required>
                 <input
@@ -357,37 +546,19 @@ export function AnalyzeForm() {
                     updateField("years_served", value === "" ? "" : Number(value));
                   }}
                 />
-                <QuickPickButtons
-                  items={commonYearsServed.map((item) => ({ value: String(item), label: `${item}년` }))}
-                  selected={String(form.years_served)}
-                  onPick={(value) => updateField("years_served", Number(value))}
-                />
               </Field>
-              {specialtyPreset ? (
-                <div className="rounded-[12px] bg-[#F8FAFB] px-3 py-2 md:col-span-2">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="mr-1 w-full text-xs font-black text-[var(--primary)] sm:w-auto">
-                      {form.specialty} 추천 보직
-                    </span>
-                    {specialtyPreset.positions.map((position) => (
-                      <button
-                        className="rounded-full bg-white px-3 py-1 text-xs font-black text-[var(--caption)] transition hover:text-[var(--foreground)]"
-                        key={position}
-                        type="button"
-                        onClick={() => applySpecialtyPreset(position)}
-                      >
-                        {position}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
             </div>
           </FormSection>
 
-          <div className="np-divider my-6" />
+          <div className="np-divider my-4 md:my-5" />
 
-          <FormSection number="2" title="직무와 전공">
+          <FormSection
+            isOpen={openSections.career}
+            number="2"
+            summary={`${form.position} · ${form.major} · ${form.desired_field}`}
+            title="직무와 전공"
+            onToggle={() => toggleSection("career")}
+          >
             <div className="grid gap-4 md:grid-cols-2">
               <Field label="보직 / 주특기" required>
                 <input
@@ -395,18 +566,13 @@ export function AnalyzeForm() {
                   list="position-options"
                   value={form.position}
                   onChange={(event) => updateField("position", event.target.value)}
-                  placeholder="예: 통신전자장비 정비/운용"
+                  placeholder="예: 신호정보(SIGINT), C4I 운용"
                 />
                 <datalist id="position-options">
                   {positionSuggestions.map((item) => (
                     <option key={item} value={item} />
                   ))}
                 </datalist>
-                <QuickPickButtons
-                  items={positionSuggestions.map((item) => ({ value: item }))}
-                  selected={form.position}
-                  onPick={(value) => updateField("position", value)}
-                />
               </Field>
               <Field label="전공" required>
                 <input
@@ -421,11 +587,6 @@ export function AnalyzeForm() {
                     <option key={item} value={item} />
                   ))}
                 </datalist>
-                <QuickPickButtons
-                  items={commonMajors.map((item) => ({ value: item }))}
-                  selected={form.major}
-                  onPick={(value) => updateField("major", value)}
-                />
               </Field>
               <Field label="희망 근무지역">
                 <input
@@ -433,44 +594,40 @@ export function AnalyzeForm() {
                   list="region-options"
                   value={form.preferred_region}
                   onChange={(event) => updateField("preferred_region", event.target.value)}
-                  placeholder="예: 서울, 대전, 창원"
+                  placeholder="예: 대전, 경기 성남/판교, 창원"
                 />
                 <datalist id="region-options">
                   {commonRegions.map((item) => (
                     <option key={item} value={item} />
                   ))}
                 </datalist>
-                <QuickPickButtons
-                  items={commonRegions.map((item) => ({ value: item }))}
-                  selected={form.preferred_region}
-                  onPick={(value) => updateField("preferred_region", value)}
-                />
               </Field>
               <Field label="희망 방산분야">
                 <select
-                  className="input"
+                  className="input h-auto min-h-[44px] py-2"
                   value={form.desired_field}
                   onChange={(event) => updateField("desired_field", event.target.value)}
                 >
                   {desiredFieldOptions.map((item) => (
                     <option key={item.value} value={item.value}>
-                      {item.label}
+                      {item.label} - {item.detail}
                     </option>
                   ))}
                 </select>
-                <QuickPickButtons
-                  items={desiredFieldOptions}
-                  selected={form.desired_field}
-                  onPick={(value) => updateField("desired_field", value)}
-                />
               </Field>
             </div>
           </FormSection>
 
-          <div className="np-divider my-6" />
+          <div className="np-divider my-4 md:my-5" />
 
-          <FormSection number="3" title="보유 자격증">
-            <div className="flex gap-2">
+          <FormSection
+            isOpen={openSections.certifications}
+            number="3"
+            summary={certifications.length ? `${certifications.length}개 등록` : "선택 사항"}
+            title="보유 자격증"
+            onToggle={() => toggleSection("certifications")}
+          >
+            <div className="grid gap-3 md:grid-cols-[1fr_auto]">
               <input
                 className="input"
                 list="certification-options"
@@ -482,7 +639,7 @@ export function AnalyzeForm() {
                     addCertification();
                   }
                 }}
-                placeholder="예: 정보처리기사"
+                placeholder="예: 정보처리기사, 품질경영기사"
               />
               <datalist id="certification-options">
                 {certificationSuggestions.map((cert) => (
@@ -490,21 +647,13 @@ export function AnalyzeForm() {
                 ))}
               </datalist>
               <button
-                className="focus-ring grid h-[44px] w-[50px] shrink-0 place-items-center rounded-[9px] border-[1.5px] border-[#E5E8EB] bg-[#F2F4F6] text-[var(--muted-foreground)]"
+                className="focus-ring inline-flex h-[44px] items-center justify-center gap-2 rounded-[9px] border-[1.5px] border-[#DDE3EA] bg-[#F2F4F6] px-4 text-sm font-black text-[var(--muted-foreground)] md:min-w-[104px]"
                 type="button"
                 onClick={() => addCertification()}
-                aria-label="자격증 추가"
               >
-                <Plus size={20} />
+                <Plus size={18} />
+                추가
               </button>
-            </div>
-            <div className="mt-3">
-              <p className="text-xs font-black text-[var(--caption)]">자주 선택하는 자격증</p>
-              <QuickPickButtons
-                items={certificationSuggestions.map((cert) => ({ value: cert, label: `+ ${cert}` }))}
-                selectedValues={certifications}
-                onPick={addCertification}
-              />
             </div>
             {certifications.length > 0 ? (
               <div className="mt-4 flex flex-wrap gap-2">
@@ -584,22 +733,50 @@ function AnalysisProgressOverlay({ isComplete, progress }: { isComplete: boolean
 
 function FormSection({
   children,
+  isOpen,
   number,
+  onToggle,
+  summary,
   title,
 }: {
   children: React.ReactNode;
+  isOpen: boolean;
   number: string;
+  onToggle: () => void;
+  summary: string;
   title: string;
 }) {
   return (
     <section>
-      <div className="mb-3 flex items-center gap-2 md:mb-4 md:gap-3">
-        <span className="grid h-[26px] w-[26px] place-items-center rounded-[7px] bg-[var(--primary)] text-[13px] font-black text-white">
+      <button
+        aria-expanded={isOpen}
+        className="focus-ring flex min-h-[54px] w-full items-center gap-3 rounded-[9px] px-1 text-left transition hover:bg-[#F8FAFB] md:min-h-[58px] md:px-2"
+        type="button"
+        onClick={onToggle}
+      >
+        <span className="grid h-[28px] w-[28px] shrink-0 place-items-center rounded-[7px] bg-[var(--primary)] text-[13px] font-black text-white">
           {number}
         </span>
-        <h2 className="text-base font-black md:text-lg">{title}</h2>
+        <span className="min-w-0 flex-1">
+          <span className="block text-base font-black md:text-lg">{title}</span>
+          <span className="mt-0.5 block truncate text-xs font-bold text-[var(--caption)] md:text-[13px]">
+            {summary}
+          </span>
+        </span>
+        <ChevronDown
+          className={`shrink-0 text-[var(--caption)] transition-transform ${isOpen ? "rotate-180" : ""}`}
+          size={22}
+        />
+      </button>
+      <div
+        className={`grid transition-[grid-template-rows,opacity] duration-200 ${
+          isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+        }`}
+      >
+        <div className="min-h-0 overflow-hidden">
+          <div className="pt-4 md:pt-5">{children}</div>
+        </div>
       </div>
-      {children}
     </section>
   );
 }
@@ -614,52 +791,11 @@ function Field({
   required?: boolean;
 }) {
   return (
-    <div className="grid gap-1.5 text-[13px] font-black text-[var(--muted-foreground)] md:gap-2 md:text-[13.5px]">
+    <label className="grid gap-1.5 text-[13px] font-black text-[var(--muted-foreground)] md:gap-2 md:text-[13.5px]">
       <span>
         {label} {required ? <span className="text-[var(--required)]">*</span> : null}
       </span>
       {children}
-    </div>
-  );
-}
-
-type QuickPickItem = {
-  value: string;
-  label?: string;
-};
-
-function QuickPickButtons({
-  items,
-  onPick,
-  selected,
-  selectedValues,
-}: {
-  items: QuickPickItem[];
-  onPick: (value: string) => void;
-  selected?: string;
-  selectedValues?: string[];
-}) {
-  const selectedSet = new Set(selectedValues ?? []);
-
-  return (
-    <div className="mt-2 flex flex-wrap gap-2">
-      {items.map((item) => {
-        const isActive = item.value === selected || selectedSet.has(item.value);
-        return (
-          <button
-            className={`rounded-full border px-3 py-1 text-xs font-black transition ${
-              isActive
-                ? "border-[var(--primary)] bg-[var(--primary-soft)] text-[var(--primary)]"
-                : "border-[var(--border)] bg-white text-[var(--caption)] hover:border-[var(--primary)] hover:text-[var(--foreground)]"
-            }`}
-            key={item.value}
-            type="button"
-            onClick={() => onPick(item.value)}
-          >
-            {item.label ?? item.value}
-          </button>
-        );
-      })}
-    </div>
+    </label>
   );
 }
