@@ -39,17 +39,21 @@ export type SaveReportPayload = {
 };
 
 function hasSupabaseConfig() {
-  return Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_PUBLISHABLE_KEY);
+  return Boolean(
+    process.env.SUPABASE_URL &&
+      (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY),
+  );
 }
 
 function getClient(accessToken?: string) {
-  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_PUBLISHABLE_KEY) {
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY;
+  if (!process.env.SUPABASE_URL || !key) {
     throw new Error("Supabase configuration is missing.");
   }
 
-  return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
+  return createClient(process.env.SUPABASE_URL, key, {
     auth: { persistSession: false, autoRefreshToken: false },
-    global: accessToken
+    global: accessToken && !process.env.SUPABASE_SERVICE_ROLE_KEY
       ? {
           headers: {
             Authorization: `Bearer ${accessToken}`,
