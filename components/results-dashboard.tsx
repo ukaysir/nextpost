@@ -714,9 +714,6 @@ function ActionButton({
 }
 
 function JobMatchCard({ job }: { job: JobMatch }) {
-  const skills = job.required_skills.map(formatSkillPillText).filter(Boolean);
-  const visibleSkills = skills.slice(0, 4);
-  const hiddenSkillCount = Math.max(skills.length - visibleSkills.length, 0);
   const relatedWeaponSystem = job.related_weapon_system?.trim();
   const fitLabel = job.fit_label ?? "적합";
   const labelClass =
@@ -727,7 +724,7 @@ function JobMatchCard({ job }: { job: JobMatch }) {
         : "bg-[#5b6b87]";
 
   return (
-    <article className="flex min-h-[150px] flex-col rounded-[14px] border border-[#e9edf4] bg-[#fbfcfe] p-4">
+    <article className="flex min-h-[126px] flex-col rounded-[14px] border border-[#e9edf4] bg-[#fbfcfe] p-4">
       <div className="min-w-0">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex min-w-0 flex-wrap items-center gap-2">
@@ -764,22 +761,6 @@ function JobMatchCard({ job }: { job: JobMatch }) {
         />
       ) : null}
 
-      <div className="mt-auto flex content-start flex-wrap gap-2 pt-3">
-        {visibleSkills.map((skill, index) => (
-          <span
-            className="max-w-full rounded-full bg-white px-3 py-1 text-xs font-extrabold leading-4 text-[#5b6b82]"
-            key={`${skill}-${index}`}
-            title={skill}
-          >
-            {skill}
-          </span>
-        ))}
-        {hiddenSkillCount > 0 ? (
-          <span className="rounded-full bg-[#e9edf4] px-3 py-1 text-xs font-black leading-4 text-[#506580]">
-            +{hiddenSkillCount}
-          </span>
-        ) : null}
-      </div>
     </article>
   );
 }
