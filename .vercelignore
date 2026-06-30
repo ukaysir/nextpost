@@ -2,5 +2,11 @@
 NEXTPOST_*.docx
 supabase/seed_chunks
 .agents
+.codex
+.env*
+.git
+.vercel
 .next
 node_modules
+*.tsbuildinfo
+next-dev*.log
