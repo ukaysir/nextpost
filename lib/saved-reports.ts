@@ -142,6 +142,23 @@ export async function listSavedReports(userId = "test", accessToken?: string) {
   return (data ?? []) as SavedReportSummary[];
 }
 
+export async function deleteSavedReport(id: string, userId = "test", accessToken?: string) {
+  if (!hasSupabaseConfig()) {
+    throw new Error("Supabase is not configured.");
+  }
+
+  const client = getClient(accessToken);
+  const { error } = await client
+    .from("saved_reports")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", userId);
+
+  if (error) {
+    throw new Error(`리포트 삭제 실패: ${error.message}`);
+  }
+}
+
 export async function getSavedReportByShareId(shareId: string) {
   if (!hasSupabaseConfig()) return null;
 

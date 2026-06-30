@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createSavedReport, listSavedReports } from "@/lib/saved-reports";
+import { createSavedReport, deleteSavedReport, listSavedReports } from "@/lib/saved-reports";
 import { getRequestUser } from "@/lib/server-auth";
 
 export const runtime = "nodejs";
@@ -46,6 +46,26 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         message: error instanceof Error ? error.message : "리포트를 저장하지 못했습니다.",
+      },
+      { status: 503 },
+    );
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const user = await getRequestUser(request);
+    const body = await request.json();
+    if (!body?.id || typeof body.id !== "string") {
+      return NextResponse.json({ message: "삭제할 리포트 ID가 없습니다." }, { status: 400 });
+    }
+
+    await deleteSavedReport(body.id, user?.id ?? body.userId ?? "test", user?.accessToken);
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        message: error instanceof Error ? error.message : "리포트를 삭제하지 못했습니다.",
       },
       { status: 503 },
     );

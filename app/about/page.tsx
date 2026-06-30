@@ -67,8 +67,8 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      <section className="page-shell py-8 md:py-16">
-        <div className="mb-5 md:mb-8">
+      <section className="page-shell py-10 md:py-20">
+        <div className="mb-8 md:mb-12">
           <p className="text-sm font-black tracking-[1px] text-[var(--primary)]">DATA FOUNDATION</p>
           <h2 className="mt-2 text-2xl font-black tracking-normal md:text-4xl">
             납득할 수 있는 커리어 추천, NEXTPOST 의 투명한 데이터로 확인하세요
@@ -144,35 +144,33 @@ export default async function AboutPage() {
           />
         </div>
 
-        <div className="mt-5">
-          <section className="np-card p-4 md:p-8">
-            <p className="text-sm font-black tracking-[1px] text-[var(--primary)]">
-              HOW IT WORKS
-            </p>
-            <h2 className="mt-2 text-xl font-black tracking-normal md:mt-3 md:text-2xl">
-              군 경력에서 방산 직무까지
-            </h2>
-            <div className="mt-4 grid gap-3 md:mt-6 md:grid-cols-4 md:gap-4">
-              {[
-                ["01", "군 경력 입력", "군별, 계급, 병과, 보직, 전공과 자격 정보를 구조화합니다."],
-                ["02", "직무 언어 변환", "복무 경험을 방산 분야와 직무 요구역량으로 매핑합니다."],
-                ["03", "공개 데이터 매칭", "계약, 기업 프로필, 채용 URL, OpenDART 재무, 출처 등급을 결합합니다."],
-                ["04", "근거형 리포트 생성", "추천 기업, 채용 신호, 직무 준비도, 교육 로드맵을 한 화면에 제공합니다."],
-              ].map(([no, title, body]) => (
-                <div className="flex gap-3 md:block" key={no}>
-                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-[11px] bg-[var(--primary)] text-xs font-black text-white md:h-11 md:w-11 md:rounded-[13px] md:text-sm">
-                    {no}
-                  </span>
-                  <div className="md:mt-4">
-                    <h3 className="font-black">{title}</h3>
-                    <p className="mt-1 text-sm leading-6 text-[var(--muted-foreground)]">
-                      {body}
-                    </p>
-                  </div>
+        <div className="mt-8 md:mt-12">
+          <p className="text-sm font-black tracking-[1px] text-[var(--primary)]">
+            HOW IT WORKS
+          </p>
+          <h2 className="mt-2 text-xl font-black tracking-normal md:mt-3 md:text-2xl">
+            군 경력에서 방산 직무까지
+          </h2>
+          <div className="mt-4 grid gap-3 md:mt-6 md:grid-cols-4 md:gap-4">
+            {[
+              ["01", "군 경력 입력", "군별, 계급, 병과, 보직, 전공과 자격 정보를 구조화합니다."],
+              ["02", "직무 언어 변환", "복무 경험을 방산 분야와 직무 요구역량으로 매핑합니다."],
+              ["03", "공개 데이터 매칭", "계약, 기업 프로필, 채용 URL, OpenDART 재무, 출처 등급을 결합합니다."],
+              ["04", "근거형 리포트 생성", "추천 기업, 채용 신호, 직무 준비도, 교육 로드맵을 한 화면에 제공합니다."],
+            ].map(([no, title, body]) => (
+              <div className="flex gap-3 md:block" key={no}>
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-[11px] bg-[var(--primary)] text-xs font-black text-white md:h-11 md:w-11 md:rounded-[13px] md:text-sm">
+                  {no}
+                </span>
+                <div className="md:mt-4">
+                  <h3 className="font-black">{title}</h3>
+                  <p className="mt-1 text-sm leading-6 text-[var(--muted-foreground)]">
+                    {body}
+                  </p>
                 </div>
-              ))}
-            </div>
-          </section>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -185,9 +183,8 @@ export default async function AboutPage() {
           />
           <div aria-hidden="true" className="absolute inset-0 bg-[#252C36]/78" />
           <div className="relative z-10">
-            <p className="text-sm font-black tracking-[1px] text-white/70">DATA FIRST</p>
             <h2 className="mt-2 text-2xl font-black leading-tight tracking-normal md:mt-3 md:text-4xl">
-              지금 NEXTPODT 와 함께 당신의 커리어를 설계해보세요.
+              지금 NEXTPOST 와 함께 당신의 커리어를 설계해보세요.
             </h2>
             <Link
               className="focus-ring mt-6 inline-flex h-11 w-full items-center justify-center gap-3 rounded-[10px] bg-[#3A404A] px-5 font-black text-white transition hover:bg-[#464D58] sm:w-auto md:mt-8 md:h-12 md:px-6"

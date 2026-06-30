@@ -24,7 +24,7 @@ export default function Home() {
             <h1 className="text-[34px] font-black leading-[1.14] tracking-normal drop-shadow-[0_2px_18px_rgba(0,0,0,.42)] md:text-[64px]">
               전역, 그 다음
               <br />
-              보직을 설계합니다
+              보직을 설계하다
             </h1>
             <p className="mt-5 max-w-[620px] text-[15px] font-medium leading-7 text-[#f1f3f5] drop-shadow md:mt-7 md:text-lg md:leading-8">
               군 경력을 방산 직무 언어로 번역하고, 방산업체 지정현황과 계약, 채용,
@@ -35,7 +35,7 @@ export default function Home() {
                 className="focus-ring inline-flex min-h-12 items-center justify-center gap-3 rounded-[10px] bg-white px-5 py-3 text-base font-black !text-[var(--foreground)] shadow-[0_8px_28px_rgba(0,0,0,.26)] md:min-h-14 md:px-7 md:text-lg"
                 href="/analyze"
               >
-                방산 커리어 분석하기
+                지금 방산 커리어 분석하기
                 <ArrowRight size={20} />
               </Link>
             </div>

@@ -134,7 +134,7 @@ export function ResultsDashboard({
             군 경력 정보를 입력하면 방산 커리어 리포트를 확인할 수 있습니다.
           </p>
           <Link
-            className="focus-ring mt-6 inline-flex h-11 items-center justify-center rounded-[10px] bg-[var(--accent)] px-5 font-black text-white"
+            className="focus-ring mt-6 inline-flex h-11 items-center justify-center rounded-[10px] bg-[#252C36] px-5 font-black text-white"
             href="/analyze"
           >
             분석하러 가기
@@ -691,7 +691,7 @@ function ActionButton({
         "focus-ring inline-flex h-10 min-w-0 items-center justify-center gap-2 rounded-[9px] px-3 text-sm font-extrabold transition duration-150 active:scale-[0.97]",
         "shadow-[0_1px_0_rgba(15,23,42,.04)] hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(15,23,42,.10)]",
         primary || isDone
-          ? "bg-[var(--accent)] text-white"
+          ? "bg-[#252C36] text-white hover:bg-[#303846]"
           : "border border-[var(--border)] bg-white text-[var(--caption)] hover:border-[var(--primary)] hover:text-[var(--foreground)]",
         isBusy ? "cursor-wait opacity-80" : "",
       )}

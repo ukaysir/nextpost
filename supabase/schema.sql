@@ -331,6 +331,11 @@ create policy "public update saved_reports"
   using (user_id = 'test')
   with check (user_id = 'test');
 
+create policy "public delete saved_reports"
+  on public.saved_reports for delete
+  to anon, authenticated
+  using (user_id = 'test');
+
 create policy "public read saved_companies"
   on public.saved_companies for select
   to anon, authenticated
@@ -360,6 +365,6 @@ grant select on public.company_profiles to anon, authenticated;
 grant select on public.company_financials to anon, authenticated;
 grant select on public.contract_records to anon, authenticated;
 grant select on public.job_postings to anon, authenticated;
-grant select, insert, update on public.saved_reports to anon, authenticated;
+grant select, insert, update, delete on public.saved_reports to anon, authenticated;
 grant select, insert, update on public.saved_companies to anon, authenticated;
 grant usage, select on sequence public.saved_companies_id_seq to anon, authenticated;
